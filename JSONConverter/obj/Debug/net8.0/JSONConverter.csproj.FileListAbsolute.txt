@@ -15,3 +15,4 @@ C:\Users\nicho\RiderProjects\JSONConverter\JSONConverter\obj\Debug\net8.0\ref\JS
 C:\Users\nicho\RiderProjects\JSONConverter\JSONConverter\obj\Debug\net8.0\JSONConverter.Resources.json_text.resources
 C:\Users\nicho\RiderProjects\JSONConverter\JSONConverter\obj\Debug\net8.0\JSONConverter.Resources.local.resources
 C:\Users\nicho\RiderProjects\JSONConverter\JSONConverter\obj\Debug\net8.0\JSONConverter.csproj.GenerateResource.cache
+C:\Users\nicho\RiderProjects\JSONConverter\JSONConverter\obj\Debug\net8.0\JSONConverter.sourcelink.json

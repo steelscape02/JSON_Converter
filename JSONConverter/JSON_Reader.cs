@@ -44,7 +44,7 @@ public class JSON_Reader(string filename)
             if (reader.TokenType == JsonTokenType.PropertyName && reader.CurrentDepth == 2 &&
                 !headers.Contains(reader.GetString()))
             {
-                Console.WriteLine($"Parent: {reader.ValueSequence}");
+                Console.WriteLine($"Parent: {reader.Position.GetInteger()}");
             }
         }
 
