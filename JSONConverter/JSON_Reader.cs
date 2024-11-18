@@ -1,6 +1,5 @@
-﻿using JSONConverter.Resources;
-using System.IO;
-using System.Runtime.InteropServices;
+﻿using System.Buffers;
+using System.Text;
 using System.Text.Json;
 
 namespace JSONConverter;
@@ -10,7 +9,7 @@ namespace JSONConverter;
 public class JSON_Reader(string filename)
 {
     public string _filename { get; } = filename;
-    private List<Header> _headers = []; //hierarchical tree of headers
+    private List<HeaderList> _headers = []; //hierarchical tree of headers
 
     //imaginary text list
     public void GetHeaders(string parent = "") //TODO: recursive run?
@@ -28,25 +27,29 @@ public class JSON_Reader(string filename)
         }
         //TODO: read json and capture unique headers as parents. If children are present run again to capture child headers
         var reader = new Utf8JsonReader(File.ReadAllBytes(_filename), options);
-        List<string?> headers = [];
+        HeaderList headerTree = new("headers");
+        string? currHeader = null;
+        List<string?> currChildren = [];
         while (reader.Read())
         {
             
             //TODO: Convert to a switch case. Once a 1 depth header is reached, attach all following headers to it (with corresponding tree) until the next 1 header is reached, then repeat.
-            if(reader.TokenType == JsonTokenType.PropertyName && reader.CurrentDepth == 1 && 
-               !headers.Contains(reader.GetString())) //get all current depth 1 (header) properties. Basically ROOT
+            if(reader.TokenType == JsonTokenType.PropertyName && reader.CurrentDepth == 1 &&
+               !headerTree.ContainsKey(reader.GetString())) //get all current depth 1 (header) properties. Basically ROOT
             {
-                
-                //Console.WriteLine($"Pos: {reader.CurrentDepth}\nName: {reader.GetString()}"); //print header pos and name
-                headers.Add(reader.GetString());
+                if (currHeader != null)
+                {
+                    headerTree.AddKeyValue(currHeader, currChildren);
+                }
+                currHeader = reader.GetString();
+                currChildren.Clear();
             }
-
-            if (reader.TokenType == JsonTokenType.PropertyName && reader.CurrentDepth == 2 &&
-                !headers.Contains(reader.GetString()))
+            else if (reader.TokenType == JsonTokenType.PropertyName)
             {
-                Console.WriteLine($"Parent: {reader.Position.GetInteger()}");
+                currChildren.Add(reader.GetString());
             }
         }
+        headerTree.Display();
 
         //TODO: 
     }
