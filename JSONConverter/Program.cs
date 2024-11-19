@@ -18,8 +18,9 @@ internal abstract class Program
         var filename = "";
         while (!fileFound)
         {
-            Console.Write(local.enter_json_name);
-            filename = Console.ReadLine();
+            //Console.Write(local.enter_json_name);
+            //filename = Console.ReadLine();
+            filename = "C:\\Users\\nicho\\RiderProjects\\JSONConverter\\JSONConverter\\tester.json";
             fileFound = File.Exists(filename);
         }
         

@@ -1,10 +1,10 @@
-﻿namespace JSONConverter;
+﻿using JSONConverter.Resources;
 
-public class HeaderList(string name)
+namespace JSONConverter;
+
+public class HeaderList()
 {
     private Dictionary<string,List<string>> KeyValueData { get; set; } = new();
-
-    public string Name { get; set; } = name;
 
     public void AddKeyValue(string key, List<string> value)
     {
@@ -18,6 +18,7 @@ public class HeaderList(string name)
 
     public void Display() //test func
     {
+        Console.WriteLine(local.page_div);
         foreach (var item in KeyValueData)
         {
             Console.WriteLine($"{item.Key}: {string.Join(", ", item.Value)}");

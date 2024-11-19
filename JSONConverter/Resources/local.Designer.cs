@@ -69,6 +69,15 @@ namespace JSONConverter.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ----------------------------.
+        /// </summary>
+        internal static string page_div {
+            get {
+                return ResourceManager.GetString("page_div", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to JSON Converter v0.0.1.
         /// </summary>
         internal static string title {

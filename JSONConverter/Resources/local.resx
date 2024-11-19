@@ -24,4 +24,7 @@
     <data name="enter_json_name" xml:space="preserve">
         <value>Enter JSON file name: </value>
     </data>
+    <data name="page_div" xml:space="preserve">
+        <value>----------------------------</value>
+    </data>
 </root>
