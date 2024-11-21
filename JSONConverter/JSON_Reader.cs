@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using JSONConverter.Resources;
 
 namespace JSONConverter;
 
@@ -12,7 +13,6 @@ namespace JSONConverter;
 public class JSON_Reader(string filename)
 {
     public string _filename { get; } = filename;
-    private List<HeaderList> _headers = []; //hierarchical tree of headers
 
     //imaginary text list
     public void GetHeaders(string parent = "") //TODO: recursive run?
@@ -41,86 +41,79 @@ public class JSON_Reader(string filename)
             }
         }
         //Console.WriteLine(string.Join('\n', headers));
-        JsonNode document = JsonNode.Parse(reader) ?? "Blah"; //funny fallback added
-        JsonNode root = document.Root;
-        var options = new JsonSerializerOptions { WriteIndented = true }; 
-        //Console.WriteLine(root.ToJsonString(options));
-        JsonNode? temp; //lookup guy
+        var document = JsonNode.Parse(reader) ?? "Blah"; //funny fallback added
+        var root = document.Root;
+        // var options = new JsonSerializerOptions { WriteIndented = true }; 
+        // Console.WriteLine(root.ToJsonString(options));
         
+        var TreeRoot = new TreeNode<string>("Root");
         foreach (var i in headers)
         {
             if (i != null)
             {
-                temp = root[i];
-                //Console.WriteLine(temp.GetType());
-                if (temp.GetType() == typeof(JsonArray)) //TODO: When Recursive tree method is built, only these type checks should exist with a call and return from the func.
-                {
-                    List<JsonNode> uniqueHeaders = [];
-                    List<string> subheads = [];//😊
-                    foreach (var header in temp.AsArray()) //TODO: Replace all of this with a recursive method to search through ALL subtrees until no more are present
-                    {
-                        //Console.WriteLine($"Header: {header.GetType()}"); //var type test
-                        if (header.GetType() == typeof(JsonObject))
-                        {
-                            
-                            foreach (var e in header.AsObject())
-                            {
-                                if (!subheads.Contains(e.Key))
-                                {
-                                    Console.WriteLine(e.Key);
-                                    if (e.Value != null && e.Value.GetType() == typeof(JsonObject))
-                                    {
-                                        foreach (var r in e.Value.AsObject())
-                                        {
-                                            Console.WriteLine($"Subhead: {r.Key}");
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine($"Subhead Primitive: {e.Value}");
-                                    }
-                                    subheads.Add(e.Key);
-                                }
-                                
-                            }
-                        }
-                        else
-                        {
-                            if (!uniqueHeaders.Contains(header))
-                            {
-                                uniqueHeaders.Add(header);
-                            }
-                        }
-                    }
-                    //Console.WriteLine(string.Join(", ",temp.AsArray()));
-                    //Console.WriteLine($"Array Found: {string.Join(", ", uniqueHeaders)}");
-                }
-                else if (temp.GetType() == typeof(JsonObject)) //TODO: split into smaller objs
-                {
-                    
-                    //Console.WriteLine($"Object found: {string.Join(", ",uniqueHeaders)}");
-                    Console.WriteLine("Object found");
-                }
-                else
-                {
-                    Console.WriteLine($"Primitive: {temp}");
-                }
+                var secondRoot = new TreeNode<string>(i);
+                var temp = root[i]; //lookup guy
+                
+                SubRecursive(temp, secondRoot);
+                TreeRoot.AddChild(secondRoot);
             }
         }
-
+        Console.WriteLine(local.page_div); //Just for debugging
+        Console.WriteLine("Root: " + TreeRoot);
+        Console.WriteLine("Children of Root:");
+        foreach (var child in TreeRoot.Children) 
+        {
+            if (child.Children.Count >= 0)
+            {
+                Console.WriteLine($"  Children of {child}");
+                foreach (var i in child.Children)
+                {
+                    Console.WriteLine("    Key: " + i);
+                }
+            }
+            else
+                Console.WriteLine("  " + child);
+        }
         
         
-
         //TODO: 
     }
-    /// <summary>
-    /// Recursively runs through a given JSON document and finds all subtrees, attaching them to a growing list
-    /// </summary>
-    /// <param name="headers"></param>
-    /// <returns></returns>
-    private List<string> SubRecursive(List<string> headers) //needs a hierarchal data struct (maybe a HeaderList data struct again?)
+    
+    private void SubRecursive(JsonNode current, TreeNode<string> parent, TreeNode<string>? currChild = null) //needs a hierarchal data struct (maybe a HeaderList data struct again?)
     {
-        
-        return new List<string>(); //temp
+        if (current is not JsonArray && current is not JsonObject) //base case
+        {
+            var finalNode = new TreeNode<string>(current.ToString());//current _should_ be a primitive here
+            if (currChild is null)
+                parent.AddChild(finalNode);
+            else
+                currChild.AddChild(finalNode);
+        }
+
+        if (current is JsonArray)
+        {
+
+            foreach (var i in current.AsArray())
+            {
+                var subNode = new TreeNode<string>(i?.ToString() ?? string.Empty);
+                if(currChild is null)
+                    parent.AddChild(subNode);
+                else
+                    currChild.AddChild(subNode);
+                if (i != null) SubRecursive(i, parent, subNode);
+            }
+        }
+        else if (current is JsonObject)
+        {
+            foreach (var i in current.AsObject())
+            {
+                var subNode = new TreeNode<string>(i.Key);
+                if(currChild is null)
+                    parent.AddChild(subNode);
+                else
+                    currChild.AddChild(subNode);
+                if (i.Value != null) SubRecursive(i.Value, parent, subNode);
+            }
+        }
     }
 }
