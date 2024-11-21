@@ -53,11 +53,11 @@ public class JSON_Reader(string filename)
             {
                 temp = root[i];
                 //Console.WriteLine(temp.GetType());
-                if (temp.GetType() == typeof(JsonArray))
+                if (temp.GetType() == typeof(JsonArray)) //TODO: When Recursive tree method is built, only these type checks should exist with a call and return from the func.
                 {
                     List<JsonNode> uniqueHeaders = [];
                     List<string> subheads = [];//😊
-                    foreach (var header in temp.AsArray())
+                    foreach (var header in temp.AsArray()) //TODO: Replace all of this with a recursive method to search through ALL subtrees until no more are present
                     {
                         //Console.WriteLine($"Header: {header.GetType()}"); //var type test
                         if (header.GetType() == typeof(JsonObject))
@@ -68,6 +68,17 @@ public class JSON_Reader(string filename)
                                 if (!subheads.Contains(e.Key))
                                 {
                                     Console.WriteLine(e.Key);
+                                    if (e.Value != null && e.Value.GetType() == typeof(JsonObject))
+                                    {
+                                        foreach (var r in e.Value.AsObject())
+                                        {
+                                            Console.WriteLine($"Subhead: {r.Key}");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"Subhead Primitive: {e.Value}");
+                                    }
                                     subheads.Add(e.Key);
                                 }
                                 
@@ -84,7 +95,7 @@ public class JSON_Reader(string filename)
                     //Console.WriteLine(string.Join(", ",temp.AsArray()));
                     //Console.WriteLine($"Array Found: {string.Join(", ", uniqueHeaders)}");
                 }
-                else if (temp.GetType() == typeof(JsonObject)) //split into smaller objs
+                else if (temp.GetType() == typeof(JsonObject)) //TODO: split into smaller objs
                 {
                     
                     //Console.WriteLine($"Object found: {string.Join(", ",uniqueHeaders)}");
@@ -96,10 +107,20 @@ public class JSON_Reader(string filename)
                 }
             }
         }
-        
+
         
         
 
         //TODO: 
+    }
+    /// <summary>
+    /// Recursively runs through a given JSON document and finds all subtrees, attaching them to a growing list
+    /// </summary>
+    /// <param name="headers"></param>
+    /// <returns></returns>
+    private List<string> SubRecursive(List<string> headers) //needs a hierarchal data struct (maybe a HeaderList data struct again?)
+    {
+        
+        return new List<string>(); //temp
     }
 }
