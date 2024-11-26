@@ -36,35 +36,24 @@ public class JSON_Reader(string filename)
         // var options = new JsonSerializerOptions { WriteIndented = true }; 
         // Console.WriteLine(root.ToJsonString(options));
         
-        var TreeRoot = new TreeNode<string>("Root");
+        //var TreeRoot = new TreeNode<string>("Root");
+        var baseStuff = new List<Header>();
         foreach (var i in headers) //replace with a recursive print method
         {
             if (i != null)
             {
                 var secondRoot = new TreeNode<string>(i);
                 var temp = root[i]; //lookup guy
-                
-                SubRecursive(temp, secondRoot);
-                TreeRoot.AddChild(secondRoot);
+                var tempHeader = new Header(i);
+                SubRecursive2(temp, baseStuff,tempHeader);
+                baseStuff.Add(tempHeader);
             }
         }
-        // Console.WriteLine(local.page_div); //Just for debugging
-        // Console.WriteLine("Root: " + TreeRoot);
-        // Console.WriteLine("Children of Root:");
-        // foreach (var child in TreeRoot.Children) 
-        // {
-        //     if (child.Children.Count >= 0)
-        //     {
-        //         Console.WriteLine($"  Children of {child}");
-        //         foreach (var i in child.Children)
-        //         {
-        //             Console.WriteLine( "    Key: " + i);
-        //             Console.WriteLine($"    Count: {i.Children.Count}");
-        //         }
-        //     }
-        //     else
-        //         Console.WriteLine("  " + child);
-        // }
+        Console.WriteLine(local.page_div); //Just for debugging
+        foreach (var child in baseStuff) 
+        {
+            child.Display();
+        }
     }
     
     private static void SubRecursive(JsonNode current, TreeNode<string> parent, TreeNode<string>? currChild = null) //needs a hierarchal data struct (maybe a HeaderList data struct again?)
@@ -155,13 +144,13 @@ public class JSON_Reader(string filename)
     //if it isn't in the list, attach the path and variable type (perhaps split and add, to construct a cute TreeNode), then construct a tree
     
     //will need a second recursive function to parse the returned list and make a tree
-    private static void SubRecursive2(JsonNode current, List<Header> headers, Header? currHeader = null)
+    private static void SubRecursive2(JsonNode current, List<Header> headers, Header currHeader)
     { 
         if (current is JsonValue jsonValue) //base case
         {
             var type = jsonValue.GetValueKind();
             currHeader.ChangeType(type.ToString()); //set primitive for the last element in currHeader's subHeads list (which would be the last guy addeed)
-            if (currHeader != null) headers.Add(currHeader);
+            headers.Add(currHeader);
         }
         else if (current is JsonArray jsonArray)
         {
@@ -199,7 +188,21 @@ public class JSON_Reader(string filename)
         }
         else if (current is JsonObject jsonObject) //TODO: Build jsonObject recursion
         {
-            
+            foreach (var j in jsonObject)
+            {
+                switch (j.Value)
+                {
+                    case JsonObject:
+                        currHeader.AddSubHeads(j.Key,"Object");
+                        break;
+                    case JsonArray jArr:
+                        currHeader.AddSubHeads(j.Key, "Array");
+                        break;
+                }
+
+                if(j.Value != null)
+                    SubRecursive2(j.Value, headers, currHeader);
+            }
         }
     }
 }

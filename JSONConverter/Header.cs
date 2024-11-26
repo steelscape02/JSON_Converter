@@ -13,7 +13,7 @@ public class Header
 
     public string Name { get; set; }
     //list of sub headers with appropriate primitive variable type (Or a capitalized version of the word if it's a class, and array with type if that's the thing)
-    private Dictionary<string,string> subHeads { get; set; }
+    private Dictionary<string,string> SubHeads { get; set; }
 
     /// <summary>
     /// Add a subhead to the <c>subHeads</c> Dictionary
@@ -30,24 +30,29 @@ public class Header
         //capitalize name if type is Object, append List<VARTYPE> to name if type is Array
         if (type.ToLower() == "object")
             name = CapWord(name);
-        subHeads.Add(name, type);
+        SubHeads.Add(name, type);
     }
 
     public bool HasSubHead(string name)
     {
-        return subHeads.ContainsKey(name);
+        return SubHeads.ContainsKey(name);
     }
 
     
     public void ChangeType(string newType)
     {
-        var last = subHeads.LastOrDefault();
-        subHeads[last.Key] = newType;
+        if (SubHeads.Count >= 1) 
+        {
+            var last = SubHeads.Last();
+            SubHeads[last.Key] = newType;
+        }
+
+        
     }
 
     public void AddNull(string name)
     {
-        subHeads[name] = subHeads[name] + "?";
+        SubHeads[name] = SubHeads[name] + "?";
     }
     
     /// <summary>
@@ -66,7 +71,7 @@ public class Header
     public void Display()
     {
         Console.WriteLine("Name: " + Name);
-        foreach (var subHead in subHeads)
+        foreach (var subHead in SubHeads)
         {
             Console.WriteLine($"  {subHead.Key}: {subHead.Value}");
         }
