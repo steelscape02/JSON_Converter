@@ -30,24 +30,17 @@ public class JSON_Reader(string filename)
                 headers.Add(headerRead.GetString());
             }
         }
-        //Console.WriteLine(string.Join('\n', headers));
         var document = JsonNode.Parse(reader) ?? "Blah"; //funny fallback added
         var root = document.Root;
-        // var options = new JsonSerializerOptions { WriteIndented = true }; 
-        // Console.WriteLine(root.ToJsonString(options));
         
-        //var TreeRoot = new TreeNode<string>("Root");
         var baseStuff = new List<Header>();
         foreach (var i in headers) //replace with a recursive print method
         {
-            if (i != null)
-            {
-                var secondRoot = new TreeNode<string>(i);
-                var temp = root[i]; //lookup guy
-                var tempHeader = new Header(i);
-                SubRecursive2(temp, baseStuff,tempHeader);
-                baseStuff.Add(tempHeader);
-            }
+            if (i == null) continue;
+            var temp = root[i]; //lookup guy
+            var tempHeader = new Header(i);
+            if (temp != null) SubRecursive2(temp, baseStuff, tempHeader);
+            baseStuff.Add(tempHeader);
         }
         Console.WriteLine(local.page_div); //Just for debugging
         foreach (var child in baseStuff) 
@@ -56,152 +49,80 @@ public class JSON_Reader(string filename)
         }
     }
     
-    private static void SubRecursive(JsonNode current, TreeNode<string> parent, TreeNode<string>? currChild = null) //needs a hierarchal data struct (maybe a HeaderList data struct again?)
-    {
-        if (current is not JsonArray && current is not JsonObject) //base case
-        {
-            //demo for SubRecursive2, or a rebuild of this one
-            //Print the path, which shows all of the elements up to that point. From here you can trace the object type (primitive, list, etc..) that is needed
-            
-            return;
-        }
-
-        if (current is JsonArray)
-        {
-
-            foreach (var i in current.AsArray())
-            {
-                
-                if (i == null) continue;
-                //check if prim
-                if (i is JsonArray)
-                {
-                    foreach (var j in i.AsArray())
-                    {
-                        if(j == null) continue;
-                        var subNode = new TreeNode<string>(j?.ToString() ?? string.Empty);
-                        if(currChild is null)
-                            parent.AddChild(subNode);
-                        else
-                        {
-                            if(!currChild.Children.Contains(subNode)) //TODO: Fix this atrocity
-                                currChild.AddChild(subNode);
-                        }
-                        SubRecursive(j, parent, subNode);
-                    }
-                }
-
-                if (i is JsonObject)
-                {
-                    foreach (var j in i.AsObject())
-                    {
-                        if (j.Value == null) continue;
-                        var subNode = new TreeNode<string>(j.Key);
-                        //if (currChild.Children.Contains(subNode)) continue;
-                        if(currChild is null)
-                            parent.AddChild(subNode);
-                        else
-                        {
-                            if(!currChild.Children.Contains(subNode))
-                                currChild.AddChild(subNode);
-                        }
-                            
-                        SubRecursive(j.Value, parent, subNode);
-                        
-                    }
-                }
-                // else
-                // {
-                //     var subNode = new TreeNode<string>(i?.ToString() ?? string.Empty);
-                //     if(currChild is null)
-                //         parent.AddChild(subNode);
-                //     else
-                //         currChild.AddChild(subNode);
-                //     SubRecursive(i, parent, subNode);
-                // }
-                
-
-            }
-        }
-        else if (current is JsonObject)
-        {
-            foreach (var i in current.AsObject())
-            {
-                if (i.Value == null) continue;
-                var subNode = new TreeNode<string>(i.Key);
-                if(currChild is null)
-                    parent.AddChild(subNode);
-                else
-                    currChild.AddChild(subNode);
-                SubRecursive(i.Value, parent, subNode);
-            }
-        }
-    }
-    
-    //**REPLACEMENT TO SubRecursive IF IT WORKS**
-    
-    //look through list and use JSONNode's GetPath attribute. Drill through until you find a primitive, check if that primitive is already in a list,
-    //if it isn't in the list, attach the path and variable type (perhaps split and add, to construct a cute TreeNode), then construct a tree
-    
-    //will need a second recursive function to parse the returned list and make a tree
     private static void SubRecursive2(JsonNode current, List<Header> headers, Header currHeader)
-    { 
-        if (current is JsonValue jsonValue) //base case
+    {
+        switch (current)
         {
-            var type = jsonValue.GetValueKind();
-            currHeader.ChangeType(type.ToString()); //set primitive for the last element in currHeader's subHeads list (which would be the last guy addeed)
-            headers.Add(currHeader);
-        }
-        else if (current is JsonArray jsonArray)
-        {
-            var isPrim = true; //check if array is just primitives, if so the item should NOT be added
-            if (currHeader == null)
+            //base case
+            case JsonValue jsonValue: //TODO: Add type thing for instances where currHeader only appears once (no children)
             {
-                throw new Exception("currHeader is null on an array");
+                var type = jsonValue.GetValueKind().ToString();
+                if (!currHeader.SubPresent()) break;
+                
+                currHeader.ChangeType(type); //set primitive for the last element in currHeader's subHeads list (which would be the last guy added)
+
+                
+                
+                if(!headers.Contains(currHeader))
+                    headers.Add(currHeader);
+                break;
             }
-            foreach (var i in jsonArray)
+            case JsonArray jsonArray:
             {
-                if (i is null)
+                var isObj = true;
+                if (currHeader == null)
                 {
-                    isPrim = false;
-                    continue;
+                    throw new Exception("currHeader is null on an array");
                 }
-                if (i is JsonObject jObj)
+                foreach (var i in jsonArray)
                 {
-                    isPrim = false;
-                    foreach (var j in jObj)
+                    switch (i) //cannot be an array, so check Prim and 
                     {
-                        if (j.Value == null)
-                        {
-                            if (currHeader.HasSubHead(j.Key))
-                            {
-                                currHeader.AddNull(j.Key);
-                            }
-                        }
-                        else
-                        {
-                            SubRecursive2(j.Value, headers, currHeader);
-                        }
+                        case JsonValue jValue:
+                            currHeader.Type = $"List<{jValue.GetValueKind().ToString()}>";
+                            isObj = false;
+                            break;
+                        case JsonObject jObj:
+                            SubRecursive2(jObj, headers, currHeader);
+                            break;
+                    }
+
+                    if (isObj)
+                    {
+                        currHeader.Type = $"List<{currHeader.Name}>";
                     }
                 }
-            }
-        }
-        else if (current is JsonObject jsonObject) //TODO: Build jsonObject recursion
-        {
-            foreach (var j in jsonObject)
-            {
-                switch (j.Value)
-                {
-                    case JsonObject:
-                        currHeader.AddSubHeads(j.Key,"Object");
-                        break;
-                    case JsonArray jArr:
-                        currHeader.AddSubHeads(j.Key, "Array");
-                        break;
-                }
 
-                if(j.Value != null)
+                break;
+            }
+            
+            case JsonObject jsonObject:
+            {
+                foreach (var j in jsonObject)
+                {
+                    if (j.Value == null)
+                    {
+                        if(currHeader.HasSubHead(j.Key))
+                            currHeader.AddNull(j.Key);
+                        return;
+                    }
+                    switch (j.Value)
+                    {
+                        case JsonObject: //TODO: Add a new currHeader to this and run as a separate SubRecur
+                            currHeader.AddSubHeads(j.Key,"Object");
+                            break;
+                        case JsonArray jArr:
+                            currHeader.AddSubHeads(j.Key, "Array");
+                            break;
+                        case JsonValue jValue: //catch primitive object members
+                            currHeader.AddSubHeads(j.Key, jValue.GetValueKind().ToString());
+                            break;
+                    }
+
+                    currHeader.Type = currHeader.Name;
                     SubRecursive2(j.Value, headers, currHeader);
+                }
+                break;
             }
         }
     }
