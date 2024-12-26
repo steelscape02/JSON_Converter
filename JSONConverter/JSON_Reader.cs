@@ -134,12 +134,17 @@ public class JsonReader(string filename)
                         if (element.Value == null) continue;
                         var elem = new Element(element.Value.GetValueKind().ToString(), element.Key);
                         if (elements.Contains(elem)) continue;
-                        SubRecursive4(element.Value, elements, elem);
                         elements.Add(elem);
+                        SubRecursive4(element.Value, elements, elem);
+                        
                     }
                 }
                 else
                 {
+                    if (headElem.Name.Length == 0)
+                    {
+                        headElem.ChangeName(""); //TODO: FEATURES[0] OBJ SAYS 3, BUT 4 ARE PRESENT
+                    }
                     foreach (var element in jsonObject)
                     {
                         
@@ -148,7 +153,7 @@ public class JsonReader(string filename)
                         var elem = new Element(element.Value.GetValueKind().ToString(), element.Key);
                         if (elements.Contains(elem)) continue;
                         headElem.AddChild(elem);
-                        SubRecursive4(element.Value, elements, headElem);
+                        SubRecursive4(element.Value, elements, elem);
 
                     }
                 }
