@@ -5,7 +5,7 @@ public class Element(string type,string name = "")
     public string Type { get; set; }= type;
     private readonly List<Element> _children = [];
     public string Name { get; } = name;
-    private string _name = name;
+    private readonly string _name = name;
     private string _type = type;
 
     public void AddChild(Element newChild)

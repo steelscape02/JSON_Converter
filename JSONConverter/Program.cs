@@ -1,15 +1,10 @@
-﻿using System.Globalization;
-using JSONConverter.Resources;
-using System.Resources;
-using System.Drawing;
+﻿using JSONConverter.Resources;
 
 namespace JSONConverter;
 
-//C:\Users\nicho\RiderProjects\JSONConverter\JSONConverter\tester.json
-
 internal abstract class Program
 {
-    private static void Main(string[] args)
+    private static void Main()
     {
         Console.WriteLine(local.title);
     
