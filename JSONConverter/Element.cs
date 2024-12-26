@@ -3,21 +3,18 @@
 public class Element(string type,string name = "")
 {
     public string Type { get; set; }= type;
-    public Element? Parent { get; set; }
     private readonly List<Element> _children = [];
-    public string Name { get; set; } = name;
+    public string Name { get; } = name;
     private string _name = name;
     private string _type = type;
 
-    public bool AddChild(Element newChild)
+    public void AddChild(Element newChild)
     {
-        newChild.Parent = this;
         if (_children.Contains(newChild))
         {
-            return false;
+            return;
         }
         _children.Add(newChild);
-        return true;
     }
 
     public void ChangeType(string newType)
@@ -25,14 +22,21 @@ public class Element(string type,string name = "")
         _type = newType;
     }
 
+    public override bool Equals(object? obj)
+    {
+        if (obj is Element other)
+        {
+            return Name == other.Name;
+        }
+        return false;
+    }
+    public override int GetHashCode()
+    {
+        return Name.GetHashCode();
+    }
+
     public string Summary() //testing ONLY
     {
-        //TODO: Add 1 count check. If 1, it may be an array, so run the child's count
-        var count = _children.Count;
-        if (count == 1)
-        {
-            count = _children[0]._children.Count;
-        }
         var summary = $"Name: {_name}, Type: {_type} - {_children.Count} children";
         return summary;
     }

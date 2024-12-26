@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Nodes;
+﻿using System.Net;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using JSONConverter.Resources;
 
 namespace JSONConverter;
@@ -25,101 +27,54 @@ public class JsonReader(string filename)
         }
     }
     
-    /// <summary>
-    /// Recursively iterate through a JSON tree from a specified header (set initially as <c>current</c>)
-    /// </summary>
-    /// <param name="current">Starting header</param>
-    /// <param name="headers">A list of headers with associated child objects</param>
-    /// <param name="currHeader">The current header to work on.</param>
-    /// <exception cref="Exception"></exception>
-    private static void SubRecursive(JsonNode current, List<Header> headers, Header currHeader)
-    {
-        switch (current)
-        {
-            //base case
-            case JsonValue jsonValue: //TODO: Add type thing for instances where currHeader only appears once (no children)
-            {
-                var type = jsonValue.GetValueKind().ToString();
-                if (!Header.SubPresent()) break;
-                
-                currHeader.ChangeType(type); //set primitive for the last element in currHeader's subHeads list (which would be the last guy added)
-
-                
-                
-                if(!headers.Contains(currHeader))
-                    headers.Add(currHeader);
-                break;
-            }
-            case JsonArray jsonArray:
-            {
-                var isObj = true;
-                if (currHeader == null)
-                {
-                    throw new Exception("currHeader is null on an array");
-                }
-                foreach (var i in jsonArray)
-                {
-                    switch (i) //cannot be an array, so check Prim and 
-                    {
-                        case JsonValue jValue:
-                            currHeader.Type = $"List<{jValue.GetValueKind().ToString()}>";
-                            isObj = false;
-                            break;
-                        case JsonObject jObj:
-                            SubRecursive(jObj, headers, currHeader);
-                            break;
-                    }
-
-                    if (isObj)
-                    {
-                        currHeader.Type = $"List<{currHeader.Name}>";
-                    }
-                }
-
-                break;
-            }
-            case JsonObject jsonObject:
-            {
-                currHeader.Type = currHeader.Name;
-                foreach (var j in jsonObject)
-                {
-                    if (j.Value == null)
-                    {
-                        if(currHeader.HasSubHead(j.Key))
-                            currHeader.AddNull(j.Key);
-                        return;
-                    }
-                    switch (j.Value)
-                    {
-                        case JsonObject: 
-                            var jObjHead = new Header(j.Key);
-                            currHeader.AddChild(jObjHead); //TODO: Ends up adding all following headers to their own children, messing up things
-                            //Console.WriteLine("A man has fallen in LEGO city");
-                            SubRecursive(j.Value, headers, jObjHead);
-                            break;
-                        case JsonArray:
-                            currHeader.AddSubHeads(j.Key, "Array"); //TODO: Add array type (maybe add a method in Header)
-                            SubRecursive(j.Value, headers, currHeader);
-                            break;
-                        case JsonValue jValue: //catch primitive object members
-                            currHeader.AddSubHeads(j.Key, jValue.GetValueKind().ToString());
-                            SubRecursive(j.Value, headers, currHeader);
-                            break;
-                    }
-
-                    
-                    
-                }
-                break;
-            }
-        }
-    }
-
     private static void SubRecursive4(JsonNode current, List<Element> elements, Element? headElem)
     {
         switch (current)
         {
-            case JsonValue jsonValue: //TODO: add type
+            case JsonValue jsonValue: //TODO: fix to prevent repeat running (currently will repeat over whole array or other item)
+                
+                if(headElem == null)
+                    throw new ArgumentNullException(headElem.ToString());
+                if (elements.Contains(headElem)) break;
+                if (headElem.Type == "Object") break; //prevent overwriting complex structure naming
+                switch (jsonValue.GetValueKind())
+                {
+                    case JsonValueKind.String:
+                        headElem.ChangeType("string");
+                        break;
+                    case JsonValueKind.Number:
+                        if (int.TryParse(jsonValue.ToString(), out _))
+                        {
+                            headElem.ChangeType("int");
+                        }
+                        else if (long.TryParse(jsonValue.ToString(), out _))
+                        {
+                            headElem.ChangeType("long");
+                        }
+                        else if (double.TryParse(jsonValue.ToString(), out _))
+                        {
+                            headElem.ChangeType("double");
+                        }
+                        else if (decimal.TryParse(jsonValue.ToString(), out _))
+                        {
+                            headElem.ChangeType("decimal");
+                        }
+                        
+                        break;
+                    case JsonValueKind.True:
+                    case JsonValueKind.False:
+                        headElem.ChangeType("bool");
+                        break;
+                    case JsonValueKind.Null:
+                        headElem.ChangeType("null");
+                        break;
+                    case JsonValueKind.Undefined:
+                    case JsonValueKind.Object:
+                    case JsonValueKind.Array:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(headElem.ToString());
+                }
                 break;
             case JsonArray jsonArray:
                 
@@ -179,98 +134,25 @@ public class JsonReader(string filename)
                     foreach (var element in jsonObject)
                     {
                         //first iter (from root, so just grab all keys)
-                        
                         var elem = new Element(element.Value.GetValueKind().ToString(), element.Key);
-                        
+                        if (elements.Contains(elem)) continue;
                         SubRecursive4(element.Value, elements, elem);
                         elements.Add(elem);
                     }
                 }
                 else
                 {
-                    List<string> known = [];
-                    foreach (var element in jsonObject) //if the name exists multiple times, reject
+                    foreach (var element in jsonObject)
                     {
                         
                         if (element.Value == null) continue; //TODO: Need fix to address null object
-                        if (known.Contains(element.Key)){
-                            Console.WriteLine("OH!"); //12.26.2024 - Never reached
-                            continue; //keep for rejecting repeat item
-                        }
                         
-                        known.Add(element.Key);
                         var elem = new Element(element.Value.GetValueKind().ToString(), element.Key);
+                        if (elements.Contains(elem)) continue;
                         headElem.AddChild(elem);
                         SubRecursive4(element.Value, elements, headElem);
 
                     }
-                }
-                
-                break;
-        }
-    }
-    
-    private static void SubRecursive3(JsonNode current, List<Element> elements, Element? headElem)
-    {
-        //TODO: Rework to capture all occurrences. This will be used to nullify prims and show arrays (and their types)
-        Element? curr;
-        switch (current)
-        {
-            case JsonValue jsonValue: //lowest level, but not base case (best to exit at parent object)
-                var type = jsonValue.GetValueKind().ToString();
-                var prim = new Element(type,jsonValue.ToString());
-                headElem.AddChild(prim);
-                //TODO: Check headElem children. If all prim (3 prim types), run ChangeType() to alter to respective primitive array type
-                
-                break;
-            case JsonArray jsonArray:
-                if (headElem == null)
-                {
-                    throw new Exception("Parent is null on an array");
-                }
-                //set array type later
-                curr = new Element("Array");
-                headElem.AddChild(curr);
-                foreach (var i in jsonArray) //keep current headElem and run all children under the array
-                {
-                    if (i != null) SubRecursive3(i, elements, curr);
-                }
-                
-                
-                break;
-            case JsonObject jsonObject:
-                
-                //TODO: Check headElem children. If all obj, run ChangeType() to alter to list of respective object
-                var e = 0;
-                var found = false;
-                foreach (var i in jsonObject) //create new headElem for obj, run all children under
-                {
-                    
-                    if (e == 0) //create headElem at first index
-                    {
-                        if (headElem == null)
-                        {
-                            headElem = new Element("Object",i.Key); //create new headElem for null
-                        }
-                        else
-                        {
-                            curr = new Element("Object",i.Key); //update existing headElem
-                            headElem.AddChild(curr);
-                            
-                            headElem = curr;
-                        }
-                    }
-                    SubRecursive3(i.Value,elements,headElem); //TODO: Handle possible i.Value null
-                    e += 1;
-                }
-                
-                //Base Case
-                //TODO: Make this read seq to check that HeadElem's name is not on the list (will create errors, but that's somethin else
-                found = elements.Any(i => i.Name == headElem.Name);
-
-                if (!found)
-                {
-                    elements.Add(headElem);
                 }
                 break;
         }
