@@ -24,7 +24,7 @@ internal abstract class Program
             fileFound = File.Exists(filename);
         }
         
-        var reader = new JSON_Reader(filename);
+        var reader = new JsonReader(filename);
         reader.GetHeaders();
         
         

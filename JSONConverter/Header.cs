@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices.JavaScript;
+﻿using System.Net;
+using System.Runtime.InteropServices.JavaScript;
 
 namespace JSONConverter;
 /// <summary>
@@ -6,17 +7,16 @@ namespace JSONConverter;
 /// </summary>
 public class Header
 {
-    public Header(string name, Header? parent = null)
+    public Header(string name)
     {
         Name = name;
-        _parent = parent;
     }
 
     public string Name { get; set; }
     public string Type { get; set; }
     //list of sub headers with appropriate primitive variable type (Or a capitalized version of the word if it's a class, and array with type if that's the thing)
     private readonly Dictionary<string, string> _subHeads = new();
-    private readonly Header? _parent;
+    public List<Header?> Children { get; set; } = [];
 
     /// <summary>
     /// Add a subhead to the <c>subHeads</c> Dictionary
@@ -33,13 +33,25 @@ public class Header
         //capitalize name if type is Object, append List<VARTYPE> to name if type is Array
         if (type.ToLower() == "object")
             name = CapWord(name);
-        if(!_subHeads.ContainsKey(name))
+        if(!HasSubHead(name))
             _subHeads.Add(name, type);
     }
 
     public bool HasSubHead(string name)
     {
         return _subHeads.ContainsKey(name);
+    }
+
+    public void AddChild(Header child)
+    {
+        foreach (var ch in Children)
+        {
+            if (child.Name == ch.Name)
+            {
+                return;
+            }
+        }
+        Children.Add(child);
     }
 
     
@@ -50,7 +62,7 @@ public class Header
         _subHeads[last.Key] = newType;
     }
 
-    public bool SubPresent()
+    public static bool SubPresent()  //broken?
     {
         return false;
     }
@@ -74,13 +86,21 @@ public class Header
         return newWord;
     }
 
-    public void Display()
+    public void Display(string depth = "")
     {
-        Console.WriteLine("Name: " + Name + " Type: " + Type);
-        _parent?.Display();
+        Console.WriteLine(depth + "Name: " + Name + " Type: " + Type);
+        
         foreach (var subHead in _subHeads)
         {
-            Console.WriteLine($"  {subHead.Key}: {subHead.Value}");
+            
+            Console.WriteLine($"{depth + "  "}{subHead.Key}: {subHead.Value}");
         }
+    
+        foreach (var child in Children)
+        {
+            Console.WriteLine("Has child");
+            child?.Display(depth += "  ");
+        }
+            
     }
 }
