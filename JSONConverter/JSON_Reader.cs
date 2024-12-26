@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 using JSONConverter.Resources;
 
@@ -9,7 +8,6 @@ public class JsonReader(string filename)
 {
     private string Filename { get; } = filename;
 
-    //imaginary text list
     public void GetHeaders()
     {
         var reader = File.ReadAllText(Filename);
@@ -22,7 +20,6 @@ public class JsonReader(string filename)
         Console.WriteLine(local.page_div); //Just for debugging
         foreach (var element in baseStuff)
         {
-            
             Console.WriteLine(element.Summary());
         }
     }
@@ -33,8 +30,7 @@ public class JsonReader(string filename)
         {
             case JsonValue jsonValue: //TODO: fix to prevent repeat running (currently will repeat over whole array or other item)
                 
-                if(headElem == null)
-                    throw new ArgumentNullException(headElem.ToString());
+                ArgumentNullException.ThrowIfNull(headElem); //TODO: Is this optimal?
                 if (elements.Contains(headElem)) break;
                 if (headElem.Type == "Object") break; //prevent overwriting complex structure naming
                 switch (jsonValue.GetValueKind())
@@ -73,7 +69,7 @@ public class JsonReader(string filename)
                     case JsonValueKind.Array:
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException(headElem.ToString());
+                        throw new ArgumentOutOfRangeException(nameof(current)); //current isn't doing good things
                 }
                 break;
             case JsonArray jsonArray:
@@ -81,7 +77,8 @@ public class JsonReader(string filename)
                 var isObj = true;
                 var isPrim = true;
                 var primType = "";
-                
+
+                ArgumentNullException.ThrowIfNull(headElem); //TODO: Is this optimal?
                 foreach (var i in jsonArray)
                 {
                     switch (i) //TODO: prevent repeat scanning, especially on lists of objects
@@ -125,7 +122,7 @@ public class JsonReader(string filename)
                 
                 break;
             case JsonObject jsonObject:
-                //TODO: Regard objects as List<Object>'s and indv objects (if you see an object next, it's not a list, if an array, it's a list of the obj)
+                //TODO: Regard objects as List<Object>'s and individual objects (if you see an object next, it's not a list, if an array, it's a list of the obj)
                 //TODO: Track number of occurrences of each item
                     //TODO: Or just track obj lists (as enclosed repeating items HAVE to be enclosed first)
                 
@@ -134,6 +131,7 @@ public class JsonReader(string filename)
                     foreach (var element in jsonObject)
                     {
                         //first iter (from root, so just grab all keys)
+                        if (element.Value == null) continue;
                         var elem = new Element(element.Value.GetValueKind().ToString(), element.Key);
                         if (elements.Contains(elem)) continue;
                         SubRecursive4(element.Value, elements, elem);
