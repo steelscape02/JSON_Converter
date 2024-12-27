@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.IO.Compression;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using JSONConverter.Resources;
 
@@ -15,20 +16,23 @@ public class JsonReader(string filename)
         var document = JsonNode.Parse(reader) ?? "Blah"; //funny fallback added
         var root = document.Root; //root is JSON Object
         var baseStuff = new List<Element>();
-        SubRecursive4(root,baseStuff,null);
+        SubRecursive(root,baseStuff,null);
         
         Console.WriteLine(local.page_div); //Just for debugging
+        var summary = "";
         foreach (var element in baseStuff)
         {
-            Console.WriteLine(element.Summary());
+            summary += $"element: {element.Name}\n"; //TODO: Only reached once?
+            summary += element.Summary();
         }
+        Console.WriteLine(summary);
     }
     
-    private static void SubRecursive4(JsonNode current, List<Element> elements, Element? headElem)
+    private static void SubRecursive(JsonNode current, List<Element> elements, Element? headElem)
     {
         switch (current)
         {
-            case JsonValue jsonValue: //TODO: fix to prevent repeat running (currently will repeat over whole array or other item)
+            case JsonValue jsonValue:
                 
                 ArgumentNullException.ThrowIfNull(headElem); //TODO: Is this optimal?
                 if (elements.Contains(headElem)) break;
@@ -85,9 +89,10 @@ public class JsonReader(string filename)
                     {
                         case JsonObject:
                         {
+                            var path = i.GetPath(); //split to access obj name
                             isPrim = false;
                             var obj = new Element("Object");
-                            SubRecursive4(i,elements,obj);
+                            SubRecursive(i,elements,obj);
                             headElem.AddChild(obj);
                             break;
                         }
@@ -97,23 +102,23 @@ public class JsonReader(string filename)
                             var val = i.AsValue();
                             primType = val.GetValueKind().ToString();
                             var prim = new Element(primType,val.ToString());
-                            SubRecursive4(i,elements,prim);
+                            SubRecursive(i,elements,prim);
                             headElem.AddChild(prim);
                             break;
                         }
                         case JsonArray: //unlikely, but possible JsonArray nesting
-                            SubRecursive4(i,elements,headElem);
+                            SubRecursive(i,elements,headElem);
                             break;
                     }
                 }
 
                 if (isObj)
                 {
-                    headElem.ChangeType($"List<{headElem.Name}>");
+                    headElem.ChangeType($"List<{MakeFriendly(headElem.Name)}>");
                 }
                 else if (isPrim)
                 {
-                    headElem.ChangeType($"List<{primType}>");
+                    headElem.ChangeType($"List<{primType}>"); //TODO: Change to use a method version of the JsonValue finder thing to get a more accurate list type
                 }
                 else
                 {
@@ -122,10 +127,6 @@ public class JsonReader(string filename)
                 
                 break;
             case JsonObject jsonObject:
-                //TODO: Regard objects as List<Object>'s and individual objects (if you see an object next, it's not a list, if an array, it's a list of the obj)
-                //TODO: Track number of occurrences of each item
-                    //TODO: Or just track obj lists (as enclosed repeating items HAVE to be enclosed first)
-                
                 if (headElem == null) //start point (basically base case)
                 {
                     foreach (var element in jsonObject)
@@ -135,16 +136,12 @@ public class JsonReader(string filename)
                         var elem = new Element(element.Value.GetValueKind().ToString(), element.Key);
                         if (elements.Contains(elem)) continue;
                         elements.Add(elem);
-                        SubRecursive4(element.Value, elements, elem);
-                        
+                        SubRecursive(element.Value, elements, elem);
                     }
                 }
                 else
                 {
-                    if (headElem.Name.Length == 0)
-                    {
-                        headElem.ChangeName(""); //TODO: FEATURES[0] OBJ SAYS 3, BUT 4 ARE PRESENT
-                    }
+                    
                     foreach (var element in jsonObject)
                     {
                         
@@ -153,11 +150,23 @@ public class JsonReader(string filename)
                         var elem = new Element(element.Value.GetValueKind().ToString(), element.Key);
                         if (elements.Contains(elem)) continue;
                         headElem.AddChild(elem);
-                        SubRecursive4(element.Value, elements, elem);
+                        SubRecursive(element.Value, elements, elem);
 
                     }
                 }
                 break;
         }
+    }
+
+    private static string MakeFriendly(string text)
+    {
+        if (text[text.Length - 1].ToString().ToLower() == "s")
+        {
+            var cap = text[0].ToString().ToUpper();
+            text = cap + text.Substring(1, text.Length - 2);
+            return text;
+        }
+
+        return text;
     }
 }

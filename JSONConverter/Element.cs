@@ -1,9 +1,12 @@
-﻿namespace JSONConverter;
+﻿using System.Reflection.PortableExecutable;
+
+namespace JSONConverter;
 
 public class Element(string type,string name = "")
 {
     public string Type { get; set; }= type;
-    private readonly List<Element> _children = [];
+    
+    private List<Element> _children = [];
     public string Name { get; } = name;
     private string _name = name;
     private string _type = type;
@@ -40,16 +43,21 @@ public class Element(string type,string name = "")
         return Name.GetHashCode();
     }
 
-    public string Summary() //testing ONLY
+    public string Summary(string summary = "",string spacing = "") //testing ONLY
     {
-        var summary = $"Name: {_name}, Type: {_type} - {_children.Count} children";
+        if(spacing == "")
+            summary += $"\n{spacing}Name: {_name}, Type: {_type} - {_children.Count} children";
         foreach (var child in _children)
         {
-            summary += $"\n   Name: {child._name} Type: {child._type} - {child._children.Count} children";
-        }
-        if(_children.Count > 0)
-            if(_children[0]._children.Count > 0)
-                Console.WriteLine(_children[0]._children[0].Summary());
+            
+            summary += $"\n{spacing}   Name: {child._name} Type: {child._type} - {child._children.Count} children";
+            if(child._children.Count > 0)
+            {
+                summary += $"\n{spacing}{child.Summary(summary,spacing + "   ")}";
+            }
+            
+        }  //TODO: Fix "building" effect (keeps printing the progressing summary
+        
         return summary;
     }
 }
