@@ -1,5 +1,4 @@
-﻿using System.IO.Compression;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 using JSONConverter.Resources;
 
@@ -18,11 +17,10 @@ public class JsonReader(string filename)
         var baseStuff = new List<Element>();
         SubRecursive(root,baseStuff,null);
         
-        Console.WriteLine(local.page_div); //Just for debugging
+        Console.WriteLine(Local.page_div); //Just for debugging
         var summary = "";
         foreach (var element in baseStuff)
         {
-            summary += $"element: {element.Name}\n"; //TODO: Only reached once?
             summary += element.Summary();
         }
         Console.WriteLine(summary);
@@ -35,38 +33,21 @@ public class JsonReader(string filename)
             case JsonValue jsonValue:
                 
                 ArgumentNullException.ThrowIfNull(headElem); //TODO: Is this optimal?
-                if (elements.Contains(headElem)) break;
                 if (headElem.Type == "Object") break; //prevent overwriting complex structure naming
                 switch (jsonValue.GetValueKind())
                 {
                     case JsonValueKind.String:
-                        headElem.ChangeType("string");
+                        headElem.Type = "string";
                         break;
                     case JsonValueKind.Number:
-                        if (int.TryParse(jsonValue.ToString(), out _))
-                        {
-                            headElem.ChangeType("int");
-                        }
-                        else if (long.TryParse(jsonValue.ToString(), out _))
-                        {
-                            headElem.ChangeType("long");
-                        }
-                        else if (double.TryParse(jsonValue.ToString(), out _))
-                        {
-                            headElem.ChangeType("double");
-                        }
-                        else if (decimal.TryParse(jsonValue.ToString(), out _))
-                        {
-                            headElem.ChangeType("decimal");
-                        }
-                        
+                        headElem.Type = GetNumType(jsonValue.ToString());
                         break;
                     case JsonValueKind.True:
                     case JsonValueKind.False:
-                        headElem.ChangeType("bool");
+                        headElem.Type = "bool";
                         break;
                     case JsonValueKind.Null:
-                        headElem.ChangeType("null");
+                        headElem.Type = "null"; //TODO: Add ? to type ... eventually -- Currently never reached
                         break;
                     case JsonValueKind.Undefined:
                     case JsonValueKind.Object:
@@ -89,7 +70,6 @@ public class JsonReader(string filename)
                     {
                         case JsonObject:
                         {
-                            var path = i.GetPath(); //split to access obj name
                             isPrim = false;
                             var obj = new Element("Object");
                             SubRecursive(i,elements,obj);
@@ -100,7 +80,7 @@ public class JsonReader(string filename)
                         {
                             isObj = false;
                             var val = i.AsValue();
-                            primType = val.GetValueKind().ToString();
+                            primType = GetNumType(i.ToString());
                             var prim = new Element(primType,val.ToString());
                             SubRecursive(i,elements,prim);
                             headElem.AddChild(prim);
@@ -114,15 +94,16 @@ public class JsonReader(string filename)
 
                 if (isObj)
                 {
-                    headElem.ChangeType($"List<{MakeFriendly(headElem.Name)}>");
+                    headElem.Type = $"List<{MakeFriendly(headElem.Name)}>";
                 }
                 else if (isPrim)
                 {
-                    headElem.ChangeType($"List<{primType}>"); //TODO: Change to use a method version of the JsonValue finder thing to get a more accurate list type
+                    headElem.Type = $"List<{primType}>"; //TODO: Change to use a method version of the JsonValue finder thing to get a more accurate list type
+                    headElem.ClearChildren();
                 }
                 else
                 {
-                    headElem.ChangeType("List<Mixed>"); //TODO: Make this a little more useful
+                    headElem.Type = "List<Mixed>"; //TODO: Make this a little more useful
                 }
                 
                 break;
@@ -146,9 +127,13 @@ public class JsonReader(string filename)
                     {
                         
                         if (element.Value == null) continue; //TODO: Need fix to address null object
-                        
-                        var elem = new Element(element.Value.GetValueKind().ToString(), element.Key);
-                        if (elements.Contains(elem)) continue;
+                        var name = element.Key;
+                        if (headElem.Type.Contains("List")) //TODO: Never reached
+                        {
+                            name = MakeFriendly(headElem.Name);
+                        }
+                        var elem = new Element(element.Value.GetValueKind().ToString(), name);
+                        if (elements.Contains(elem) && element.Value is not JsonValue) continue;
                         headElem.AddChild(elem);
                         SubRecursive(element.Value, elements, elem);
 
@@ -160,7 +145,7 @@ public class JsonReader(string filename)
 
     private static string MakeFriendly(string text)
     {
-        if (text[text.Length - 1].ToString().ToLower() == "s")
+        if (text[^1].ToString().Equals("s", StringComparison.CurrentCultureIgnoreCase))
         {
             var cap = text[0].ToString().ToUpper();
             text = cap + text.Substring(1, text.Length - 2);
@@ -168,5 +153,30 @@ public class JsonReader(string filename)
         }
 
         return text;
+    }
+
+    private static string GetNumType(string num)
+    {
+        if (int.TryParse(num, out _))
+        {
+            return "int";
+        }
+
+        if (long.TryParse(num, out _))
+        {
+            return "long";
+        }
+
+        if (double.TryParse(num, out _))
+        {
+            return "double";
+        }
+
+        if (decimal.TryParse(num, out _))
+        {
+            return "decimal";
+        }
+
+        return "";
     }
 }

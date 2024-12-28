@@ -6,7 +6,7 @@ internal abstract class Program
 {
     private static void Main()
     {
-        Console.WriteLine(local.title);
+        Console.WriteLine(Local.title);
     
         //get JSON file info
         var fileFound = false;

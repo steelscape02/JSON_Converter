@@ -8,8 +8,6 @@ public class Element(string type,string name = "")
     
     private List<Element> _children = [];
     public string Name { get; } = name;
-    private string _name = name;
-    private string _type = type;
 
     public void AddChild(Element newChild)
     {
@@ -19,17 +17,24 @@ public class Element(string type,string name = "")
         }
         _children.Add(newChild);
     }
-
-    public void ChangeType(string newType)
+    
+    public void ClearChildren()
     {
-        _type = newType;
+        _children.Clear();
     }
 
-    public void ChangeName(string name)
+    public string Summary(string summary = "",string spacing = "") //testing ONLY
     {
-        _name = name;
+        summary += $"\n{spacing}Name: {Name}, Type: {Type} - {_children.Count} children";
+        foreach (var child in _children)
+        {
+            summary += $"{spacing}{child.Summary("",spacing + "   ")}";
+        }  
+        
+        return summary;
     }
-
+    
+    //.Contains() override
     public override bool Equals(object? obj)
     {
         if (obj is Element other)
@@ -41,23 +46,5 @@ public class Element(string type,string name = "")
     public override int GetHashCode()
     {
         return Name.GetHashCode();
-    }
-
-    public string Summary(string summary = "",string spacing = "") //testing ONLY
-    {
-        if(spacing == "")
-            summary += $"\n{spacing}Name: {_name}, Type: {_type} - {_children.Count} children";
-        foreach (var child in _children)
-        {
-            
-            summary += $"\n{spacing}   Name: {child._name} Type: {child._type} - {child._children.Count} children";
-            if(child._children.Count > 0)
-            {
-                summary += $"\n{spacing}{child.Summary(summary,spacing + "   ")}";
-            }
-            
-        }  //TODO: Fix "building" effect (keeps printing the progressing summary
-        
-        return summary;
     }
 }
