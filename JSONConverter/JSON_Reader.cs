@@ -14,7 +14,7 @@ public class JsonReader(string filename)
         
         var document = JsonNode.Parse(reader) ?? "Blah"; //funny fallback added
         var root = document.Root; //root is JSON Object
-        var baseStuff = new List<Element>();
+        var baseStuff = new HashSet<Element>();
         SubRecursive(root,baseStuff,null);
         
         Console.WriteLine(Local.page_div); //Just for debugging
@@ -26,7 +26,7 @@ public class JsonReader(string filename)
         Console.WriteLine(summary);
     }
     
-    private static void SubRecursive(JsonNode current, List<Element> elements, Element? headElem)
+    private static void SubRecursive(JsonNode current, HashSet<Element> elements, Element? headElem)
     {
         switch (current)
         {
@@ -47,6 +47,7 @@ public class JsonReader(string filename)
                         headElem.Type = "bool";
                         break;
                     case JsonValueKind.Null:
+                        Console.WriteLine("OOOOOIE MAMA");
                         headElem.Type = "null"; //TODO: Add ? to type ... eventually -- Currently never reached
                         break;
                     case JsonValueKind.Undefined:
@@ -66,39 +67,52 @@ public class JsonReader(string filename)
                 ArgumentNullException.ThrowIfNull(headElem); //TODO: Is this optimal?
                 foreach (var i in jsonArray)
                 {
-                    switch (i) //TODO: prevent repeat scanning, especially on lists of objects
+                    switch (i)
                     {
                         case JsonObject:
                         {
                             isPrim = false;
                             var obj = new Element("Object");
-                            SubRecursive(i,elements,obj);
-                            headElem.AddChild(obj);
+                            var added = headElem.AddChild(obj);
+                            if(added) SubRecursive(i,elements,obj); //want to include ALL versions to catch possible nulls
+                            else
+                            {
+                                var match = headElem.GetMatching(obj);
+                                if (match != null) SubRecursive(i, elements, match);
+                            }
                             break;
                         }
                         case JsonValue:
                         {
                             isObj = false;
                             var val = i.AsValue();
+                            
                             primType = GetNumType(i.ToString());
                             var prim = new Element(primType,val.ToString());
-                            SubRecursive(i,elements,prim);
-                            headElem.AddChild(prim);
+                            var added = headElem.AddChild(prim);
+                            if(added) SubRecursive(i,elements,prim);
+                            
                             break;
                         }
                         case JsonArray: //unlikely, but possible JsonArray nesting
-                            SubRecursive(i,elements,headElem);
+                        {
+                            SubRecursive(i, elements, headElem);
                             break;
+                        }
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(current));
                     }
                 }
 
                 if (isObj)
                 {
-                    headElem.Type = $"List<{MakeFriendly(headElem.Name)}>";
+                    var objType = MakeFriendly(headElem.Name);
+                    headElem.Type = $"List<{objType}>";
+                    headElem.ChangeChildName(objType);
                 }
                 else if (isPrim)
                 {
-                    headElem.Type = $"List<{primType}>"; //TODO: Change to use a method version of the JsonValue finder thing to get a more accurate list type
+                    headElem.Type = $"List<{primType}>";
                     headElem.ClearChildren();
                 }
                 else
@@ -107,15 +121,14 @@ public class JsonReader(string filename)
                 }
                 
                 break;
-            case JsonObject jsonObject:
+            case JsonObject jsonObject: 
                 if (headElem == null) //start point (basically base case)
                 {
                     foreach (var element in jsonObject)
                     {
                         //first iter (from root, so just grab all keys)
-                        if (element.Value == null) continue;
-                        var elem = new Element(element.Value.GetValueKind().ToString(), element.Key);
-                        if (elements.Contains(elem)) continue;
+                        var type = element.Value?.GetValueKind().ToString();
+                        var elem = new Element(type, element.Key);
                         elements.Add(elem);
                         SubRecursive(element.Value, elements, elem);
                     }
@@ -125,18 +138,17 @@ public class JsonReader(string filename)
                     
                     foreach (var element in jsonObject)
                     {
+                        var type = element.Value?.GetValueKind().ToString();
+                        var elem = new Element(type, element.Key);
                         
-                        if (element.Value == null) continue; //TODO: Need fix to address null object
-                        var name = element.Key;
-                        if (headElem.Type.Contains("List")) //TODO: Never reached
+                        if (type == null)
                         {
-                            name = MakeFriendly(headElem.Name);
+                            Console.WriteLine(elem.Name);
+                            elem.Nullable = true;
                         }
-                        var elem = new Element(element.Value.GetValueKind().ToString(), name);
-                        if (elements.Contains(elem) && element.Value is not JsonValue) continue;
-                        headElem.AddChild(elem);
-                        SubRecursive(element.Value, elements, elem);
-
+                        
+                        var added = headElem.AddChild(elem); //TODO: Added under different parent
+                        if(added) SubRecursive(element.Value, elements, elem);
                     }
                 }
                 break;

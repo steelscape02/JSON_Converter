@@ -1,21 +1,40 @@
-﻿using System.Reflection.PortableExecutable;
+﻿namespace JSONConverter;
 
-namespace JSONConverter;
-
-public class Element(string type,string name = "")
+public class Element(string? type,string name = "")
 {
-    public string Type { get; set; }= type;
-    
-    private List<Element> _children = [];
-    public string Name { get; } = name;
+    private readonly List<Element> _children = [];
+    public string Name { get; private set; } = name;
+    public string? Type { get; set; }= type;
+    public bool Nullable { get; set; }
 
-    public void AddChild(Element newChild)
+    public bool AddChild(Element newChild)
     {
-        if (_children.Contains(newChild))
+        var match = _children.FirstOrDefault(x => x.Name == newChild.Name);
+        if (match != null)
         {
-            return;
+            if (newChild.Type.Length > 1)
+            {
+                if(newChild.Name.Length > 1) Console.WriteLine($"{newChild.Name} : {newChild.Type}");
+                match.Type = newChild.Type;
+            }
+            return false;
         }
         _children.Add(newChild);
+        return true;
+    }
+
+    public Element? GetMatching(Element element)
+    {
+        var match = _children.FirstOrDefault(x => x.Name == element.Name);
+        return match ?? null;
+    }
+    
+    public void ChangeChildName(string newName)
+    {
+        foreach (var child in _children)
+        {
+            child.Name = newName;
+        }
     }
     
     public void ClearChildren()
@@ -25,7 +44,8 @@ public class Element(string type,string name = "")
 
     public string Summary(string summary = "",string spacing = "") //testing ONLY
     {
-        summary += $"\n{spacing}Name: {Name}, Type: {Type} - {_children.Count} children";
+        var type = (Nullable) ? $"{Type}?" : Type;
+        summary += $"\n{spacing}Name: {Name}, Type: {type} - {_children.Count} children";
         foreach (var child in _children)
         {
             summary += $"{spacing}{child.Summary("",spacing + "   ")}";
@@ -34,10 +54,10 @@ public class Element(string type,string name = "")
         return summary;
     }
     
-    //.Contains() override
+    //.Contains() overrides
     public override bool Equals(object? obj)
     {
-        if (obj is Element other)
+        if (obj is Element other) //return Name == other.Name && Age == other.Age;
         {
             return Name == other.Name;
         }
