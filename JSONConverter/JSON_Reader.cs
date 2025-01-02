@@ -37,6 +37,7 @@ public class JsonReader(string filename)
                 switch (jsonValue.GetValueKind())
                 {
                     case JsonValueKind.String:
+                        
                         headElem.Type = "string";
                         break;
                     case JsonValueKind.Number:
@@ -47,7 +48,6 @@ public class JsonReader(string filename)
                         headElem.Type = "bool";
                         break;
                     case JsonValueKind.Null:
-                        Console.WriteLine("OOOOOIE MAMA");
                         headElem.Type = "null"; //TODO: Add ? to type ... eventually -- Currently never reached
                         break;
                     case JsonValueKind.Undefined:
@@ -91,7 +91,11 @@ public class JsonReader(string filename)
                             var prim = new Element(primType,val.ToString());
                             var added = headElem.AddChild(prim);
                             if(added) SubRecursive(i,elements,prim);
-                            
+                            else
+                            {
+                                var match = headElem.GetMatching(prim);
+                                if (match != null) SubRecursive(i, elements, match);
+                            }
                             break;
                         }
                         case JsonArray: //unlikely, but possible JsonArray nesting
@@ -129,8 +133,10 @@ public class JsonReader(string filename)
                         //first iter (from root, so just grab all keys)
                         var type = element.Value?.GetValueKind().ToString();
                         var elem = new Element(type, element.Key);
-                        elements.Add(elem);
-                        SubRecursive(element.Value, elements, elem);
+                        var added = elements.Add(elem);
+                        if(added)
+                            if (element.Value != null)
+                                SubRecursive(element.Value, elements, elem);
                     }
                 }
                 else
@@ -141,14 +147,22 @@ public class JsonReader(string filename)
                         var type = element.Value?.GetValueKind().ToString();
                         var elem = new Element(type, element.Key);
                         
-                        if (type == null)
-                        {
-                            Console.WriteLine(elem.Name);
-                            elem.Nullable = true;
-                        }
+                        if (type == null) elem.Nullable = true;
                         
                         var added = headElem.AddChild(elem); //TODO: Added under different parent
                         if(added) SubRecursive(element.Value, elements, elem);
+                        else
+                        {
+                            
+                            if (element.Value == null || element.Value.GetValueKind() != JsonValueKind.Object) continue;
+                            foreach (var i in element.Value.AsObject())
+                            {
+                                if (i.Value == null) continue;
+                                var felt = new Element(i.Value?.GetValueKind().ToString(), i.Key);
+                                if (string.IsNullOrEmpty(felt.Type)) continue;
+                                headElem.ChangeType(i.Key, GetNumType(i.Value?.ToString()));
+                            }
+                        }
                     }
                 }
                 break;
@@ -167,7 +181,7 @@ public class JsonReader(string filename)
         return text;
     }
 
-    private static string GetNumType(string num)
+    private static string GetNumType(string? num)
     {
         if (int.TryParse(num, out _))
         {
