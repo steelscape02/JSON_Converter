@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Nodes;
-using JSONConverter.Resources;
 
 namespace JSONConverter;
 
@@ -33,22 +32,19 @@ public class JsonReader(string filename)
         {
             case JsonValue jsonValue:
                 
-                ArgumentNullException.ThrowIfNull(headElem); //TODO: Is this optimal?
+                ArgumentNullException.ThrowIfNull(headElem);
                 switch (jsonValue.GetValueKind())
                 {
                     case JsonValueKind.String:
-                        
                         headElem.Type = "string";
                         break;
                     case JsonValueKind.Number:
-                        //TODO: Keep highest accuracy for nums
-                        //Accuracy: int : long > double > float 
+                        //Accuracy: int & long > double > float 
                         var type = GetNumType(jsonValue.ToString());
                         var newPrec = GetNumPrecision(type);
                         var oldPrec = GetNumPrecision(headElem.Type);
-                        if (newPrec > oldPrec)
+                        if (newPrec > oldPrec && newPrec != -1) //-1 is the error case of GetNumPrecision
                             headElem.Type = type;
-                        //if(headElem.Name == "gap") Console.WriteLine($"Gap located w/ val: {jsonValue}");
                         break;
                     case JsonValueKind.True:
                     case JsonValueKind.False:
@@ -60,7 +56,7 @@ public class JsonReader(string filename)
                     case JsonValueKind.Array:
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(current)); //current isn't doing good things
+                        throw new ArgumentOutOfRangeException(current.ToString()); //current isn't doing good things
                 }
                 break;
             case JsonArray jsonArray:
@@ -79,15 +75,8 @@ public class JsonReader(string filename)
                             isPrim = false;
                             var obj = new Element("Object");
                             var match = headElem.GetMatching(obj);
-                            if (match != null)
-                            {
-                                SubRecursive(i, elements, match);
-                            }
-                            else
-                            {
-                                SubRecursive(i,elements,headElem);
-                            }
-                            
+                            SubRecursive(i, elements, match ?? headElem);
+
                             break;
                         }
                         case JsonValue:
@@ -102,12 +91,8 @@ public class JsonReader(string filename)
                             else
                             {
                                 var match = headElem.GetMatching(prim);
-
                                 if (match != null)
-                                {
-                                    if(match.Type != null && prim.Type != null && prim.Type.Length > match.Type.Length) match.Type = prim.Type;
                                     SubRecursive(i, elements, match);
-                                }
                             }
                             break;
                         }
@@ -123,7 +108,7 @@ public class JsonReader(string filename)
 
                 if (isObj)
                 {
-                    var objType = MakeFriendly(headElem.Name);
+                    var objType = MakeFriendly(headElem.Name,true);
                     headElem.Type = $"List<{objType}>";
                     headElem.List = true;
                 }
@@ -139,13 +124,13 @@ public class JsonReader(string filename)
                 
                 break;
             case JsonObject jsonObject: 
-                if (headElem == null) //start point (basically base case)
+                if (headElem == null)
                 {
                     foreach (var element in jsonObject)
                     {
-                        //first iter (from root, so just grab all keys)
-                        var type = element.Value?.GetValueKind().ToString();
-                        if(type == "Object") type = MakeFriendly(element.Key);
+                        var valueKind = element.Value?.GetValueKind();
+                        var type = valueKind.ToString();
+                        if(valueKind == JsonValueKind.Object) type = MakeFriendly(element.Key);
                         var elem = new Element(type, element.Key);
                         var added = elements.Add(elem);
                         if(added)
@@ -158,28 +143,25 @@ public class JsonReader(string filename)
                     
                     foreach (var element in jsonObject)
                     {
-                        var type = element.Value?.GetValueKind().ToString();
-                        if(type == "Object") type = MakeFriendly(element.Key);
+                        var valueKind = element.Value?.GetValueKind();
+                        var type = valueKind.ToString();
+                        if(valueKind == JsonValueKind.Object) type = MakeFriendly(element.Key);
                         var elem = new Element(type, element.Key);
-                        
-                        if (type == null) elem.Nullable = true;
+
+                        if (valueKind is null or JsonValueKind.Null) elem.Nullable = true; //null is possible due to ? above
                         
                         var added = headElem.AddChild(elem);
-                        if(added) SubRecursive(element.Value, elements, elem);
+                        if(added)
+                        {
+                            if (element.Value != null) SubRecursive(element.Value, elements, elem);
+                        }
                         else
                         {
-                            // TODO: Currently too scared to delete this code chunk. It just really confused me and the replacement code is a lot a bit cooler
-                            
-                            // if (element.Value == null || element.Value.GetValueKind() != JsonValueKind.Object) continue;
-                            // foreach (var i in element.Value.AsObject())
-                            // {
-                            //     if (i.Value == null) continue;
-                            //     var felt = new Element(i.Value?.GetValueKind().ToString(), i.Key);
-                            //     if (string.IsNullOrEmpty(felt.Type)) continue;
-                            //     headElem.ChangeType(i.Key, GetNumType(i.Value?.ToString()));
-                            // }
                             var match = headElem.GetMatching(elem);
-                            SubRecursive(element.Value, elements, match);
+                            if (match == null) continue;
+                            if (elem.Nullable) match.Nullable = true;
+
+                            if (element.Value != null) SubRecursive(element.Value, elements, match);
                         }
                     }
                 }
@@ -187,21 +169,26 @@ public class JsonReader(string filename)
         }
     }
 
-    private static string MakeFriendly(string text)
+    private static string MakeFriendly(string text,bool list = false)
     {
-        //TODO: Make more fancy to accomodate grammatically stupid friendly names (like properties to Propertie)
-        if (text[^1].ToString().Equals("s", StringComparison.CurrentCultureIgnoreCase))
-        {
-            var cap = text[0].ToString().ToUpper();
-            text = cap + text.Substring(1, text.Length - 2);
-            return text;
-        }
-        else
-        {
-            var cap = text[0].ToString().ToUpper();
+        //TODO: Expand w Pluralize.NET?
+        //check against basic plural rules
+        var cap = text[0].ToString().ToUpper();
+        //ies -> y
+        if(!list)
+        { //just capitalize the word and return
             text = cap + text.Substring(1, text.Length - 1);
-            return text;
         }
+        else if (text.EndsWith("ies"))
+        {
+            text = cap + text.Substring(1, text.Length - 4) + "y";
+        }
+        //s -> remove s (except special cases)
+        else if (text.EndsWith("s"))
+            text = cap + text.Substring(1, text.Length - 2);
+        
+        
+        return text;
     }
 
     private static string GetNumType(string? num)
@@ -229,19 +216,15 @@ public class JsonReader(string filename)
         return "";
     }
 
-    private static int GetNumPrecision(string type)
+    private static int GetNumPrecision(string? type)
     {
-        switch (type)
+        return type switch
         {
-            case "int":
-            case "long":
-                return 0;
-            case "double":
-                return 1;
-            case "float":
-                return 2;
-            default:
-                return -1;
-        }
+            "int" => 0,
+            "long" => 1,
+            "double" => 2,
+            "float" => 3,
+            _ => -1 //default
+        };
     }
 }

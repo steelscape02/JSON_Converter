@@ -2,23 +2,23 @@
 
 namespace JSONConverter;
 
-public class DomCreator(string name = "")
+// --C# DOM Creator--
+
+public class DomCreator //TODO: Optimize this structure (inc naming)
 {
-    private string vis = "public";
-    private string _summary = "";
+    private const string Vis = "public";
 
     public string BuildRoot(HashSet<Element> elements)
     {
-        var root = $"{vis} class Root\n{{\n";
+        var summary = $"{Vis} class Root\n{{\n";
         foreach (var element in elements)
         {
-            root += "   " + $"{vis} {element.Type} {element.Name} {{get; set;}}\n";
+            summary += "   " + $"{Vis} {element.Type} {element.Name} {{get; set;}}\n";
         }
 
-        _summary += root;
-        _summary += "}\n";
-        _summary += BuildSubDom(elements);
-        return _summary;
+        summary += "}\n";
+        summary += BuildSubDom(elements);
+        return summary;
     }
     
     private string BuildSubDom(HashSet<Element> elements,string summary = "")
@@ -43,12 +43,12 @@ public class DomCreator(string name = "")
             type = currHeader.List ? RemoveList(currHeader.Type) : currHeader.Type;
         }
 
-        summary += $"{vis} class {type}\n{{\n";
+        summary += $"{Vis} class {type}\n{{\n";
         foreach (var element in elements)
         {
             if (string.IsNullOrEmpty(element.Type)) element.Type = "object";
             var nulled = element.Nullable ? element.Type + "?" : element.Type;
-            summary += "    " + $"{vis} {nulled} {element.Name} {{get; set;}}\n";
+            summary += "    " + $"{Vis} {nulled} {element.Name} {{get; set;}}\n";
         }
         summary += "}\n";
         return summary;
