@@ -2,26 +2,27 @@
 
 public class Element(string? type,string name = "")
 {
-    private readonly HashSet<Element> _children = [];
+    public HashSet<Element> Children = [];
     public string Name { get; set; } = name;
     public string? Type { get; set; }= type;
     public bool Nullable { get; set; }
+    public bool List { get; set; }
 
     public bool AddChild(Element newChild)
     {
-        var added = _children.Add(newChild);
+        var added = Children.Add(newChild);
         return added;
     }
 
     public Element? GetMatching(Element element)
     {
-        var match = _children.FirstOrDefault(x => x.Name == element.Name);
+        var match = Children.FirstOrDefault(x => x.Name == element.Name);
         return match ?? null;
     }
 
     public bool ChangeType(string name, string newType)
     {
-        foreach (var obj in _children)
+        foreach (var obj in Children)
         {
             // Check if the current object's name matches
             if (obj.Name == name)
@@ -31,7 +32,7 @@ public class Element(string? type,string name = "")
             }
 
             // If the current object has children, recursively search them
-            if (obj._children.Count <= 0) continue;
+            if (obj.Children.Count <= 0) continue;
             if (obj.ChangeType(name, newType))
             {
                 return true; // Stop searching once a match is found
@@ -41,24 +42,16 @@ public class Element(string? type,string name = "")
         return false;
     }
     
-    public void ChangeChildName(string newName)
-    {
-        foreach (var child in _children)
-        {
-            child.Name = newName;
-        }
-    }
-    
     public void ClearChildren()
     {
-        _children.Clear();
+        Children.Clear();
     }
 
     public string Summary(string summary = "",string spacing = "") //testing ONLY
     {
-        var type = (Nullable) ? $"{Type}?" : Type;
-        summary += $"\n{spacing}Name: {Name}, Type: {type} - {_children.Count} children";
-        foreach (var child in _children)
+        var type = Nullable ? $"{Type}?" : Type; //TODO: Add object catch to "?" solos
+        summary += $"\n{spacing}Name: {Name}, Type: {type} - {Children.Count} children";
+        foreach (var child in Children)
         {
             summary += $"{spacing}{child.Summary("",spacing + "   ")}";
         }  
