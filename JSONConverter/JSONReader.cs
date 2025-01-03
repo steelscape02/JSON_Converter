@@ -15,14 +15,6 @@ public class JsonReader(string filename)
         var root = document.Root; //root is JSON Object
         var baseStuff = new HashSet<Element>();
         SubRecursive(root,baseStuff,null);
-        
-        // Console.WriteLine(Local.page_div); //Just for debugging
-        // var summary = "";
-        // foreach (var element in baseStuff)
-        // {
-        //     summary += element.Summary();
-        // }
-        // Console.WriteLine(summary);
         return baseStuff;
     }
     

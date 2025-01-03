@@ -3,7 +3,7 @@
 public class Element(string? type,string name = "")
 {
     public HashSet<Element> Children = [];
-    public string Name { get; set; } = name;
+    public string Name { get; } = name;
     public string? Type { get; set; }= type;
     public bool Nullable { get; set; }
     public bool List { get; set; }
@@ -18,28 +18,6 @@ public class Element(string? type,string name = "")
     {
         var match = Children.FirstOrDefault(x => x.Name == element.Name);
         return match ?? null;
-    }
-
-    public bool ChangeType(string name, string newType)
-    {
-        foreach (var obj in Children)
-        {
-            // Check if the current object's name matches
-            if (obj.Name == name)
-            {
-                obj.Type ??= newType;
-                return true;
-            }
-
-            // If the current object has children, recursively search them
-            if (obj.Children.Count <= 0) continue;
-            if (obj.ChangeType(name, newType))
-            {
-                return true; // Stop searching once a match is found
-            }
-        }
-
-        return false;
     }
     
     public void ClearChildren()
