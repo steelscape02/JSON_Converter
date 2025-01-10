@@ -38,7 +38,7 @@ namespace JSONConverter.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("JSONConverter.Resources.local", typeof(Local).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("JSONConverter.Resources.Local", typeof(Local).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -78,7 +78,7 @@ namespace JSONConverter.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to JSON Converter v0.0.1.
+        ///   Looks up a localized string similar to JSON Converter v1.0.0.
         /// </summary>
         internal static string title {
             get {

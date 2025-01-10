@@ -21,12 +21,13 @@ public class DomCreator //TODO: Optimize this structure (inc naming)
         return summary;
     }
     
-    private string BuildSubDom(HashSet<Element> elements,string summary = "")
+    private static string BuildSubDom(HashSet<Element> elements,string summary = "")
     {
         foreach (var element in elements)
         {
             if (element.Children.Count > 0)
             {
+                if (summary.Contains(element.Name)) continue;
                 if (element.Type != null) summary = SubClassDom(element.Children, element, summary);
                 summary = BuildSubDom(element.Children,summary);
             }
@@ -35,7 +36,7 @@ public class DomCreator //TODO: Optimize this structure (inc naming)
         return summary;
     }
     
-    private string SubClassDom(HashSet<Element> elements, Element currHeader, string summary = "")
+    private static string SubClassDom(HashSet<Element> elements, Element currHeader, string summary = "")
     {
         string type = "";
         if (currHeader.Type != null)
@@ -54,7 +55,7 @@ public class DomCreator //TODO: Optimize this structure (inc naming)
         return summary;
     }
 
-    private string RemoveList(string text)
+    private static string RemoveList(string text)
     {
         var pattern = @"<(.+?)>";
         var result = Regex.Match(text, pattern).Groups[1].Value;

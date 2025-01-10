@@ -8,17 +8,20 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <EmbeddedResource Update="Resources\local.resx">
+      <EmbeddedResource Update="Resources\Local.resx">
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>local.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\Local.resx">
+        <LastGenOutput>Local.Designer.cs</LastGenOutput>
       </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="Resources\local.Designer.cs">
+      <Compile Update="Resources\Local.Designer.cs">
         <DesignTime>True</DesignTime>
         <AutoGen>True</AutoGen>
-        <DependentUpon>local.resx</DependentUpon>
+        <DependentUpon>Local.resx</DependentUpon>
       </Compile>
     </ItemGroup>
 

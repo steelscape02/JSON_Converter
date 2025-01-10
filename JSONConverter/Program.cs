@@ -14,9 +14,13 @@ internal abstract class Program
         var filename = "";
         while (!fileFound)
         {
-            //Console.Write(local.enter_json_name);
-            //filename = Console.ReadLine();
-            filename = "C:\\Users\\nicho\\RiderProjects\\JSONConverter\\JSONConverter\\tester.json";
+            Console.Write(Local.enter_json_name);
+            filename = Console.ReadLine();
+            var currDir = Directory.GetCurrentDirectory();
+            var projectDir = Directory.GetParent(currDir)?.Parent?.Parent?.FullName; //pull back 3 levels to project folder (from net bin)
+            if (filename == null) continue;
+            
+            if (projectDir != null) filename = Path.Combine(projectDir, filename);
             fileFound = File.Exists(filename);
         }
         

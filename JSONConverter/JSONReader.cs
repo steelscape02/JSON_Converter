@@ -14,7 +14,7 @@ public class JsonReader(string filename)
         var document = JsonNode.Parse(reader) ?? "Blah"; //funny fallback added
         var root = document.Root; //root is JSON Object
         var baseStuff = new HashSet<Element>();
-        SubRecursive(root,baseStuff,null);
+        SubRecursive(root, baseStuff, null);
         return baseStuff;
     }
     
@@ -28,6 +28,11 @@ public class JsonReader(string filename)
                 switch (jsonValue.GetValueKind())
                 {
                     case JsonValueKind.String:
+                        if (headElem.Name.Contains("-")) //TODO: Add code to catch other bad naming cases
+                        {
+                            //TODO: Add func to change Rename element bool. Using this flag in DomCreator, add a [JsonProperty(ACTUAL_NAME)] flag above a modified valid variable name
+                            //TODO: If this is reached, run a func to change the name to something friendly ("user-name" -> "userName")
+                        }
                         headElem.Type = "string";
                         break;
                     case JsonValueKind.Number:
@@ -111,7 +116,7 @@ public class JsonReader(string filename)
                 }
                 else
                 {
-                    headElem.Type = "List<Mixed>"; //TODO: Make this a little more useful
+                    headElem.Type = "List<Mixed>"; //TODO: Determine an error case
                 }
                 
                 break;
@@ -120,6 +125,7 @@ public class JsonReader(string filename)
                 {
                     foreach (var element in jsonObject)
                     {
+                        
                         var valueKind = element.Value?.GetValueKind();
                         var type = valueKind.ToString();
                         if(valueKind == JsonValueKind.Object) type = MakeFriendly(element.Key);
@@ -141,6 +147,8 @@ public class JsonReader(string filename)
                         var elem = new Element(type, element.Key);
 
                         if (valueKind is null or JsonValueKind.Null) elem.Nullable = true; //null is possible due to ? above
+
+                        //add method for searching list children
                         
                         var added = headElem.AddChild(elem);
                         if(added)

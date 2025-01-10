@@ -6,6 +6,7 @@ public class Element(string? type,string name = "")
     public string Name { get; } = name;
     public string? Type { get; set; }= type;
     public bool Nullable { get; set; }
+    public bool Rename { get; set; }
     public bool List { get; set; }
 
     public bool AddChild(Element newChild)
