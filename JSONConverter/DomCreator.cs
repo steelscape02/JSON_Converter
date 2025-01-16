@@ -7,14 +7,11 @@ namespace JSONConverter;
 public class DomCreator //TODO: Optimize this structure (inc naming)
 {
     private const string Vis = "public";
-
-    public string BuildRoot(HashSet<Element> elements)
+    //TODO: Catch Rename mem var for Element to create JsonProperty override in output (should be true on all weird named)
+    public static string BuildRoot(HashSet<Element> elements)
     {
-        var summary = $"{Vis} class Root\n{{\n";
-        foreach (var element in elements)
-        {
-            summary += "   " + $"{Vis} {element.Type} {element.Name} {{get; set;}}\n";
-        }
+        var summary = elements.Aggregate($"{Vis} class Root\n{{\n", (current, element) =>
+            current + ("   " + $"{Vis} {element.Type} {element.Name} {{get; set;}}\n"));
 
         summary += "}\n";
         summary += BuildSubDom(elements);
@@ -23,14 +20,11 @@ public class DomCreator //TODO: Optimize this structure (inc naming)
     
     private static string BuildSubDom(HashSet<Element> elements,string summary = "")
     {
-        foreach (var element in elements)
+        foreach (var element in elements.Where(element => element.Children.Count > 0)
+                     .Where(element => !summary.Contains(element.Name)))
         {
-            if (element.Children.Count > 0)
-            {
-                if (summary.Contains(element.Name)) continue;
-                if (element.Type != null) summary = SubClassDom(element.Children, element, summary);
-                summary = BuildSubDom(element.Children,summary);
-            }
+            if (element.Type != null) summary = SubClassDom(element.Children, element, summary);
+            summary = BuildSubDom(element.Children,summary);
         }
 
         return summary;
@@ -38,7 +32,7 @@ public class DomCreator //TODO: Optimize this structure (inc naming)
     
     private static string SubClassDom(HashSet<Element> elements, Element currHeader, string summary = "")
     {
-        string type = "";
+        var type = "";
         if (currHeader.Type != null)
         {
             type = currHeader.List ? RemoveList(currHeader.Type) : currHeader.Type;

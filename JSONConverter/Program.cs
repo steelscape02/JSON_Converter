@@ -27,7 +27,7 @@ internal abstract class Program
         var reader = new JsonReader(filename);
         var jsonTree = reader.ReadJson();
         var display = new DomCreator();
-        Console.WriteLine(display.BuildRoot(jsonTree));
+        Console.WriteLine(DomCreator.BuildRoot(jsonTree));
         var contents = File.ReadAllText(filename);
         var root = JsonSerializer.Deserialize<Root>(contents);
         //Console.WriteLine(root.type);

@@ -130,6 +130,7 @@ public class JsonReader(string filename)
                         var type = valueKind.ToString();
                         if(valueKind == JsonValueKind.Object) type = MakeFriendly(element.Key);
                         var elem = new Element(type, element.Key);
+                        //if(valueKind == JsonValueKind.Object) elem.FriendlyName();
                         var added = elements.Add(elem);
                         if(added)
                             if (element.Value != null)
@@ -145,6 +146,7 @@ public class JsonReader(string filename)
                         var type = valueKind.ToString();
                         if(valueKind == JsonValueKind.Object) type = MakeFriendly(element.Key);
                         var elem = new Element(type, element.Key);
+                        //if(valueKind == JsonValueKind.Object) elem.FriendlyName(); //TODO: FIX THIS
 
                         if (valueKind is null or JsonValueKind.Null) elem.Nullable = true; //null is possible due to ? above
 
@@ -168,7 +170,7 @@ public class JsonReader(string filename)
                 break;
         }
     }
-
+    //TODO: Move to element (for use here and in DomCreator)
     private static string MakeFriendly(string text,bool list = false)
     {
         //TODO: Expand w Pluralize.NET?

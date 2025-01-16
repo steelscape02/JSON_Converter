@@ -1,10 +1,22 @@
 ﻿namespace JSONConverter;
 
-public class Element(string? type,string name = "")
+public class Element
 {
     public HashSet<Element> Children = [];
-    public string Name { get; } = name;
-    public string? Type { get; set; }= type;
+
+    public Element(string? type,string name = "")
+    {
+        Name = name;
+        if (_illegal.Any(name.Contains))
+        {
+            Rename = true;
+        }
+        Type = type;
+    }
+    private List<string> _illegal = ["#", "$", "%", "^", "&", "*", "(", ")", "-", "+", "=", //list of illegal characters for variable naming
+        "{", "}", "[", "]", "|", "\\", ";", ":", "'", "\"", "<", ">", ",", ".", "/", "?", "!"];
+    public string Name { get; set; }
+    public string? Type { get; set; }
     public bool Nullable { get; set; }
     public bool Rename { get; set; }
     public bool List { get; set; }
@@ -36,6 +48,27 @@ public class Element(string? type,string name = "")
         }  
         
         return summary;
+    }
+    
+    public void FriendlyName()
+    {
+        //TODO: Expand w Pluralize.NET?
+        //check against basic plural rules
+        var cap = Name[0].ToString().ToUpper();
+        //ies -> y
+        if(!List)
+        { //just capitalize the word and return
+            Name = cap + Name.Substring(1, Name.Length - 1);
+        }
+        else if (Name.EndsWith("ies"))
+        {
+            Name = cap + Name.Substring(1, Name.Length - 4) + "y";
+        }
+        //s -> remove s (except special cases)
+        else if (Name.EndsWith("s"))
+        {
+            Name = cap + Name.Substring(1, Name.Length - 2);
+        }
     }
     
     //.Contains() overrides
