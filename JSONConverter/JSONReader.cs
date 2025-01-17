@@ -177,7 +177,6 @@ public class JsonReader(string filename)
     /// <returns>The "friendly" name</returns>
     private static string MakeFriendly(string text,bool list = false)
     {
-        //TODO: Expand w Pluralize.NET?
         //check against basic plural rules
         var cap = text[0].ToString().ToUpper();
         
@@ -197,6 +196,11 @@ public class JsonReader(string filename)
         return text;
     }
 
+    /// <summary>
+    /// Gets the type of the given number string using type parsing
+    /// </summary>
+    /// <param name="num">The string representation of the number</param>
+    /// <returns>A string of the type</returns>
     private static string GetNumType(string? num)
     {
         if (int.TryParse(num, out _))
@@ -222,6 +226,14 @@ public class JsonReader(string filename)
         return "";
     }
 
+    /// <summary>
+    /// Finds the "precision" of a number using its classification (<c>string</c>, <c>double</c>, etc..) for comparison
+    /// of precision when deciding what type to keep
+    /// </summary>
+    /// <param name="type">The numerical type as a <c>string</c></param>
+    /// <returns>
+    /// The numerical precision of the number, or <c>-1</c> if the type is not a basic C# number variable type
+    /// </returns>
     private static int GetNumPrecision(string? type)
     {
         return type switch

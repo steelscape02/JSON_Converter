@@ -3,10 +3,23 @@
 namespace JSONConverter;
 
 // --C# DOM Creator--
-
-public class DomCreator //TODO: Optimize this structure (inc naming)
+/// <summary>
+/// Builds a C# data model (DM). Uses a <c>HashSet</c> of <c>Element</c> objects to recursively print a set of classes that
+/// can be used to parse the JSON tree represented by the <c>HashSet</c>.
+/// </summary>
+public class CSharpDm //TODO: Optimize this structure (inc naming)
 {
+    /// <summary>
+    /// The default visibility of the C# elements in the data model
+    /// </summary>
     private const string Vis = "public";
+    
+    /// <summary>
+    /// Builds the Root class, with calls <c>BuildSubDm</c> to create the child classes.
+    /// </summary>
+    /// <param name="elements">A <c>HashSet</c> of <c>Element</c> objects representing the <c>Root</c> class of
+    /// a JSON response</param>
+    /// <returns>A string representation of a C# data model</returns>
     public static string BuildRoot(HashSet<Element> elements)
     {
         
@@ -20,24 +33,30 @@ public class DomCreator //TODO: Optimize this structure (inc naming)
 
         summary += "}";
         summary += "}\n";
-        summary += BuildSubDom(elements);
+        summary += BuildSubDm(elements);
         return summary;
     }
     
-    private static string BuildSubDom(HashSet<Element> elements,string summary = "")
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="elements"></param>
+    /// <param name="summary"></param>
+    /// <returns></returns>
+    private static string BuildSubDm(HashSet<Element> elements,string summary = "")
     {
         foreach (var element in elements.Where(element => element.Children.Count > 0)
                      .Where(element => !summary.Contains(element.LegalName())))
         {
-            if (element.Type != null) summary = SubClassDom(element.Children, element, summary);
+            if (element.Type != null) summary = SubClassDm(element.Children, element, summary);
             
-            summary = BuildSubDom(element.Children,summary);
+            summary = BuildSubDm(element.Children,summary);
         }
 
         return summary;
     }
-    
-    private static string SubClassDom(HashSet<Element> elements, Element currHeader, string summary = "")
+    //TODO: Explain what SubClassDm does. Rename and address how it relates to BuildSubDm
+    private static string SubClassDm(HashSet<Element> elements, Element currHeader, string summary = "")
     {
         var type = "";
         if (currHeader.Type != null)

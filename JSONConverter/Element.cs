@@ -90,7 +90,7 @@ public class Element
     /// <summary>
     /// Removes all illegal characters from the <c>Name</c> member variable
     /// </summary>
-    /// <returns>An unaltered <c>Name</c> if no illegal characters where found, otherwise a <c>Name</c> with all illegal characters removed</returns>
+    /// <returns>An unaltered <c>Name</c> if no illegal characters were found, otherwise a <c>Name</c> with all illegal characters removed</returns>
     public string LegalName()
     {
         if (!Rename) return Name;
