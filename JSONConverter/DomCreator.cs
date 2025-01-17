@@ -7,12 +7,18 @@ namespace JSONConverter;
 public class DomCreator //TODO: Optimize this structure (inc naming)
 {
     private const string Vis = "public";
-    //TODO: Catch Rename mem var for Element to create JsonProperty override in output (should be true on all weird named)
     public static string BuildRoot(HashSet<Element> elements)
     {
-        var summary = elements.Aggregate($"{Vis} class Root\n{{\n", (current, element) =>
-            current + ("   " + $"{Vis} {element.Type} {element.Name} {{get; set;}}\n"));
+        
+        var summary = $"{Vis} class Root\n{{\n";
 
+        foreach (var element in elements)
+        {
+            var rename = element.Rename ? $"\n   [JsonProperty(\"{element.Name}\")]\n   " : null;
+            summary += $"   {rename}{Vis} {element.Type} {element.LegalName()} {{get; set;}}\n";
+        }
+
+        summary += "}";
         summary += "}\n";
         summary += BuildSubDom(elements);
         return summary;
@@ -21,9 +27,10 @@ public class DomCreator //TODO: Optimize this structure (inc naming)
     private static string BuildSubDom(HashSet<Element> elements,string summary = "")
     {
         foreach (var element in elements.Where(element => element.Children.Count > 0)
-                     .Where(element => !summary.Contains(element.Name)))
+                     .Where(element => !summary.Contains(element.LegalName())))
         {
             if (element.Type != null) summary = SubClassDom(element.Children, element, summary);
+            
             summary = BuildSubDom(element.Children,summary);
         }
 
@@ -43,7 +50,8 @@ public class DomCreator //TODO: Optimize this structure (inc naming)
         {
             if (string.IsNullOrEmpty(element.Type)) element.Type = "object";
             var nulled = element.Nullable ? element.Type + "?" : element.Type;
-            summary += "    " + $"{Vis} {nulled} {element.Name} {{get; set;}}\n";
+            var rename = element.Rename ? $"\n[JsonProperty(\"{element.Name}\")]\n    " : null;
+            summary += "    " + rename + $"{Vis} {nulled} {element.LegalName()} {{get; set;}}\n";
         }
         summary += "}\n";
         return summary;
@@ -51,7 +59,7 @@ public class DomCreator //TODO: Optimize this structure (inc naming)
 
     private static string RemoveList(string text)
     {
-        var pattern = @"<(.+?)>";
+        var pattern = @"<>";
         var result = Regex.Match(text, pattern).Groups[1].Value;
         return result;
     }

@@ -18,6 +18,13 @@ public class JsonReader(string filename)
         return baseStuff;
     }
     
+    /// <summary>
+    /// Search through a JSON object recursively to find all child items.
+    /// </summary>
+    /// <param name="current">The initial JSON object (<i>Typically <c>root</c></i>)</param>
+    /// <param name="elements">An <b>empty</b> Element HashSet to store the top level (root) elements with their respective children</param>
+    /// <param name="headElem">The current head element. When execution begins, this should be <c>null</c> unless another start point has been determined</param>
+    // <exception cref="ArgumentOutOfRangeException"></exception> //TODO: Add back. Reduce existing exceptions?
     private static void SubRecursive(JsonNode current, HashSet<Element> elements, Element? headElem)
     {
         switch (current)
@@ -28,11 +35,6 @@ public class JsonReader(string filename)
                 switch (jsonValue.GetValueKind())
                 {
                     case JsonValueKind.String:
-                        if (headElem.Name.Contains("-")) //TODO: Add code to catch other bad naming cases
-                        {
-                            //TODO: Add func to change Rename element bool. Using this flag in DomCreator, add a [JsonProperty(ACTUAL_NAME)] flag above a modified valid variable name
-                            //TODO: If this is reached, run a func to change the name to something friendly ("user-name" -> "userName")
-                        }
                         headElem.Type = "string";
                         break;
                     case JsonValueKind.Number:
@@ -130,7 +132,6 @@ public class JsonReader(string filename)
                         var type = valueKind.ToString();
                         if(valueKind == JsonValueKind.Object) type = MakeFriendly(element.Key);
                         var elem = new Element(type, element.Key);
-                        //if(valueKind == JsonValueKind.Object) elem.FriendlyName();
                         var added = elements.Add(elem);
                         if(added)
                             if (element.Value != null)
@@ -146,11 +147,8 @@ public class JsonReader(string filename)
                         var type = valueKind.ToString();
                         if(valueKind == JsonValueKind.Object) type = MakeFriendly(element.Key);
                         var elem = new Element(type, element.Key);
-                        //if(valueKind == JsonValueKind.Object) elem.FriendlyName(); //TODO: FIX THIS
 
                         if (valueKind is null or JsonValueKind.Null) elem.Nullable = true; //null is possible due to ? above
-
-                        //add method for searching list children
                         
                         var added = headElem.AddChild(elem);
                         if(added)
@@ -170,13 +168,19 @@ public class JsonReader(string filename)
                 break;
         }
     }
-    //TODO: Move to element (for use here and in DomCreator)
+    
+    /// <summary>
+    /// Make the given text "friendly". If the given text was from a list object, return a capitalized and singular version of the word. Otherwise, capitalize and return.
+    /// </summary>
+    /// <param name="text">The text to convert</param>
+    /// <param name="list"><c>true</c> if the caller is editing a List <c>Element</c> name</param>
+    /// <returns>The "friendly" name</returns>
     private static string MakeFriendly(string text,bool list = false)
     {
         //TODO: Expand w Pluralize.NET?
         //check against basic plural rules
         var cap = text[0].ToString().ToUpper();
-        //ies -> y
+        
         if(!list)
         { //just capitalize the word and return
             text = cap + text.Substring(1, text.Length - 1);
