@@ -59,7 +59,6 @@ public class JsonReader(string filename)
                 }
                 break;
             case JsonArray jsonArray:
-                
                 var isObj = true;
                 var isPrim = true;
                 var primType = "";
@@ -105,20 +104,32 @@ public class JsonReader(string filename)
                     }
                 }
 
-                if (isObj)
+                switch (isObj)
                 {
-                    var objType = MakeFriendly(headElem.Name,true);
-                    headElem.Type = $"List<{objType}>";
-                    headElem.List = true;
-                }
-                else if (isPrim)
-                {
-                    headElem.Type = $"List<{primType}>";
-                    headElem.ClearChildren(); //kill all prim type child elems
-                }
-                else
-                {
-                    headElem.Type = "List<Mixed>"; //TODO: Determine an error case
+                    case true when isPrim: //when the array contains nothing (no prims or objs)
+                    case false when !isPrim: //when the array contains both prims and objs
+                    {
+                        headElem.Type = "List<object>";
+                        headElem.List = true;
+                        break;
+                    }
+                    case true:
+                    {
+                        var objType = MakeFriendly(headElem.Name,true);
+                        headElem.Type = $"List<{objType}>";
+                        headElem.List = true;
+                        break;
+                    }
+                    case false when isPrim: //if isObj is false 
+                    {
+                        headElem.Type = $"List<{primType}>";
+                        headElem.ClearChildren(); //kill all prim type child elems
+                        break;
+                    }
+                    default:
+                        Console.Error.WriteLine("Unknown array type");
+                        Environment.Exit(100);
+                        break;
                 }
                 
                 break;

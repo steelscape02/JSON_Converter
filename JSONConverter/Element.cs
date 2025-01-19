@@ -54,9 +54,11 @@ public class Element
     /// </summary>
     public bool List { get; set; }
     
+    //TODO: Add illegal reserved words?
+    
     private readonly char[] _illegal = ['#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', //list of illegal characters for variable naming
         '{', '}', '[', ']', '|', '\\', ';', ':', '"', '\'', '<', '>', ',', '.', '/', '?', '!'];
-
+    
     /// <summary>
     /// Add child to the <c>Children</c> list
     /// </summary>
