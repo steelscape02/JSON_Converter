@@ -29,7 +29,7 @@ internal abstract class Program
         var display = new CSharpDm();
         Console.WriteLine(CSharpDm.BuildRoot(jsonTree));
         var contents = File.ReadAllText(filename);
-        var root = JsonSerializer.Deserialize<Root>(contents);
-        //Console.WriteLine(root.type);
+        //var root = JsonSerializer.Deserialize<Root>(contents);
+        //Console.WriteLine(root.firstname);
     }
 }

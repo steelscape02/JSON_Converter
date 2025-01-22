@@ -7,13 +7,14 @@ namespace JSONConverter;
 /// Builds a C# data model (DM). Uses a <c>HashSet</c> of <c>Element</c> objects to recursively print a set of classes that
 /// can be used to parse the JSON tree represented by the <c>HashSet</c>.
 /// </summary>
-public partial class CSharpDm //TODO: Optimize this structure (inc naming)
+public class CSharpDm //TODO: Optimize this structure (inc naming)
 {
     /// <summary>
     /// The default visibility of the C# elements in the data model
     /// </summary>
     private const string Vis = "public";
-    
+
+    public static bool OverWrite;
     /// <summary>
     /// Builds the Root class, with calls to <c>BuildSubDm</c> to create the child classes.
     /// </summary>
@@ -22,71 +23,100 @@ public partial class CSharpDm //TODO: Optimize this structure (inc naming)
     /// <returns>A string representation of a C# data model</returns>
     public static string BuildRoot(HashSet<Element> elements)
     {
-        
-        var summary = $"{Vis} class Root\n{{\n";
+        var classDefinitions = new List<string>();
+
+        // Collect all classes, starting with the root
+        var rootClass = $"{Vis} class Root\n{{\n";
 
         foreach (var element in elements)
         {
-            var rename = element.Rename ? $"\n   [JsonProperty(\"{element.Name}\")]\n   " : null;
-            summary += $"   {rename}{Vis} {element.Type} {element.LegalName()} {{get; set;}}\n";
-        }
-        
-        summary += "}\n";
-        summary += BuildSubDm(elements);
-        return summary;
-    }
-    
-    //TODO: FIX!!!!!!!!!!!!!!!!!! Lesser classes not getting added
-    private static string BuildSubDm(HashSet<Element> elements)
-    {
-        //look through each Root element for children
-        var summary = "";
-        foreach (var element in elements.Where(element => element.Children.Count > 0)
-                     .Where(element => !summary.Contains(element.LegalName())))
-        {
-            summary += ChildDm(element);
-        }
-        return summary;
-    }
-    /// <summary>
-    /// Builds a data model (DM) for any of the root <c>Element</c> objects which have children
-    /// </summary>
-    /// <param name="currHeader"></param>
-    /// <param name="summary"></param>
-    /// <returns></returns>
-    private static string ChildDm(Element currHeader, string summary = "")
-    {
-        var type = "";
-        if (currHeader.Type != null)
-        {
-            type = currHeader.List ? RemoveList(currHeader.Type) : currHeader.Type;
-        }
-
-        summary += $"\n{Vis} class {type}\n{{\n";
-        foreach (var element in currHeader.Children)
-        {
-            if (element.Children.Count > 0)
+            string? rename;
+            if (element.Rename)
             {
-                Console.WriteLine(element.Name);
-                summary += BuildSubDm(element.Children);
+                rename = $"\n   [JsonPropertyName(\"{element.Name}\")]\n   ";
+                OverWrite = true;
             }
-            if (string.IsNullOrEmpty(element.Type)) element.Type = "object";
-            var nulled = element.Nullable ? element.Type + "?" : element.Type;
-            var rename = element.Rename ? $"\n[JsonProperty(\"{element.Name}\")]\n    " : null;
-            summary += "    " + rename + $"{Vis} {nulled} {element.LegalName()} {{get; set;}}\n";
+            else
+                rename = null;
+            rootClass += $"   {rename}{Vis} {element.Type} {element.LegalName()} {{get; set;}}\n";
         }
-        summary += "}\n";
-        return summary;
+
+        rootClass += "}\n";
+        classDefinitions.Add(rootClass);
+
+        // Recursively build sub-classes
+        var visited = new HashSet<string>();
+        foreach (var element in elements)
+        {
+            BuildSubDm(element, visited, classDefinitions);
+        }
+
+        if (OverWrite) //add Json.Serialization package to use JsonPropertyName
+        {
+            classDefinitions.Insert(0,"using System.Text.Json.Serialization;\n");
+        }
+        return string.Join("\n", classDefinitions);
     }
 
     /// <summary>
-    /// Removes the <c>List</c> generic type from a string (<c>List<![CDATA[<>]]></c>)
+    /// Recursively builds child classes for nested elements.
     /// </summary>
-    /// <param name="text">The text containing a <c>List</c> generic type</param>
-    /// <returns>The type argument of the <c>List</c></returns>
+    private static void BuildSubDm(Element element, HashSet<string> visited, List<string> classDefinitions)
+    {
+        if (element.Type == null) return;
+        var type = element.List ? RemoveList(element.Type) : element.Type;
+
+        // Avoid re-creating classes
+        if (IsPrimitive(RemoveList(type)) || !visited.Add(type))
+            return;
+
+        var classDef = $"{Vis} class {type}\n{{\n";
+
+        foreach (var child in element.Children)
+        {
+            if (string.IsNullOrEmpty(child.Type))
+            {
+                child.Type = "object";
+            }
+
+            if (child.Children.Count > 0)
+            {
+                classDef += $"    {Vis} {child.Type} {child.LegalName()} {{get; set;}}\n";
+                BuildSubDm(child, visited, classDefinitions); // Recursive call for nested children
+            }
+            else
+            {
+                var nulled = child.Nullable ? child.Type + "?" : child.Type;
+                string? rename;
+                if (child.Rename)
+                {
+                    rename = $"\n    [JsonPropertyName(\"{child.Name}\")]\n    ";
+                    OverWrite = true;
+                }
+                else
+                    rename = null;
+                classDef += $"    {rename}{Vis} {nulled} {child.LegalName()} {{get; set;}}\n";
+            }
+        }
+
+        classDef += "}\n";
+        classDefinitions.Add(classDef);
+    }
+
+    /// <summary>
+    /// Removes the <c>List</c> generic type from a string (<c>List<![CDATA[<>]]></c>).
+    /// </summary>
     private static string RemoveList(string text)
     {
-        var result = Regex.Replace(text, @"^.*?<|>.*?$", "");
-        return result;
+        return Regex.Replace(text, @"^.*?<|>.*?$", "");
+    }
+    
+    private static bool IsPrimitive(string type)
+    {
+        var primitives = new HashSet<string>
+        {
+            "string", "int", "long", "float", "double", "decimal", "bool", "object"
+        };
+        return primitives.Contains(type);
     }
 }
