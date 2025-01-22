@@ -14,7 +14,16 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
     /// </summary>
     private const string Vis = "public";
 
-    public static bool OverWrite;
+    /// <summary>
+    /// The default name for the base class. Almost always "Root"
+    /// </summary>
+    private const string BaseName = "Root";
+
+    /// <summary>
+    /// Tracks if a variable name has been changed due to containing illegal characters.
+    /// Used to improve the corresponding JSON package
+    /// </summary>
+    private static bool _overWrite;
     /// <summary>
     /// Builds the Root class, with calls to <c>BuildSubDm</c> to create the child classes.
     /// </summary>
@@ -26,7 +35,7 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
         var classDefinitions = new List<string>();
 
         // Collect all classes, starting with the root
-        var rootClass = $"{Vis} class Root\n{{\n";
+        var rootClass = $"{Vis} class {BaseName}\n{{\n";
 
         foreach (var element in elements)
         {
@@ -34,7 +43,7 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
             if (element.Rename)
             {
                 rename = $"\n   [JsonPropertyName(\"{element.Name}\")]\n   ";
-                OverWrite = true;
+                _overWrite = true;
             }
             else
                 rename = null;
@@ -51,7 +60,7 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
             BuildSubDm(element, visited, classDefinitions);
         }
 
-        if (OverWrite) //add Json.Serialization package to use JsonPropertyName
+        if (_overWrite) //add Json.Serialization package to use JsonPropertyName
         {
             classDefinitions.Insert(0,"using System.Text.Json.Serialization;\n");
         }
@@ -91,7 +100,7 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
                 if (child.Rename)
                 {
                     rename = $"\n    [JsonPropertyName(\"{child.Name}\")]\n    ";
-                    OverWrite = true;
+                    _overWrite = true;
                 }
                 else
                     rename = null;
