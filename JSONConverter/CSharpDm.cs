@@ -7,6 +7,9 @@ namespace JSONConverter;
 /// Builds a C# data model (DM). Uses a <c>HashSet</c> of <c>Element</c> objects to recursively print a set of classes that
 /// can be used to parse the JSON tree represented by the <c>HashSet</c>.
 /// </summary>
+
+//TODO: REPAIR LIST NAMING ON CLASSES AND BBOX ARTIFACT (tester.json (still prints prim array when header))
+
 public class CSharpDm //TODO: Optimize this structure (inc naming)
 {
     /// <summary>
@@ -47,15 +50,18 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
             }
             else
                 rename = null;
-            rootClass += $"   {rename}{Vis} {element.Type} {element.LegalName()} {{get; set;}}\n";
+
+            if (element.Prim) continue;
+            var headerType = PrintType(element,true);
+            rootClass += $"   {rename}{Vis} {headerType} {element.LegalName()} {{get; set;}}\n";
         }
 
         rootClass += "}\n";
         classDefinitions.Add(rootClass);
 
-        // Recursively build sub-classes
+        // Recursively build subclasses
         var visited = new HashSet<string>();
-        foreach (var element in elements)
+        foreach (var element in elements.Where(element => !element.Prim))
         {
             BuildSubDm(element, visited, classDefinitions);
         }
@@ -73,29 +79,27 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
     private static void BuildSubDm(Element element, HashSet<string> visited, List<string> classDefinitions)
     {
         if (element.Type == null) return;
-        var type = element.List ? RemoveList(element.Type) : element.Type;
+        var type = PrintType(element,true);
 
         // Avoid re-creating classes
-        if (IsPrimitive(RemoveList(type)) || !visited.Add(type))
+        if (IsPrimitive(type) || !visited.Add(type))
             return;
-
+        
         var classDef = $"{Vis} class {type}\n{{\n";
 
         foreach (var child in element.Children)
         {
-            if (string.IsNullOrEmpty(child.Type))
-            {
-                child.Type = "object";
-            }
-
+            child.Type ??= Element.Types.Null;
+            var childType = PrintType(child,false);
             if (child.Children.Count > 0)
             {
-                classDef += $"    {Vis} {child.Type} {child.LegalName()} {{get; set;}}\n";
+                
+                classDef += $"    {Vis} {childType} {child.LegalName()} {{get; set;}}\n";
                 BuildSubDm(child, visited, classDefinitions); // Recursive call for nested children
             }
             else
             {
-                var nulled = child.Nullable ? child.Type + "?" : child.Type;
+                var nulled = child.Nullable ? childType + "?" : childType;
                 string? rename;
                 if (child.Rename)
                 {
@@ -112,14 +116,7 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
         classDefinitions.Add(classDef);
     }
 
-    /// <summary>
-    /// Removes the <c>List</c> generic type from a string (<c>List<![CDATA[<>]]></c>).
-    /// </summary>
-    private static string RemoveList(string text)
-    {
-        return Regex.Replace(text, @"^.*?<|>.*?$", "");
-    }
-    
+    //TODO: Comment
     private static bool IsPrimitive(string type)
     {
         var primitives = new HashSet<string>
@@ -127,5 +124,67 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
             "string", "int", "long", "float", "double", "decimal", "bool", "object"
         };
         return primitives.Contains(type);
+    }
+
+    /// <summary>
+    /// Make the given text "friendly". If the given text was from a list object, return a capitalized and singular version of the word. Otherwise, capitalize and return.
+    /// </summary>
+    /// <param name="text">The text to convert</param>
+    /// <param name="list"><c>true</c> if the caller is editing a List <c>Element</c> name</param>
+    /// <returns>The "friendly" name</returns>
+    private static string MakeFriendly(string text, bool list = false)
+    {
+        //check against basic plural rules
+        var cap = text[0].ToString().ToUpper();
+
+        if (!list)
+        {
+            //just capitalize the word and return
+            text = cap + text.Substring(1, text.Length - 1);
+        }
+        else
+        {
+            if (text.EndsWith("ies"))
+            {
+                text = cap + text.Substring(1, text.Length - 4) + "y";
+            }
+            //s -> remove s (except special cases)
+            else if (text.EndsWith("s"))
+                text = cap + text.Substring(1, text.Length - 2);
+            text = "List<" + text + ">";
+        }
+        return text;
+    }
+
+    //TODO: Comment
+    private static string PrintType(Element elem,bool header)
+    {
+        var type = elem.Type.ToString();
+        switch (elem.Type)
+        {
+            case Element.Types.Array:
+            case Element.Types.Object:
+                var isList = elem.List;
+                if (header) isList = false;
+                type = MakeFriendly(elem.Name,isList);
+                break;
+            case Element.Types.Null:
+                type = "object";
+                break;
+            case Element.Types.Integer:
+            case Element.Types.Double:
+            case Element.Types.Float:
+            case Element.Types.Long:
+            case Element.Types.String:
+            case Element.Types.Boolean:
+                type = type?.ToLower();
+                break;
+            case null:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        return type;
     }
 }

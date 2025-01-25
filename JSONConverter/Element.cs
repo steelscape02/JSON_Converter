@@ -36,7 +36,8 @@ public class Element
     /// The JSON type of the <c>Element</c>
     /// </summary>
     public Types? Type { get; set; }
-    
+
+    public bool Prim { get; set; }
     /// <summary>
     /// The nullability of the <c>Element</c>. When <c>true</c>, this <c>Element</c> could be null, when <c>false</c>
     /// the <c>Element</c> never appeared as null

@@ -137,6 +137,7 @@ public class JsonReader(string filename)
                     case false when isPrim: //if isObj is false 
                     {
                         headElem.List = true;
+                        headElem.Prim = true;
                         headElem.ClearChildren(); //kill all prim type child elems
                         break;
                     }
