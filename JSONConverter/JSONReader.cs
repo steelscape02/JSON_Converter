@@ -3,10 +3,25 @@ using System.Text.Json.Nodes;
 
 namespace JSONConverter;
 
+
+/// <summary>
+/// Creates a reader to parse a JSON response into an appropriate Data Model with intentionally language-agnostic
+/// notation. After creating a string representing the Data Model, a Data Model class can be used to create a
+/// language-specific Data Model
+/// </summary>
+/// <param name="filename">The filename of the JSON response to be parsed</param>
 public class JsonReader(string filename)
 {
+    /// <summary>
+    /// The filename of the JSON response
+    /// </summary>
     private string Filename { get; } = filename;
 
+    /// <summary>
+    /// Uses recursion to parse this <c>JsonReader</c>'s JSON file into a <c>HashSet</c> of <c>Element</c> objects,
+    /// allowing for creations of a data model in multiple languages
+    /// </summary>
+    /// <returns></returns>
     public HashSet<Element> ReadJson()
     {
         var reader = File.ReadAllText(Filename);
@@ -35,7 +50,7 @@ public class JsonReader(string filename)
                 switch (jsonValue.GetValueKind())
                 {
                     case JsonValueKind.String:
-                        headElem.Type = "string";
+                        headElem.Type = Element.Types.String;
                         break;
                     case JsonValueKind.Number:
                         //Accuracy: int & long > double > float 
@@ -47,7 +62,7 @@ public class JsonReader(string filename)
                         break;
                     case JsonValueKind.True:
                     case JsonValueKind.False:
-                        headElem.Type = "bool";
+                        headElem.Type = Element.Types.Boolean;
                         break;
                     case JsonValueKind.Null:
                     case JsonValueKind.Undefined:
@@ -61,7 +76,7 @@ public class JsonReader(string filename)
             case JsonArray jsonArray:
                 var isObj = true;
                 var isPrim = true;
-                var primType = "";
+                Element.Types? primType;
 
                 ArgumentNullException.ThrowIfNull(headElem); //TODO: Is this optimal?
                 foreach (var i in jsonArray)
@@ -71,7 +86,7 @@ public class JsonReader(string filename)
                         case JsonObject:
                         {
                             isPrim = false;
-                            var obj = new Element("Object");
+                            var obj = new Element(Element.Types.Object);
                             var match = headElem.GetMatching(obj);
                             SubRecursive(i, elements, match ?? headElem);
 
@@ -109,20 +124,19 @@ public class JsonReader(string filename)
                     case true when isPrim: //when the array contains nothing (no prims or objs)
                     case false when !isPrim: //when the array contains both prims and objs
                     {
-                        headElem.Type = "List<object>";
+                        headElem.Type = Element.Types.Object;
                         headElem.List = true;
                         break;
                     }
                     case true:
                     {
                         var objType = MakeFriendly(headElem.Name,true);
-                        headElem.Type = $"List<{objType}>";
                         headElem.List = true;
                         break;
                     }
                     case false when isPrim: //if isObj is false 
                     {
-                        headElem.Type = $"List<{primType}>";
+                        headElem.List = true;
                         headElem.ClearChildren(); //kill all prim type child elems
                         break;
                     }
@@ -139,10 +153,12 @@ public class JsonReader(string filename)
                     foreach (var element in jsonObject)
                     {
                         
-                        var valueKind = element.Value?.GetValueKind();
-                        var type = valueKind.ToString();
-                        if(valueKind == JsonValueKind.Object) type = MakeFriendly(element.Key);
-                        var elem = new Element(type, element.Key);
+                        var type = GetValueType(element.Value);
+                        var name = element.Key;
+                        if(type == Element.Types.Object) name = MakeFriendly(name);
+                        
+                        var elem = new Element(type, name);
+                        if (type == Element.Types.Null) elem.Nullable = true; //null is possible due to ? above
                         var added = elements.Add(elem);
                         if(added)
                             if (element.Value != null)
@@ -154,12 +170,12 @@ public class JsonReader(string filename)
                     
                     foreach (var element in jsonObject)
                     {
-                        var valueKind = element.Value?.GetValueKind();
-                        var type = valueKind.ToString();
-                        if(valueKind == JsonValueKind.Object) type = MakeFriendly(element.Key);
-                        var elem = new Element(type, element.Key);
-
-                        if (valueKind is null or JsonValueKind.Null) elem.Nullable = true; //null is possible due to ? above
+                        var type = GetValueType(element.Value);
+                        var name = element.Key;
+                        if(type == Element.Types.Object) name = MakeFriendly(name);
+                        
+                        var elem = new Element(type, name);
+                        if (type == Element.Types.Null) elem.Nullable = true; //null is possible due to ? above
                         
                         var added = headElem.AddChild(elem);
                         if(added)
@@ -212,31 +228,59 @@ public class JsonReader(string filename)
     /// </summary>
     /// <param name="num">The string representation of the number</param>
     /// <returns>A string of the type</returns>
-    private static string GetNumType(string? num)
+    private static Element.Types? GetNumType(string? num)
     {
         if (int.TryParse(num, out _))
         {
-            return "int";
+            return Element.Types.Integer;
         }
 
         if (long.TryParse(num, out _))
         {
-            return "long";
+            return Element.Types.Long;
         }
 
         if (double.TryParse(num, out _))
         {
-            return "double";
+            return Element.Types.Double;
         }
 
         if (decimal.TryParse(num, out _))
         {
-            return "decimal";
+            return Element.Types.Float;
         }
 
-        return "";
+        return null;
     }
 
+    private static Element.Types? GetValueType(JsonNode? value)
+    {
+        if (value != null)
+        {
+            var valueKind = value.GetValueKind();
+            switch (valueKind)
+            {
+                case JsonValueKind.String:
+                    return Element.Types.String;
+                case JsonValueKind.Number:
+                    return GetNumType(value?.ToString());
+                case JsonValueKind.True:
+                case JsonValueKind.False:
+                    return Element.Types.Boolean;
+                case JsonValueKind.Object:
+                    return Element.Types.Object;
+                case JsonValueKind.Array:
+                    return Element.Types.Array;
+                case JsonValueKind.Null:
+                    return Element.Types.Null;
+                case JsonValueKind.Undefined:
+                default:
+                    throw new Exception("Invalid valueKind"); 
+            }
+        }
+
+        return null;
+    }
     /// <summary>
     /// Finds the "precision" of a number using its classification (<c>string</c>, <c>double</c>, etc..) for comparison
     /// of precision when deciding what type to keep
@@ -245,14 +289,14 @@ public class JsonReader(string filename)
     /// <returns>
     /// The numerical precision of the number, or <c>-1</c> if the type is not a basic C# number variable type
     /// </returns>
-    private static int GetNumPrecision(string? type)
+    private static int GetNumPrecision(Element.Types? type)
     {
         return type switch
         {
-            "int" => 0,
-            "long" => 1,
-            "double" => 2,
-            "float" => 3,
+            Element.Types.Integer => 0,
+            Element.Types.Long => 1,
+            Element.Types.Double => 2,
+            Element.Types.Float => 3,
             _ => -1 //default
         };
     }

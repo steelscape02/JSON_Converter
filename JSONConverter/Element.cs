@@ -12,7 +12,7 @@ public class Element
     /// </summary>
     /// <param name="type">The type of the JSON item</param>
     /// <param name="name">The name of the JSON item. Can be parsed to improve readability and comply with language restrictions</param>
-    public Element(string? type,string name = "")
+    public Element(Types? type,string name = "")
     {
         Name = name;
         if (_illegal.Any(name.Contains))
@@ -35,7 +35,7 @@ public class Element
     /// <summary>
     /// The JSON type of the <c>Element</c>
     /// </summary>
-    public string? Type { get; set; }
+    public Types? Type { get; set; }
     
     /// <summary>
     /// The nullability of the <c>Element</c>. When <c>true</c>, this <c>Element</c> could be null, when <c>false</c>
@@ -56,8 +56,22 @@ public class Element
     
     //TODO: Add illegal reserved words?
     
+    //TODO: Switch to enum
     private readonly char[] _illegal = ['#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', //list of illegal characters for variable naming
         '{', '}', '[', ']', '|', '\\', ';', ':', '"', '\'', '<', '>', ',', '.', '/', '?', '!'];
+
+    public enum Types
+    {
+        Object,
+        Array,
+        Integer,
+        Double,
+        Float,
+        Long,
+        String,
+        Boolean,
+        Null,
+    }
     
     /// <summary>
     /// Add child to the <c>Children</c> list
@@ -112,7 +126,7 @@ public class Element
     /// <returns>A completed summary of all child <c>Element</c> objects</returns>
     public string Summary(string summary = "",string spacing = "") //testing ONLY
     {
-        var type = Nullable ? $"{Type}?" : Type; //TODO: Add object catch to "?" solos
+        var type = Nullable ? $"{Type}?" : Type?.ToString(); //TODO: Add object catch to "?" solos
         summary += $"\n{spacing}Name: {Name}, Type: {type} - {Children.Count} children";
         foreach (var child in Children)
         {
