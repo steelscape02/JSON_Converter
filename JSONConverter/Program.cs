@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using JSONConverter.Resources;
+﻿using JSONConverter.Resources;
 
 namespace JSONConverter;
 
@@ -23,13 +22,16 @@ internal abstract class Program
             if (projectDir != null) filename = Path.Combine(projectDir, filename);
             fileFound = File.Exists(filename);
         }
+
+        if (filename != null)
+        {
+            var reader = new JsonReader(filename);
+            var jsonTree = reader.ReadJson();
         
-        var reader = new JsonReader(filename);
-        var jsonTree = reader.ReadJson();
-        var display = new CSharpDm();
-        Console.WriteLine(CSharpDm.BuildRoot(jsonTree));
-        var contents = File.ReadAllText(filename);
-        //var root = JsonSerializer.Deserialize<Root>(contents);
-        //Console.WriteLine(root.firstname);
+            Console.WriteLine(CSharpDm.BuildRoot(jsonTree));
+            var contents = File.ReadAllText(filename);
+        }
+
+        
     }
 }

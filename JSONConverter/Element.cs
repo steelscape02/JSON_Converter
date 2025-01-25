@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net.Mime;
-
-namespace JSONConverter;
+﻿namespace JSONConverter;
 /// <summary>
 /// Stores an individual JSON element for efficient management of the JSON tree
 /// </summary>
@@ -37,7 +34,7 @@ public class Element
     /// </summary>
     public Types? Type { get; set; }
 
-    public bool Prim { get; set; }
+    public Types? Prim { get; set; }
     /// <summary>
     /// The nullability of the <c>Element</c>. When <c>true</c>, this <c>Element</c> could be null, when <c>false</c>
     /// the <c>Element</c> never appeared as null
@@ -55,11 +52,16 @@ public class Element
     /// </summary>
     public bool List { get; set; }
     
-    //TODO: Add illegal reserved words?
-    
-    //TODO: Switch to enum
-    private readonly char[] _illegal = ['#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', //list of illegal characters for variable naming
-        '{', '}', '[', ']', '|', '\\', ';', ':', '"', '\'', '<', '>', ',', '.', '/', '?', '!'];
+    /// <summary>
+    /// A list of illegal chars for variable naming
+    /// </summary>
+    private readonly char[] _illegal = 
+    [
+        '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
+        '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':',
+        ';', '"', '\'', '<', '>', ',', '.', '?', '/', '~',
+        '`', ' ', '\t', '\n'
+    ];
 
     public enum Types
     {
@@ -108,33 +110,16 @@ public class Element
     /// Removes all illegal characters from the <c>Name</c> member variable
     /// </summary>
     /// <returns>An unaltered <c>Name</c> if no illegal characters were found, otherwise a <c>Name</c> with all illegal characters removed</returns>
-    public string LegalName()
+    public string LegalName(bool addAt = false)
     {
-        if (!Rename) return Name;
         while (_illegal.Any(Name.Contains))
         {
             var index = Name.IndexOfAny(_illegal);
             Name = Name.Remove(index,1);
+            
         }
+        if(addAt) Name = "@" + Name;
         return Name;
-    }
-
-    /// <summary>
-    /// <b>For testing <i>only</i></b>. Returns an indented list of all child elements of the called <c>Element</c>
-    /// </summary>
-    /// <param name="summary"><b>Optional</b>Sets the initial summary text for the summary</param>
-    /// <param name="spacing"><b>Optional</b>Sets initial padding for Summary</param>
-    /// <returns>A completed summary of all child <c>Element</c> objects</returns>
-    public string Summary(string summary = "",string spacing = "") //testing ONLY
-    {
-        var type = Nullable ? $"{Type}?" : Type?.ToString(); //TODO: Add object catch to "?" solos
-        summary += $"\n{spacing}Name: {Name}, Type: {type} - {Children.Count} children";
-        foreach (var child in Children)
-        {
-            summary += $"{spacing}{child.Summary("",spacing + "   ")}";
-        }  
-        
-        return summary;
     }
     
     //.Contains() overrides

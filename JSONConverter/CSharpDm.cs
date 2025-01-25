@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace JSONConverter;
+﻿namespace JSONConverter;
 
 // --C# DOM Creator--
 /// <summary>
@@ -8,9 +6,7 @@ namespace JSONConverter;
 /// can be used to parse the JSON tree represented by the <c>HashSet</c>.
 /// </summary>
 
-//TODO: REPAIR LIST NAMING ON CLASSES AND BBOX ARTIFACT (tester.json (still prints prim array when header))
-
-public class CSharpDm //TODO: Optimize this structure (inc naming)
+public abstract class CSharpDm //TODO: Optimize this structure (inc naming)
 {
     /// <summary>
     /// The default visibility of the C# elements in the data model
@@ -27,6 +23,21 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
     /// Used to improve the corresponding JSON package
     /// </summary>
     private static bool _overWrite;
+    
+    /// <summary>
+    /// Array of reserved words in C#
+    /// </summary>
+    private static readonly string[] ReservedWords =
+    [
+        "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const", 
+        "continue", "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit", "extern",
+        "false", "finally", "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in", "int", "interface", 
+        "internal", "is", "lock", "long", "namespace", "new", "null", "object", "operator", "out", "override", "params",
+        "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short", "sizeof",
+        "stackalloc", "static", "string", "struct", "switch", "this", "throw", "true", "try", "typeof", "uint", "ulong",
+        "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while"
+    ];
+    
     /// <summary>
     /// Builds the Root class, with calls to <c>BuildSubDm</c> to create the child classes.
     /// </summary>
@@ -43,7 +54,7 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
         foreach (var element in elements)
         {
             string? rename;
-            if (element.Rename)
+            if (element.Rename || HasReserved(element.Name))
             {
                 rename = $"\n   [JsonPropertyName(\"{element.Name}\")]\n   ";
                 _overWrite = true;
@@ -51,21 +62,21 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
             else
                 rename = null;
 
-            if (element.Prim) continue;
-            var headerType = PrintType(element,true);
-            rootClass += $"   {rename}{Vis} {headerType} {element.LegalName()} {{get; set;}}\n";
+            var headerType = GetPrintType(element,false);
+            rootClass += $"   {rename}{Vis} {headerType} {element.LegalName(HasReserved(element.Name))} {{get; set;}}\n";
         }
 
         rootClass += "}\n";
         classDefinitions.Add(rootClass);
 
         // Recursively build subclasses
-        var visited = new HashSet<string>();
-        foreach (var element in elements.Where(element => !element.Prim))
+        var visited = new HashSet<string?>();
+        foreach (var element in elements.Where(element => !IsPrimitive(element.Prim.ToString()?.ToLower()) && !IsPrimitive(element.Type.ToString()?.ToLower())))
         {
             BuildSubDm(element, visited, classDefinitions);
         }
 
+        
         if (_overWrite) //add Json.Serialization package to use JsonPropertyName
         {
             classDefinitions.Insert(0,"using System.Text.Json.Serialization;\n");
@@ -76,39 +87,43 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
     /// <summary>
     /// Recursively builds child classes for nested elements.
     /// </summary>
-    private static void BuildSubDm(Element element, HashSet<string> visited, List<string> classDefinitions)
+    /// <param name="element">The Element to be searched</param>
+    /// <param name="visited">The currently visited nested locations (stored by type)</param>
+    /// <param name="classDefinitions">
+    /// A list of class definitions, representing the child classes that are created
+    /// </param>
+    private static void BuildSubDm(Element element, HashSet<string?> visited, List<string> classDefinitions)
     {
         if (element.Type == null) return;
-        var type = PrintType(element,true);
+        var type = GetPrintType(element,true);
 
         // Avoid re-creating classes
         if (IsPrimitive(type) || !visited.Add(type))
             return;
-        
-        var classDef = $"{Vis} class {type}\n{{\n";
 
+        var classDef = $"{Vis} class {MakeFriendly(type)}\n{{\n";
         foreach (var child in element.Children)
         {
             child.Type ??= Element.Types.Null;
-            var childType = PrintType(child,false);
+            var childType = GetPrintType(child,false);
             if (child.Children.Count > 0)
             {
                 
-                classDef += $"    {Vis} {childType} {child.LegalName()} {{get; set;}}\n";
+                classDef += $"    {Vis} {childType} {child.LegalName(HasReserved(child.Name))} {{get; set;}}\n";
                 BuildSubDm(child, visited, classDefinitions); // Recursive call for nested children
             }
             else
             {
-                var nulled = child.Nullable ? childType + "?" : childType;
+                var nullable = child.Nullable ? childType + "?" : childType;
                 string? rename;
-                if (child.Rename)
+                if (child.Rename || HasReserved(child.Name))
                 {
                     rename = $"\n    [JsonPropertyName(\"{child.Name}\")]\n    ";
                     _overWrite = true;
                 }
                 else
                     rename = null;
-                classDef += $"    {rename}{Vis} {nulled} {child.LegalName()} {{get; set;}}\n";
+                classDef += $"    {rename}{Vis} {nullable} {child.LegalName(HasReserved(child.Name))} {{get; set;}}\n";
             }
         }
 
@@ -116,12 +131,17 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
         classDefinitions.Add(classDef);
     }
 
-    //TODO: Comment
-    private static bool IsPrimitive(string type)
+    /// <summary>
+    /// If a type is a primitive or null (<b>o</b>bject) type, it won't create a class. This method returns a bool response in accordance to the type
+    /// of the passed in variable
+    /// </summary>
+    /// <param name="type">The string representation of the type</param>
+    /// <returns><c>true</c> if the type string is a primitive or null (<b>o</b>bject) type, otherwise <c>false</c></returns>
+    private static bool IsPrimitive(string? type)
     {
-        var primitives = new HashSet<string>
+        var primitives = new HashSet<string?>
         {
-            "string", "int", "long", "float", "double", "decimal", "bool", "object"
+            "string", "integer","int", "long", "float", "double", "boolean", "bool"
         };
         return primitives.Contains(type);
     }
@@ -132,59 +152,86 @@ public class CSharpDm //TODO: Optimize this structure (inc naming)
     /// <param name="text">The text to convert</param>
     /// <param name="list"><c>true</c> if the caller is editing a List <c>Element</c> name</param>
     /// <returns>The "friendly" name</returns>
-    private static string MakeFriendly(string text, bool list = false)
+    private static string? MakeFriendly(string? text, bool list = false)
     {
         //check against basic plural rules
-        var cap = text[0].ToString().ToUpper();
+        var cap = text?[0].ToString().ToUpper();
 
-        if (!list)
+
+        if (text != null && text.EndsWith("ies"))
         {
-            //just capitalize the word and return
-            text = cap + text.Substring(1, text.Length - 1);
+            text = cap + text.Substring(1, text.Length - 4) + "y";
         }
-        else
-        {
-            if (text.EndsWith("ies"))
-            {
-                text = cap + text.Substring(1, text.Length - 4) + "y";
-            }
-            //s -> remove s (except special cases)
-            else if (text.EndsWith("s"))
-                text = cap + text.Substring(1, text.Length - 2);
-            text = "List<" + text + ">";
-        }
+        //s -> remove s (except special cases)
+        else if (text != null && text.EndsWith('s'))
+            text = cap + text.Substring(1, text.Length - 2);
+        
+        if(list) text = "List<" + text + ">";
+        
         return text;
     }
 
-    //TODO: Comment
-    private static string PrintType(Element elem,bool header)
+    /// <summary>
+    /// Translates a <c>Element.Types...</c> enum to the appropriate string
+    /// </summary>
+    /// <param name="elem">The element to get a "print" type for</param>
+    /// <param name="className">
+    /// <c>true</c> if the <c>Element</c> object being passed in is a class name (removes any List tags)
+    /// </param>
+    /// <returns>Appropriate C# type string</returns>
+    /// <exception cref="Exception">The type was not recognized as an <c>Element.Types...</c> type</exception>
+    private static string? GetPrintType(Element elem,bool className)
     {
+        
         var type = elem.Type.ToString();
         switch (elem.Type)
         {
             case Element.Types.Array:
             case Element.Types.Object:
                 var isList = elem.List;
-                if (header) isList = false;
-                type = MakeFriendly(elem.Name,isList);
+                var name = elem.Name;
+                if (className) isList = false;
+                if (IsPrimitive(elem.Prim.ToString()?.ToLower()) && isList)
+                {
+                    name = elem.Prim.ToString()?.ToLower();
+                }
+
+                if (name != null) type = MakeFriendly(name, isList);
                 break;
             case Element.Types.Null:
                 type = "object";
                 break;
             case Element.Types.Integer:
+                type = "int";
+                break;
             case Element.Types.Double:
             case Element.Types.Float:
             case Element.Types.Long:
             case Element.Types.String:
-            case Element.Types.Boolean:
                 type = type?.ToLower();
+                break;
+            case Element.Types.Boolean:
+                type = "bool";
                 break;
             case null:
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new Exception("Unknown type");
         }
 
         return type;
+    }
+
+    /// <summary>
+    /// Reserved words cannot be a variable name. To address this, a "@" is placed at the beginning of the text string
+    /// </summary>
+    /// <param name="text">The text to be checked</param>
+    /// <returns>
+    /// The original string if it is not a reserved word, or the original string with an "@" symbol appended to the
+    /// front.
+    /// </returns>
+    private static bool HasReserved(string text)
+    {
+        return ReservedWords.Any(s => string.Equals(s, text, StringComparison.OrdinalIgnoreCase));
     }
 }

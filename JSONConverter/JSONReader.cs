@@ -76,7 +76,7 @@ public class JsonReader(string filename)
             case JsonArray jsonArray:
                 var isObj = true;
                 var isPrim = true;
-                Element.Types? primType;
+                Element.Types? primType = Element.Types.Null;
 
                 ArgumentNullException.ThrowIfNull(headElem); //TODO: Is this optimal?
                 foreach (var i in jsonArray)
@@ -130,14 +130,13 @@ public class JsonReader(string filename)
                     }
                     case true:
                     {
-                        var objType = MakeFriendly(headElem.Name,true);
                         headElem.List = true;
                         break;
                     }
                     case false when isPrim: //if isObj is false 
                     {
                         headElem.List = true;
-                        headElem.Prim = true;
+                        headElem.Prim = primType;
                         headElem.ClearChildren(); //kill all prim type child elems
                         break;
                     }
@@ -159,7 +158,7 @@ public class JsonReader(string filename)
                         if(type == Element.Types.Object) name = MakeFriendly(name);
                         
                         var elem = new Element(type, name);
-                        if (type == Element.Types.Null) elem.Nullable = true; //null is possible due to ? above
+                        if (type is Element.Types.Null or null) elem.Nullable = true; //null is possible due to ? above
                         var added = elements.Add(elem);
                         if(added)
                             if (element.Value != null)
@@ -176,7 +175,7 @@ public class JsonReader(string filename)
                         if(type == Element.Types.Object) name = MakeFriendly(name);
                         
                         var elem = new Element(type, name);
-                        if (type == Element.Types.Null) elem.Nullable = true; //null is possible due to ? above
+                        if (type is Element.Types.Null or null) elem.Nullable = true; //null is possible due to ? above
                         
                         var added = headElem.AddChild(elem);
                         if(added)
@@ -264,7 +263,7 @@ public class JsonReader(string filename)
                 case JsonValueKind.String:
                     return Element.Types.String;
                 case JsonValueKind.Number:
-                    return GetNumType(value?.ToString());
+                    return GetNumType(value.ToString());
                 case JsonValueKind.True:
                 case JsonValueKind.False:
                     return Element.Types.Boolean;
@@ -283,7 +282,7 @@ public class JsonReader(string filename)
         return null;
     }
     /// <summary>
-    /// Finds the "precision" of a number using its classification (<c>string</c>, <c>double</c>, etc..) for comparison
+    /// Finds the "precision" of a number using its classification (<c>string</c>, <c>double</c>, etc...) for comparison
     /// of precision when deciding what type to keep
     /// </summary>
     /// <param name="type">The numerical type as a <c>string</c></param>
