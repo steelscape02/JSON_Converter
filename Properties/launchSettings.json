@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "JsonConverter (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "JsonConverter (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

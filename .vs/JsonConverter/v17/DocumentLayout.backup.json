@@ -1,0 +1,143 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|c:\\users\\nicho\\documents\\programming\\jsonconverter\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|c:\\users\\nicho\\documents\\programming\\jsonconverter\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|c:\\users\\nicho\\documents\\programming\\jsonconverter\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|solutionrelative:app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|c:\\users\\nicho\\documents\\programming\\jsonconverter\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|solutionrelative:app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|c:\\users\\nicho\\documents\\programming\\jsonconverter\\csharpdm.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|solutionrelative:csharpdm.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|c:\\users\\nicho\\documents\\programming\\jsonconverter\\jsonreader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|solutionrelative:jsonreader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|c:\\users\\nicho\\documents\\programming\\jsonconverter\\element.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8BFD0527-5FBF-47EA-ABC1-63108517E617}|JsonConverter.csproj|solutionrelative:element.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "JsonReader.cs",
+              "DocumentMoniker": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\JsonReader.cs",
+              "RelativeDocumentMoniker": "JsonReader.cs",
+              "ToolTip": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\JsonReader.cs",
+              "RelativeToolTip": "JsonReader.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-28T21:19:51.597Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CSharpDm.cs",
+              "DocumentMoniker": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\CSharpDm.cs",
+              "RelativeDocumentMoniker": "CSharpDm.cs",
+              "ToolTip": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\CSharpDm.cs",
+              "RelativeToolTip": "CSharpDm.cs",
+              "ViewState": "AgIAACoAAAAAAAAAAAAAACkAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-28T21:17:57.165Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "App.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\App.xaml.cs",
+              "RelativeDocumentMoniker": "App.xaml.cs",
+              "ToolTip": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\App.xaml.cs",
+              "RelativeToolTip": "App.xaml.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-26T00:54:15.643Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\MainWindow.xaml.cs",
+              "RelativeToolTip": "MainWindow.xaml.cs",
+              "ViewState": "AgIAACYAAAAAAAAAAAAcwCsAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-25T23:37:41.245Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "MainWindow.xaml",
+              "ToolTip": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\MainWindow.xaml",
+              "RelativeToolTip": "MainWindow.xaml",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAADUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-01-25T23:36:23.732Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Element.cs",
+              "DocumentMoniker": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\Element.cs",
+              "RelativeDocumentMoniker": "Element.cs",
+              "ToolTip": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\Element.cs",
+              "RelativeToolTip": "Element.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-28T21:25:21.973Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "App.xaml",
+              "DocumentMoniker": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\App.xaml",
+              "RelativeDocumentMoniker": "App.xaml",
+              "ToolTip": "C:\\Users\\nicho\\Documents\\Programming\\JsonConverter\\App.xaml",
+              "RelativeToolTip": "App.xaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-01-25T23:36:19.203Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
