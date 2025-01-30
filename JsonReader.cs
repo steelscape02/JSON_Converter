@@ -9,12 +9,12 @@ using System.IO;
 
 namespace JsonConverter
 {
-    internal class JsonReader(string filename)
+    internal class JsonReader(string contents)
     {
         /// <summary>
         /// The filename of the JSON response
         /// </summary>
-        private string Filename { get; } = filename;
+        private string Contents { get; } = contents;
 
         /// <summary>
         /// Uses recursion to parse this <c>JsonReader</c>'s JSON file into a <c>HashSet</c> of <c>Element</c> objects,
@@ -23,9 +23,7 @@ namespace JsonConverter
         /// <returns></returns>
         public HashSet<Element> ReadJson()
         {
-            var reader = File.ReadAllText(Filename);
-
-            var document = JsonNode.Parse(reader) ?? "Blah"; //funny fallback added
+            var document = JsonNode.Parse(Contents) ?? "Blah"; //funny fallback added
             var root = document.Root; //root is JSON Object
             var baseStuff = new HashSet<Element>();
             SubRecursive(root, baseStuff, null);

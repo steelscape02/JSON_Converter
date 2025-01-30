@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace JsonConverter
 {
-    public abstract class CSharpDm //TODO: Optimize this structure (inc naming)
+    public class CSharpDm //TODO: Optimize this structure (inc naming)
     {
         /// <summary>
         /// The default visibility of the C# elements in the data model

@@ -53,13 +53,13 @@
             Padding="10,10"
             Margin="10"
             Background="{ThemeResource TextControlBackground}">
-            <TextBlock 
-                
-                Text="Begin Conversion"
-                Foreground="{ThemeResource TextControlForeground}"
-                
-                
-            />
+            <ScrollViewer>
+                <TextBlock
+                    x:Name="outputBox"
+                    Text="Begin Conversion"
+                    Foreground="{ThemeResource TextControlForeground}"
+                />
+            </ScrollViewer>
         </Border>
     </Grid>
 </Window>

@@ -31,17 +31,31 @@ namespace JsonConverter
 
         private void myButton_Click(object sender, RoutedEventArgs e)
         {
-            myButton.Content = "Submitting";
             jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out string entry);
             if (IsJson(entry))
             {
-                //send to JsonReader
+                myButton.Content = "Submitting";
+                JsonReader reader = new JsonReader(entry);
+                var contents = new HashSet<Element>();
+                contents = reader.ReadJson();
+                //c# dm
+                var dm = CSharpDm.BuildRoot(contents);
+                Console.WriteLine(dm);
+                outputBox.Text = dm;
+                myButton.Content = "Submit";
             }
             else
             {
+                var existing = myButton.Content.ToString();
                 myButton.Content = "JSON Entry not valid";
-                //wait 5 sec
-                //reset
+                DispatcherTimer timer = new DispatcherTimer();
+                timer.Interval = TimeSpan.FromSeconds(5);
+                timer.Tick += (s, args) =>
+                {
+                    myButton.Content = existing; // Revert content
+                    timer.Stop(); // Stop the timer
+                };
+                timer.Start();
             }
         }
         private void Menu_Opening(object sender, object e)
