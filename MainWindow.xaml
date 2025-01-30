@@ -8,7 +8,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Title="JsonConverter">
-
+    <Window.SystemBackdrop>
+        <DesktopAcrylicBackdrop/>
+    </Window.SystemBackdrop>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -18,7 +20,6 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-
         <RichEditBox 
             Grid.Row="0"
             Grid.Column="0"
@@ -42,24 +43,28 @@
             Click="myButton_Click" 
             HorizontalAlignment="Center"
         >Submit</Button>
-
-        <Border 
+        
+        <Border
             Grid.Row="0"
             Grid.Column="1"
             MinWidth="100" MinHeight="50"
-            MaxWidth="400" MaxHeight="600"
+             MaxHeight="600"
             VerticalAlignment="Stretch"
             HorizontalAlignment="Stretch"
-            Padding="10,10"
+            
             Margin="10"
+            CornerRadius="4"
             Background="{ThemeResource TextControlBackground}">
             <ScrollViewer>
-                <TextBlock
+                <TextBox
                     x:Name="outputBox"
                     Text="Begin Conversion"
+                    IsReadOnly="True"
+                    AcceptsReturn="True"
                     Foreground="{ThemeResource TextControlForeground}"
                 />
             </ScrollViewer>
         </Border>
+        
     </Grid>
 </Window>

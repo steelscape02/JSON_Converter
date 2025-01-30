@@ -27,6 +27,7 @@ namespace JsonConverter
         public MainWindow()
         {
             this.InitializeComponent();
+            SystemBackdrop = new DesktopAcrylicBackdrop();
         }
 
         private void myButton_Click(object sender, RoutedEventArgs e)
