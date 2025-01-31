@@ -38,7 +38,11 @@ namespace JsonConverter
         /// </summary>
         public Types? Type { get; set; }
 
+        /// <summary>
+        /// Indicates the Prim type (if present) of the <c>Element</c>
+        /// </summary>
         public Types? Prim { get; set; }
+
         /// <summary>
         /// The nullability of the <c>Element</c>. When <c>true</c>, this <c>Element</c> could be null, when <c>false</c>
         /// the <c>Element</c> never appeared as null
@@ -67,6 +71,9 @@ namespace JsonConverter
         '`', ' ', '\t', '\n'
         ];
 
+        /// <summary>
+        /// Available JSON types
+        /// </summary>
         public enum Types
         {
             Object,

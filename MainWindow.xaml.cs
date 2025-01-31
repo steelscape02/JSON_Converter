@@ -59,7 +59,7 @@ namespace JsonConverter
                 timer.Start();
             }
         }
-        private void Menu_Opening(object sender, object e)
+        private void Menu_Opening(object? sender, object e)
         {
             CommandBarFlyout? myFlyout = sender as CommandBarFlyout;
             if (myFlyout != null && myFlyout.Target == jsonEntry)

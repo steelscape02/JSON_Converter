@@ -152,7 +152,7 @@ namespace JsonConverter
 
                             var type = GetValueType(element.Value);
                             var name = element.Key;
-                            if (type == Element.Types.Object) name = MakeFriendly(name);
+                            if (type == Element.Types.Object) name = MakeFriendly(name); //TODO: Switch to a catch that sets this as a Root elem?
 
                             var elem = new Element(type, name);
                             if (type is Element.Types.Null or null) elem.Nullable = true; //null is possible due to ? above
@@ -169,7 +169,7 @@ namespace JsonConverter
                         {
                             var type = GetValueType(element.Value);
                             var name = element.Key;
-                            if (type == Element.Types.Object) name = MakeFriendly(name);
+                            //if (type == Element.Types.Object) name = MakeFriendly(name);
 
                             var elem = new Element(type, name);
                             if (type is Element.Types.Null or null) elem.Nullable = true; //null is possible due to ? above
