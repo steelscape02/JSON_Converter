@@ -62,7 +62,7 @@ namespace JsonConverter
         private void Menu_Opening(object sender, object e)
         {
             CommandBarFlyout? myFlyout = sender as CommandBarFlyout;
-            if (myFlyout.Target == jsonEntry)
+            if (myFlyout != null && myFlyout.Target == jsonEntry)
             {
                 AppBarButton myButton = new AppBarButton
                 {
@@ -84,7 +84,7 @@ namespace JsonConverter
             jsonEntry.ContextFlyout.Opening -= Menu_Opening;
         }
 
-        private bool IsJson(string input)
+        private static bool IsJson(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
                 return false;
