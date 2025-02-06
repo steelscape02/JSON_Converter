@@ -104,24 +104,21 @@ namespace JsonConverter
             {
                 child.Type ??= Element.Types.Null;
                 var childType = GetPrintType(child, false);
-                if (child.Children.Count > 0)
+                var nullable = child.Nullable ? childType + "?" : childType;
+                string? rename;
+                if (child.Rename || HasReserved(child.Name))
                 {
-
-                    classDef += $"    {Vis} {childType} {child.LegalName(HasReserved(child.Name))} {{get; set;}}\n";
-                    BuildSubDm(child, visited, classDefinitions); // Recursive call for nested children
+                    rename = $"\n    [JsonPropertyName(\"{child.Name}\")]\n    ";
+                    _overWrite = true;
                 }
                 else
+                    rename = null;
+
+                classDef += $"    {rename}{Vis} {nullable} {child.LegalName(HasReserved(child.Name))} {{get; set;}}\n";
+
+                if (child.Children.Count > 0)
                 {
-                    var nullable = child.Nullable ? childType + "?" : childType;
-                    string? rename;
-                    if (child.Rename || HasReserved(child.Name))
-                    {
-                        rename = $"\n    [JsonPropertyName(\"{child.Name}\")]\n    ";
-                        _overWrite = true;
-                    }
-                    else
-                        rename = null;
-                    classDef += $"    {rename}{Vis} {nullable} {child.LegalName(HasReserved(child.Name))} {{get; set;}}\n";
+                    BuildSubDm(child, visited, classDefinitions); // Recursive call for nested children
                 }
             }
 
@@ -161,9 +158,14 @@ namespace JsonConverter
                 text = cap + text.Substring(1, text.Length - 4) + "y";
             }
             //s -> remove s (except special cases)
+            else if (text != null && text.EndsWith("es"))
+                text = cap + text.Substring(1, text.Length - 2);
             else if (text != null && text.EndsWith('s'))
                 text = cap + text.Substring(1, text.Length - 2);
-
+            else
+            {
+                text = cap + text.Substring(1, text.Length - 1);
+            }
             if (list) text = "List<" + text + ">";
 
             return text;
@@ -212,7 +214,6 @@ namespace JsonConverter
                     type = "bool";
                     break;
                 case null:
-                    break;
                 default:
                     throw new Exception("Unknown type");
             }

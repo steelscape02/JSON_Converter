@@ -33,6 +33,7 @@
             Margin="10"
             Loaded="jsonEntry_Loaded"
             Unloaded="jsonEntry_Unloaded"
+            IsSpellCheckEnabled="False"
         />
         <Button 
             Grid.Row="1"
@@ -42,6 +43,7 @@
             x:Name="myButton"
             Click="myButton_Click" 
             HorizontalAlignment="Center"
+            VerticalAlignment="Top"
         >Submit</Button>
         
         <Border

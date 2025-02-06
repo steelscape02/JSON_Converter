@@ -6,6 +6,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.IO;
+using System.Diagnostics;
 
 namespace JsonConverter
 {
@@ -152,14 +153,15 @@ namespace JsonConverter
 
                             var type = GetValueType(element.Value);
                             var name = element.Key;
-                            if (type == Element.Types.Object) name = MakeFriendly(name); //TODO: Switch to a catch that sets this as a Root elem?
 
                             var elem = new Element(type, name);
                             if (type is Element.Types.Null or null) elem.Nullable = true; //null is possible due to ? above
                             var added = elements.Add(elem);
                             if (added)
+                            {
                                 if (element.Value != null)
                                     SubRecursive(element.Value, elements, elem);
+                            }
                         }
                     }
                     else
@@ -181,8 +183,12 @@ namespace JsonConverter
                             }
                             else
                             {
+                                //TODO: check if match headElem is the same, otherwise, create this with a weird name (add @ or sum)
+                                //TODO: Maybe add a parent Elem in Element so that you can compare match and elem side by side to see if they're
+                                //      cool and jazzy. If parent matches, run it normally, if not rename the elem, and that should run it normally
                                 var match = headElem.GetMatching(elem);
                                 if (match == null) continue;
+
                                 if (elem.Nullable) match.Nullable = true;
 
                                 if (element.Value != null) SubRecursive(element.Value, elements, match);
@@ -191,33 +197,6 @@ namespace JsonConverter
                     }
                     break;
             }
-        }
-
-        /// <summary>
-        /// Make the given text "friendly". If the given text was from a list object, return a capitalized and singular version of the word. Otherwise, capitalize and return.
-        /// </summary>
-        /// <param name="text">The text to convert</param>
-        /// <param name="list"><c>true</c> if the caller is editing a List <c>Element</c> name</param>
-        /// <returns>The "friendly" name</returns>
-        private static string MakeFriendly(string text, bool list = false)
-        {
-            //check against basic plural rules
-            var cap = text[0].ToString().ToUpper();
-
-            if (!list)
-            { //just capitalize the word and return
-                text = cap + text.Substring(1, text.Length - 1);
-            }
-            else if (text.EndsWith("ies"))
-            {
-                text = cap + text.Substring(1, text.Length - 4) + "y";
-            }
-            //s -> remove s (except special cases)
-            else if (text.EndsWith("s"))
-                text = cap + text.Substring(1, text.Length - 2);
-
-
-            return text;
         }
 
         /// <summary>
