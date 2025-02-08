@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,6 +33,7 @@ namespace JsonConverter
         /// The name of the <c>Element</c>
         /// </summary>
         public string Name { get; }
+        
 
         /// <summary>
         /// The JSON type of the <c>Element</c>
@@ -94,6 +96,7 @@ namespace JsonConverter
         /// <returns><c>true</c> if added, <c>false</c> if not</returns>
         public bool AddChild(Element newChild)
         {
+            if (newChild.Name.Contains("data")) Debug.WriteLine("data found. in a trashcan");
             var added = Children.Add(newChild);
             return added;
         }

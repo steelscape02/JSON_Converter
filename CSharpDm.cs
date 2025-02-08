@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace JsonConverter
 {
@@ -69,7 +70,8 @@ namespace JsonConverter
 
             // Recursively build subclasses
             var visited = new HashSet<string?>();
-            foreach (var element in elements.Where(element => !IsPrimitive(element.Prim.ToString()?.ToLower()) && !IsPrimitive(element.Type.ToString()?.ToLower())))
+            foreach (var element in elements.Where(element => 
+                !IsPrimitive(element.Prim.ToString()?.ToLower()) && !IsPrimitive(element.Type.ToString()?.ToLower())))
             {
                 BuildSubDm(element, visited, classDefinitions);
             }
@@ -90,7 +92,7 @@ namespace JsonConverter
         /// <param name="classDefinitions">
         /// A list of class definitions, representing the child classes that are created
         /// </param>
-        private static void BuildSubDm(Element element, HashSet<string?> visited, List<string> classDefinitions)
+        private static void BuildSubDm(Element element, HashSet<string?> visited, List<string> classDefinitions,bool redo = false)
         {
             if (element.Type == null) return;
             var type = GetPrintType(element, true);
@@ -99,7 +101,11 @@ namespace JsonConverter
             if (IsPrimitive(type) || !visited.Add(type))
                 return;
 
-            var classDef = $"{Vis} class {MakeFriendly(type)}\n{{\n";
+            if(redo) type = "@" + type;
+
+            //TODO: Check for prim
+            if (element.Prim == null) type = MakeFriendly(type);
+            var classDef = $"{Vis} class {type}\n{{\n";
             foreach (var child in element.Children)
             {
                 child.Type ??= Element.Types.Null;
@@ -147,24 +153,27 @@ namespace JsonConverter
         /// <param name="text">The text to convert</param>
         /// <param name="list"><c>true</c> if the caller is editing a List <c>Element</c> name</param>
         /// <returns>The "friendly" name</returns>
-        private static string? MakeFriendly(string? text, bool list = false)
+        private static string? MakeFriendly(string? text, bool list = false,bool prim = false)
         {
             //check against basic plural rules
-            var cap = text?[0].ToString().ToUpper();
+            if(!prim)
+            { 
+                var cap = text?[0].ToString().ToUpper();
 
-
-            if (text != null && text.EndsWith("ies"))
-            {
-                text = cap + text.Substring(1, text.Length - 4) + "y";
-            }
-            //s -> remove s (except special cases)
-            else if (text != null && text.EndsWith("es"))
-                text = cap + text.Substring(1, text.Length - 2);
-            else if (text != null && text.EndsWith('s'))
-                text = cap + text.Substring(1, text.Length - 2);
-            else
-            {
-                text = cap + text.Substring(1, text.Length - 1);
+                //TODO: CORRECT LIST NAMING (Currently may not add list if MakeFriendly false (pass in Prim param?)
+                if (text != null && text.EndsWith("ies"))
+                {
+                    text = cap + text.Substring(1, text.Length - 4) + "y";
+                }
+                //s -> remove s (except special cases)
+                else if (text != null && text.EndsWith("es"))
+                    text = cap + text.Substring(1, text.Length - 2);
+                else if (text != null && text.EndsWith('s'))
+                    text = cap + text.Substring(1, text.Length - 2);
+                else
+                {
+                    text = cap + text.Substring(1, text.Length - 1);
+                }
             }
             if (list) text = "List<" + text + ">";
 
@@ -191,12 +200,12 @@ namespace JsonConverter
                     var isList = elem.List;
                     var name = elem.Name;
                     if (className) isList = false;
-                    if (IsPrimitive(elem.Prim.ToString()?.ToLower()) && isList)
+                    var isPrim = IsPrimitive(elem.Prim.ToString()?.ToLower());
+                    if (isPrim && isList)
                     {
                         name = elem.Prim.ToString()?.ToLower();
                     }
-
-                    if (name != null) type = MakeFriendly(name, isList);
+                    if (name != null) type = MakeFriendly(name, isList,isPrim);
                     break;
                 case Element.Types.Null:
                     type = "object";

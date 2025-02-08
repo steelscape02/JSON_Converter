@@ -160,7 +160,10 @@ namespace JsonConverter
                             if (added)
                             {
                                 if (element.Value != null)
-                                    SubRecursive(element.Value, elements, elem);
+                                {
+                                    SubRecursive(element.Value, elements, elem); 
+                                }
+                               
                             }
                         }
                     }
@@ -182,7 +185,7 @@ namespace JsonConverter
                                 if (element.Value != null) SubRecursive(element.Value, elements, elem);
                             }
                             else
-                            {
+                            { //st case never reaches this
                                 //TODO: check if match headElem is the same, otherwise, create this with a weird name (add @ or sum)
                                 //TODO: Maybe add a parent Elem in Element so that you can compare match and elem side by side to see if they're
                                 //      cool and jazzy. If parent matches, run it normally, if not rename the elem, and that should run it normally
