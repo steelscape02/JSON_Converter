@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Security.Cryptography.Core;
 
 namespace JsonConverter
 {
@@ -52,6 +53,11 @@ namespace JsonConverter
         public bool Nullable { get; set; }
 
         /// <summary>
+        /// The total count of prefix @ signs for unusual repeat naming
+        /// </summary>
+        public int at_count { get; set; } = 0;
+
+        /// <summary>
         /// If an illegal character is found, the <c>Name</c> member variable will need to be edited when printed. If <c>true</c>,
         /// this <c>Element</c> must be renamed in the DOM, if <c>false</c> the name is valid without renaming
         /// </summary>
@@ -96,7 +102,6 @@ namespace JsonConverter
         /// <returns><c>true</c> if added, <c>false</c> if not</returns>
         public bool AddChild(Element newChild)
         {
-            if (newChild.Name.Contains("data")) Debug.WriteLine("data found. in a trashcan");
             var added = Children.Add(newChild);
             return added;
         }
@@ -111,6 +116,24 @@ namespace JsonConverter
             var match = Children.FirstOrDefault(x => x.Name == element.Name);
             return match ?? null;
         }
+
+        /// <summary>
+        /// Find if this object's children <b>exactly</b> match the <c>match</c>'s children
+        /// </summary>
+        /// <param name="match">The match item to compare to</param>
+        /// <returns><c>true</c> if the children of both objects match perfectly, otherwise <c>false</c></returns>
+        public bool MatchingChildren(Element match)
+        {
+            foreach (var child in match.Children)
+            {
+                if (!Children.Contains(child))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
 
         /// <summary>
         /// Remove all Children for this element

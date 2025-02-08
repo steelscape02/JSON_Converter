@@ -69,7 +69,7 @@ namespace JsonConverter
             classDefinitions.Add(rootClass);
 
             // Recursively build subclasses
-            var visited = new HashSet<string?>();
+            var visited = new HashSet<Element?>();
             foreach (var element in elements.Where(element => 
                 !IsPrimitive(element.Prim.ToString()?.ToLower()) && !IsPrimitive(element.Type.ToString()?.ToLower())))
             {
@@ -92,16 +92,39 @@ namespace JsonConverter
         /// <param name="classDefinitions">
         /// A list of class definitions, representing the child classes that are created
         /// </param>
-        private static void BuildSubDm(Element element, HashSet<string?> visited, List<string> classDefinitions,bool redo = false)
+        private static void BuildSubDm(Element element, HashSet<Element?> visited, List<string> classDefinitions,bool redo = false)
         {
             if (element.Type == null) return;
             var type = GetPrintType(element, true);
 
             // Avoid re-creating classes
-            if (IsPrimitive(type) || !visited.Add(type))
-                return;
+            if (IsPrimitive(type) || !visited.Add(element))
+            {
+                if (!visited.Add(element))
+                {
+                    if (visited.TryGetValue(element, out var match))
+                    {
+                        if (match != null && element.MatchingChildren(match)) return;
+                        else 
+                        {
+                            if (match == null) return;
+                            for(int i=0;i<=match.at_count; i++)
+                                type = "@" + type;
 
-            if(redo) type = "@" + type;
+                            visited.Remove(match);
+                            match.at_count += 1;
+                            visited.Add(match);
+                        }
+
+                    }
+                }
+                
+            }
+
+            if(redo) 
+            {
+                type = "@" + type; 
+            }
 
             //TODO: Check for prim
             if (element.Prim == null) type = MakeFriendly(type);
@@ -125,6 +148,7 @@ namespace JsonConverter
                 if (child.Children.Count > 0)
                 {
                     BuildSubDm(child, visited, classDefinitions); // Recursive call for nested children
+                    
                 }
             }
 
