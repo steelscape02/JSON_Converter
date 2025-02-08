@@ -17,6 +17,8 @@ namespace JsonConverter
         /// </summary>
         private const string BaseName = "Root";
 
+        private const string RptPlaceHolder = "_";
+
         /// <summary>
         /// Tracks if a variable name has been changed due to containing illegal characters.
         /// Used to improve the corresponding JSON package
@@ -104,12 +106,11 @@ namespace JsonConverter
                 {
                     if (visited.TryGetValue(element, out var match))
                     {
-                        if (match != null && element.MatchingChildren(match)) return;
+                        if (match == null || element.MatchingChildren(match)) return;
                         else 
                         {
-                            if (match == null) return;
                             for(int i=0;i<=match.at_count; i++)
-                                type = "@" + type;
+                                type = RptPlaceHolder + type;
 
                             visited.Remove(match);
                             match.at_count += 1;
@@ -123,7 +124,7 @@ namespace JsonConverter
 
             if(redo) 
             {
-                type = "@" + type; 
+                type = RptPlaceHolder + type; 
             }
 
             //TODO: Check for prim
@@ -131,8 +132,21 @@ namespace JsonConverter
             var classDef = $"{Vis} class {type}\n{{\n";
             foreach (var child in element.Children)
             {
+                    
                 child.Type ??= Element.Types.Null;
-                var childType = GetPrintType(child, false);
+                string? childType;
+                
+                if (visited.TryGetValue(child, out var match) && match != null)
+                {
+                    
+                    match.List = child.List; //match list and type mem vars (not needed in normal TryGetValue override in Element)
+                    match.Type = child.Type; 
+                    childType = GetPrintType(match, false);
+                    for (int i = 0; i <= match.at_count; i++)
+                        childType = RptPlaceHolder + childType;
+                }
+                else
+                    childType = GetPrintType(child, false);
                 var nullable = child.Nullable ? childType + "?" : childType;
                 string? rename;
                 if (child.Rename || HasReserved(child.Name))

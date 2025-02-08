@@ -163,15 +163,18 @@ namespace JsonConverter
         //.Contains() overrides
         public override bool Equals(object? obj)
         {
-            if (obj is Element other) //return Name == other.Name && Age == other.Age;
+            if (obj is Element other)
             {
                 return Name == other.Name;
+                //return Name == other.Name && List == other.List;
             }
             return false;
         }
+
         public override int GetHashCode()
         {
             return Name.GetHashCode();
+            //return HashCode.Combine(Name, List);
         }
     }
 }
