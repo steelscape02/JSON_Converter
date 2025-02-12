@@ -13,6 +13,10 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using System.Threading.Tasks;
+using Windows.Storage;
+using WinRT.Interop;
+using Windows.ApplicationModel.DataTransfer;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -30,45 +34,113 @@ namespace JsonConverter
             SystemBackdrop = new DesktopAcrylicBackdrop();
         }
 
-        private void myButton_Click(object sender, RoutedEventArgs e)
+        private void submit_Click(object sender, RoutedEventArgs e)
         {
             jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out string entry);
             if (IsJson(entry))
             {
-                myButton.Content = "Submitting";
-                JsonReader reader = new JsonReader(entry);
+                var reader = new JsonReader(entry);
                 var contents = new HashSet<Element>();
                 contents = reader.ReadJson();
                 //c# dm
                 var dm = CSharpDm.BuildRoot(contents);
                 Console.WriteLine(dm);
                 outputBox.Text = dm;
-                myButton.Content = "Submit";
+            }
+        }
+        private void clear_input(object sender, RoutedEventArgs e)
+        {
+            jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None,"");
+            outputBox.Text = "";
+        }
+        private async void upload_json(object sender, RoutedEventArgs e)
+        {
+            var picker = new Windows.Storage.Pickers.FileOpenPicker();
+            picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Downloads;
+            picker.FileTypeFilter.Add(".json");
+
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this); // Get your main window handle
+            InitializeWithWindow.Initialize(picker, hwnd);
+
+            var file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                var contents = await ReadFileContentsAsync(file);
+
+                if (jsonEntry != null)
+                {
+                    // Set the text of the RichEditBox
+                    jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, contents);
+                }
+
             }
             else
             {
-                var existing = myButton.Content.ToString();
-                myButton.Content = "JSON Entry not valid";
-                DispatcherTimer timer = new DispatcherTimer();
-                timer.Interval = TimeSpan.FromSeconds(5);
-                timer.Tick += (s, args) =>
-                {
-                    myButton.Content = existing; // Revert content
-                    timer.Stop(); // Stop the timer
-                };
-                timer.Start();
+                //error msg
             }
         }
+        async Task<string> ReadFileContentsAsync(StorageFile file)
+        {
+            return await FileIO.ReadTextAsync(file);
+        }
+        private async void saveJson(object sender, RoutedEventArgs e)
+        {
+
+            var savePicker = new Windows.Storage.Pickers.FileSavePicker();
+            savePicker.SuggestedStartLocation =
+                Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+            // Dropdown of file types the user can save the file as
+            savePicker.FileTypeChoices.Add("C# Source File", new List<string>() { ".cs" }); //ONLY CSHARP
+            // Default file name if the user does not type one in or select a file to replace
+            savePicker.SuggestedFileName = "json_model";
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this); // Get your main window handle
+            InitializeWithWindow.Initialize(savePicker, hwnd);
+            Windows.Storage.StorageFile file = await savePicker.PickSaveFileAsync();
+            if (file != null)
+            {
+                // Prevent updates to the remote version of the file until
+                // we finish making changes and call CompleteUpdatesAsync.
+                Windows.Storage.CachedFileManager.DeferUpdates(file);
+                // write to file
+                await Windows.Storage.FileIO.WriteTextAsync(file, outputBox.Text);
+                // Let Windows know that we're finished changing the file so
+                // the other app can update the remote version of the file.
+                // Completing updates may require Windows to ask for user input.
+                Windows.Storage.Provider.FileUpdateStatus status =
+                    await Windows.Storage.CachedFileManager.CompleteUpdatesAsync(file);
+                if (status == Windows.Storage.Provider.FileUpdateStatus.Complete)
+                {
+                    this.outputBox.Text = "File " + file.Name + " was saved.";
+                }
+                else
+                {
+                    this.outputBox.Text = "File " + file.Name + " couldn't be saved.";
+                }
+            }
+            else
+            {
+                this.outputBox.Text = "Operation cancelled.";
+            }
+        }
+
+        private void copy(object sender, RoutedEventArgs e)
+        {
+            var dataPackage = new DataPackage();
+            dataPackage.SetText(outputBox.Text); // Copy the text from the TextBox
+            Clipboard.SetContent(dataPackage);
+        }
+
         private void Menu_Opening(object? sender, object e)
         {
             CommandBarFlyout? myFlyout = sender as CommandBarFlyout;
             if (myFlyout != null && myFlyout.Target == jsonEntry)
             {
-                AppBarButton myButton = new AppBarButton
+                AppBarButton submitBtn = new AppBarButton
                 {
                     Command = new StandardUICommand(StandardUICommandKind.Copy)
                 };
-                myFlyout.PrimaryCommands.Add(myButton);
+                myFlyout.PrimaryCommands.Add(submitBtn);
             }
         }
 
