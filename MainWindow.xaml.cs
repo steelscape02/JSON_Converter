@@ -1,40 +1,32 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using System.Threading.Tasks;
 using Windows.Storage;
 using WinRT.Interop;
 using Windows.ApplicationModel.DataTransfer;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using System.Diagnostics;
 
 namespace JsonConverter
 {
     /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
+    /// Main JSON Converter Window
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        private string Language = "";
+
         public MainWindow()
         {
-            this.InitializeComponent();
+            InitializeComponent();
             SystemBackdrop = new DesktopAcrylicBackdrop();
         }
 
-        private void submit_Click(object sender, RoutedEventArgs e)
+        private void Submit_Click(object sender, RoutedEventArgs e)
         {
             jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out string entry);
             if (IsJson(entry))
@@ -42,18 +34,34 @@ namespace JsonConverter
                 var reader = new JsonReader(entry);
                 var contents = new HashSet<Element>();
                 contents = reader.ReadJson();
-                //c# dm
-                var dm = CSharpDm.BuildRoot(contents);
-                Console.WriteLine(dm);
-                outputBox.Text = dm;
+                string dm = "";
+                switch (Language)
+                {
+                    case "C#":
+                        dm = CSharpDm.BuildRoot(contents);
+                        outputBox.Text = dm;
+                        break;
+                    case "Python":
+                        dm = PythonDm.BuildRoot(contents);
+                        outputBox.Text = dm;
+                        break;
+                    default:
+                        Debug.WriteLine("OH");
+                        FlashComboBox();
+                        break;
+                }
+
+
             }
         }
-        private void clear_input(object sender, RoutedEventArgs e)
+
+        private void Clear_input(object sender, RoutedEventArgs e)
         {
             jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None,"");
             outputBox.Text = "";
         }
-        private async void upload_json(object sender, RoutedEventArgs e)
+
+        private async void Upload_json(object sender, RoutedEventArgs e)
         {
             var picker = new Windows.Storage.Pickers.FileOpenPicker();
             picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
@@ -80,11 +88,13 @@ namespace JsonConverter
                 //error msg
             }
         }
-        async Task<string> ReadFileContentsAsync(StorageFile file)
+
+        private static async Task<string> ReadFileContentsAsync(StorageFile file)
         {
             return await FileIO.ReadTextAsync(file);
         }
-        private async void saveJson(object sender, RoutedEventArgs e)
+
+        private async void SaveJson(object sender, RoutedEventArgs e)
         {
 
             var savePicker = new Windows.Storage.Pickers.FileSavePicker();
@@ -124,7 +134,7 @@ namespace JsonConverter
             }
         }
 
-        private void copy(object sender, RoutedEventArgs e)
+        private void Copy(object sender, RoutedEventArgs e)
         {
             var dataPackage = new DataPackage();
             dataPackage.SetText(outputBox.Text); // Copy the text from the TextBox
@@ -144,13 +154,13 @@ namespace JsonConverter
             }
         }
 
-        private void jsonEntry_Loaded(object sender, RoutedEventArgs e)
+        private void JsonEntry_Loaded(object sender, RoutedEventArgs e)
         {
             jsonEntry.SelectionFlyout.Opening += Menu_Opening;
             jsonEntry.ContextFlyout.Opening += Menu_Opening;
         }
 
-        private void jsonEntry_Unloaded(object sender, RoutedEventArgs e)
+        private void JsonEntry_Unloaded(object sender, RoutedEventArgs e)
         {
             jsonEntry.SelectionFlyout.Opening -= Menu_Opening;
             jsonEntry.ContextFlyout.Opening -= Menu_Opening;
@@ -163,13 +173,31 @@ namespace JsonConverter
 
             try
             {
-                JsonDocument.Parse(input);
+                using (JsonDocument.Parse(input)) { }
                 return true;
             }
             catch (JsonException)
             {
                 return false;
             }
+        }
+
+        private void Language_Select(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox comboBox && comboBox.SelectedItem is not null)
+            {
+                Language = (string)comboBox.SelectedItem;
+            }
+        }
+
+        private async void FlashComboBox()
+        {
+            var originalBrush = LanguageSelect.Background;
+            var brush = new SolidColorBrush(Microsoft.UI.Colors.Red);
+            LanguageSelect.Background = brush;
+
+            await Task.Delay(500); // Wait for fade animation to complete
+            LanguageSelect.Background = originalBrush; // Restore original background
         }
     }
 }
