@@ -39,12 +39,6 @@ namespace JsonConverter
         /// </summary>
         private const string BaseName = "Root";
 
-        /// <summary>
-        /// Tracks if a variable name has been changed due to containing illegal characters.
-        /// Used to improve the corresponding JSON package
-        /// </summary>
-        private static bool _overWrite;
-
         private const string RptPlaceHolder = "_";
 
 
@@ -65,35 +59,40 @@ namespace JsonConverter
             var classDefinitions = new List<string>
             {
                 //imports
-                "import json" +
-                "\nfrom dataclasses import dataclass" +
-                "\nfrom typing import List" +
-                "\n"
+                "#include <nlohmann/json.hpp>\n\n" +
+                "using json = nlohmann::json;\n" +
+                "#include <vector>\n" +
+                "#include <string>\n"
             };
-
-            var rootClass = $"@dataclass\nclass {BaseName}:\n";
+            var forwards = new List<Element>();
+            var rootClass = $"class {BaseName}\n{{\npublic:\n";
+            var builder = "    void from_json(const json& j)\n    {\n";
             foreach (var element in elements)
             {
-                if (element.Rename || HasReserved(element.Name))
-                {
-                    _overWrite = true;
-                }
+                if(element.Type == Element.Types.Object) forwards.Add(element);
                 var headerType = GetPrintType(element, false);
-                rootClass += $"    {element.LegalName(HasReserved(element.Name))} : {headerType}\n";
+
+                var fqName = element.LegalName(HasReserved(element.Name));
+                rootClass += $"    {headerType} {fqName};\n";
+                builder += $"        j.at(\"{element.Name}\").get_to({fqName});\n"; //keep actual name for deser.
             }
-            rootClass += "    @staticmethod\r\n" +
-                "    def from_json(json_string: str) -> \"Root\":\r\n" +
-                "        \"\"\"Parses a JSON string into a Root object.\"\"\"\r\n" +
-                "        data = json.loads(json_string)\r\n        return Root(**data)\n";
+            builder += "    }\n";
+            rootClass += builder;
+            rootClass += "};\n";
             classDefinitions.Add(rootClass);
 
             var visited = new HashSet<Element?>();
+
+            //TODO: Append forwards to front, JSON contents to back
+            //Forward: class Feature; (list of class defs for circular dep prevention)
+            //JSON contents: void from_json(const json& j, Root& r) { r.from_json(j); } (list of from_json method decs for simple calling)
+
             foreach (var element in elements.Where(element =>
                     !IsPrimitive(element.Prim.ToString()?.ToLower()) && !IsPrimitive(element.Type.ToString()?.ToLower())))
             {
-                BuildSubDm(element, visited, classDefinitions);
+                BuildSubDm(element, visited, classDefinitions, forwards,new Element(Element.Types.Object, BaseName));
             }
-            classDefinitions.Add("\n"); //python convention to end with a newline
+
             return string.Join("\n", classDefinitions);
         }
 
@@ -105,7 +104,7 @@ namespace JsonConverter
         /// <param name="classDefinitions">
         /// A list of class definitions, representing the child classes that are created
         /// </param>
-        private static void BuildSubDm(Element element, HashSet<Element?> visited, List<string> classDefinitions, bool redo = false)
+        private static void BuildSubDm(Element element, HashSet<Element?> visited, List<string> classDefinitions, List<Element> forwards, Element parent)
         {
             if (element.Type == null) return;
             var type = GetPrintType(element, true);
@@ -133,49 +132,36 @@ namespace JsonConverter
 
             }
 
-            if (redo)
-            {
-                type = RptPlaceHolder + type;
-            }
-
             //TODO: Check for prim
             if (element.Prim == null) type = MakeFriendly(type);
 
-            var classDef = $"@dataclass\nclass {type}:\n";
+            var classDef = $"class {type}\n{{\npublic:\n" +
+                $"    {GetPrintType(parent,false)} {parent.LegalName(HasReserved(parent.Name))};\n";
+            var builder = $"    void from_json(const json& j)\n    {{\n" +
+                $"        j.at(\"{parent.Name}\").get_to({parent.LegalName(HasReserved(parent.Name))});\n";
             foreach (var child in element.Children)
             {
-
                 child.Type ??= Element.Types.Null;
-                string? childType;
+                if (child.Type == Element.Types.Object) forwards.Add(child);
+                var childType = GetPrintType(child, false);
 
-                if (visited.TryGetValue(child, out var match) && match != null)
-                {
-
-                    match.List = child.List; //match list and type mem vars (not needed in normal TryGetValue override in Element)
-                    match.Type = child.Type;
-                    childType = GetPrintType(match, false);
-                    for (int i = 0; i <= match.at_count; i++)
-                        childType = RptPlaceHolder + childType;
-                }
-                else
-                    childType = GetPrintType(child, false);
-                if (child.Rename || HasReserved(child.Name))
-                {
-                    //rename = $"\n    [JsonPropertyName(\"{child.Name}\")]\n    ";
-                    //TODO: Add rename
-                    _overWrite = true;
-                }
-
-                classDef += $"    {child.LegalName(HasReserved(child.Name))} : {childType}\n";
+                var fqName = child.LegalName(HasReserved(child.Name));
+                classDef += $"    {childType} {fqName};\n";
+                builder += $"        j.at(\"{child.Name}\").get_to({fqName});\n"; //keep actual name for deser.
 
                 if (child.Children.Count > 0)
                 {
-                    BuildSubDm(child, visited, classDefinitions); // Recursive call for nested children
+                    BuildSubDm(child, visited, classDefinitions, forwards,element); // Recursive call for nested children
 
                 }
             }
+
+            builder += "    }\n";
+            classDef += builder;
+            classDef += "};\n";
             classDefinitions.Add(classDef);
         }
+        
 
         /// <summary>
         /// If a type is a primitive or null (<b>o</b>bject) type, it won't create a class. This method returns a bool response in accordance to the type
@@ -220,7 +206,7 @@ namespace JsonConverter
                     text = cap + text.Substring(1, text.Length - 1);
                 }
             }
-            if (list) text = "List[" + text + "]";
+            if (list) text = "std::vector<" + text + ">";
 
             return text;
         }
@@ -253,7 +239,7 @@ namespace JsonConverter
                     if (name != null) type = MakeFriendly(name, isList, isPrim);
                     break;
                 case Element.Types.Null:
-                    type = "object";
+                    type = "json";
                     break;
                 case Element.Types.Integer:
                     type = "int";
@@ -262,7 +248,7 @@ namespace JsonConverter
                 case Element.Types.Float:
                 case Element.Types.Long:
                 case Element.Types.String:
-                    type = type?.ToLower();
+                    type = "std::string";
                     break;
                 case Element.Types.Boolean:
                     type = "bool";

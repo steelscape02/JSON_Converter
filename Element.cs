@@ -18,6 +18,10 @@ namespace JsonConverter
         public Element(Types? type, string name = "")
         {
             Name = name;
+            if(!string.IsNullOrEmpty(name) && char.IsUpper(name[0]))
+            {
+                Name = char.ToLower(name[0]) + name.Substring(1);
+            }
             if (_illegal.Any(name.Contains))
             {
                 Rename = true;

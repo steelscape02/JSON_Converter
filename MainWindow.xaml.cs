@@ -45,6 +45,10 @@ namespace JsonConverter
                         dm = PythonDm.BuildRoot(contents);
                         outputBox.Text = dm;
                         break;
+                    case "C++":
+                        dm = CppDm.BuildRoot(contents);
+                        outputBox.Text = dm;
+                        break;
                     default:
                         FlashComboBox();
                         break;
