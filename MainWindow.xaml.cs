@@ -46,7 +46,6 @@ namespace JsonConverter
                         outputBox.Text = dm;
                         break;
                     default:
-                        Debug.WriteLine("OH");
                         FlashComboBox();
                         break;
                 }

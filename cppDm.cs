@@ -31,7 +31,8 @@ using System.Xml.Linq;
 
 namespace JsonConverter
 {
-    class cppDm
+    //TODO: Complete conversion (basically copy from Python)
+    class CppDm
     {
         /// <summary>
         /// The default name for the base class. Almost always "Root"
