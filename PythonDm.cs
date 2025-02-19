@@ -17,12 +17,6 @@ namespace JsonConverter
         /// </summary>
         private const string BaseName = "Root";
 
-        /// <summary>
-        /// Tracks if a variable name has been changed due to containing illegal characters.
-        /// Used to improve the corresponding JSON package
-        /// </summary>
-        private static bool _overWrite;
-
         private const string RptPlaceHolder = "_";
 
 
@@ -50,12 +44,8 @@ namespace JsonConverter
             var rootClass = $"@dataclass\nclass {BaseName}:\n";
             foreach(var element in elements)
             {
-                if(element.Rename || HasReserved(element.Name))
-                {
-                    _overWrite = true;
-                }
                 var headerType = GetPrintType(element, false);
-                rootClass += $"    {element.LegalName(HasReserved(element.Name))} : {headerType}\n";
+                rootClass += $"    {element.LegalName('_',HasReserved(element.Name))} : {headerType}\n";
             }
             rootClass += "    @staticmethod\r\n" +
                 "    def from_json(json_string: str) -> \"Root\":\r\n" +
@@ -135,14 +125,8 @@ namespace JsonConverter
                 }
                 else
                     childType = GetPrintType(child, false);
-                if (child.Rename || HasReserved(child.Name))
-                {
-                    //rename = $"\n    [JsonPropertyName(\"{child.Name}\")]\n    ";
-                    //TODO: Add rename
-                    _overWrite = true;
-                }
 
-                classDef += $"    {child.LegalName(HasReserved(child.Name))} : {childType}\n";
+                classDef += $"    {child.LegalName('_', HasReserved(child.Name))} : {childType}\n";
 
                 if (child.Children.Count > 0)
                 {
@@ -181,7 +165,6 @@ namespace JsonConverter
             {
                 var cap = text?[0].ToString().ToUpper();
 
-                //TODO: CORRECT LIST NAMING (Currently may not add list if MakeFriendly false (pass in Prim param?)
                 if (text != null && text.EndsWith("ies"))
                 {
                     text = cap + text.Substring(1, text.Length - 4) + "y";

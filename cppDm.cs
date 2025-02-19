@@ -62,17 +62,17 @@ namespace JsonConverter
                 "#include <nlohmann/json.hpp>\n\n" +
                 "using json = nlohmann::json;\n" +
                 "#include <vector>\n" +
-                "#include <string>\n"
+                "#include <string>"
             };
             var forwards = new List<Element>();
-            var rootClass = $"class {BaseName}\n{{\npublic:\n";
+            var rootClass = $"\nclass {BaseName}\n{{\npublic:\n";
             var builder = "    void from_json(const json& j)\n    {\n";
             foreach (var element in elements)
             {
-                if(element.Type == Element.Types.Object) forwards.Add(element);
+                //if(element.Type == Element.Types.Object) classDefinitions.Insert(1, $"class {element.Name};");
                 var headerType = GetPrintType(element, false);
 
-                var fqName = element.LegalName(HasReserved(element.Name));
+                var fqName = element.LegalName('_', HasReserved(element.Name));
                 rootClass += $"    {headerType} {fqName};\n";
                 builder += $"        j.at(\"{element.Name}\").get_to({fqName});\n"; //keep actual name for deser.
             }
@@ -108,7 +108,7 @@ namespace JsonConverter
         {
             if (element.Type == null) return;
             var type = GetPrintType(element, true);
-
+            //if (element.Type == Element.Types.Object) classDefinitions.Insert(1, $"class {element.Name};");
             // Avoid re-creating classes
             if (IsPrimitive(type) || !visited.Add(element))
             {
@@ -136,16 +136,16 @@ namespace JsonConverter
             if (element.Prim == null) type = MakeFriendly(type);
 
             var classDef = $"class {type}\n{{\npublic:\n" +
-                $"    {GetPrintType(parent,false)} {parent.LegalName(HasReserved(parent.Name))};\n";
+                $"    {GetPrintType(parent,false)} {parent.LegalName('_', HasReserved(parent.Name))};\n";
             var builder = $"    void from_json(const json& j)\n    {{\n" +
-                $"        j.at(\"{parent.Name}\").get_to({parent.LegalName(HasReserved(parent.Name))});\n";
+                $"        j.at(\"{parent.Name}\").get_to({parent.LegalName('_', HasReserved(parent.Name))});\n";
             foreach (var child in element.Children)
             {
                 child.Type ??= Element.Types.Null;
                 if (child.Type == Element.Types.Object) forwards.Add(child);
                 var childType = GetPrintType(child, false);
 
-                var fqName = child.LegalName(HasReserved(child.Name));
+                var fqName = child.LegalName('_', HasReserved(child.Name));
                 classDef += $"    {childType} {fqName};\n";
                 builder += $"        j.at(\"{child.Name}\").get_to({fqName});\n"; //keep actual name for deser.
 
@@ -160,6 +160,8 @@ namespace JsonConverter
             classDef += builder;
             classDef += "};\n";
             classDefinitions.Add(classDef);
+            
+            
         }
         
 
@@ -191,7 +193,6 @@ namespace JsonConverter
             {
                 var cap = text?[0].ToString().ToUpper();
 
-                //TODO: CORRECT LIST NAMING (Currently may not add list if MakeFriendly false (pass in Prim param?)
                 if (text != null && text.EndsWith("ies"))
                 {
                     text = cap + text.Substring(1, text.Length - 4) + "y";

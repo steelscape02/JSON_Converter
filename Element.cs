@@ -151,7 +151,7 @@ namespace JsonConverter
         /// Removes all illegal characters from the <c>Name</c> member variable
         /// </summary>
         /// <returns>An unaltered <c>Name</c> if no illegal characters were found, otherwise a <c>Name</c> with all illegal characters removed</returns>
-        public string LegalName(bool addAt = false)
+        public string LegalName(char replace, bool addAt = false)
         {
             var legalName = Name;
             while (_illegal.Any(Name.Contains))
@@ -160,7 +160,7 @@ namespace JsonConverter
                 legalName = Name.Remove(index, 1);
 
             }
-            if (addAt) legalName = "@" + legalName;
+            if (addAt) legalName = replace + legalName;
             return legalName;
         }
 

@@ -64,7 +64,7 @@ namespace JsonConverter
                     rename = null;
 
                 var headerType = GetPrintType(element, false);
-                rootClass += $"   {rename}{Vis} {headerType} {element.LegalName(HasReserved(element.Name))} {{get; set;}}\n";
+                rootClass += $"   {rename}{Vis} {headerType} {element.LegalName('@',HasReserved(element.Name))} {{get; set;}}\n";
             }
 
             rootClass += "}\n";
@@ -157,7 +157,7 @@ namespace JsonConverter
                 else
                     rename = null;
 
-                classDef += $"    {rename}{Vis} {nullable} {child.LegalName(HasReserved(child.Name))} {{get; set;}}\n";
+                classDef += $"    {rename}{Vis} {nullable} {child.LegalName('@', HasReserved(child.Name))} {{get; set;}}\n";
 
                 if (child.Children.Count > 0)
                 {
@@ -198,7 +198,6 @@ namespace JsonConverter
             { 
                 var cap = text?[0].ToString().ToUpper();
 
-                //TODO: CORRECT LIST NAMING (Currently may not add list if MakeFriendly false (pass in Prim param?)
                 if (text != null && text.EndsWith("ies"))
                 {
                     text = cap + text.Substring(1, text.Length - 4) + "y";

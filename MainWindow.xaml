@@ -25,11 +25,10 @@
         <CommandBar 
             Grid.Row="1"
             Grid.Column="1"
-            Margin="10"
             Background="Transparent"
             IsOpen="False" 
             DefaultLabelPosition="Right"
-            HorizontalAlignment="Center"
+            HorizontalAlignment="Left"
             VerticalAlignment="Top">
                 <AppBarButton Icon="Upload" Label="Upload" Click="Upload_json"/>
                 <AppBarButton Icon="Delete" Label="Clear" Click="Clear_input"/>
@@ -49,7 +48,6 @@
             </Grid.ColumnDefinitions>
             <CommandBar 
                 Grid.Column="0"
-                Margin="10"
                 Background="Transparent"
                 IsOpen="False" 
                 DefaultLabelPosition="Right"
