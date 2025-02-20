@@ -52,11 +52,15 @@ namespace JsonConverter
                             break;
                         case JsonValueKind.Number:
                             //Accuracy: int & long > double > float 
+                            
                             var type = GetNumType(jsonValue.ToString());
                             var newPrec = GetNumPrecision(type);
                             var oldPrec = GetNumPrecision(headElem.Type);
                             if (newPrec > oldPrec && newPrec != -1) //-1 is the error case of GetNumPrecision
+                            {
+                                
                                 headElem.Type = type;
+                            }
                             break;
                         case JsonValueKind.True:
                         case JsonValueKind.False:
@@ -74,7 +78,7 @@ namespace JsonConverter
                 case JsonArray jsonArray:
                     var isObj = true;
                     var isPrim = true;
-                    Element.Types? primType = Element.Types.Null;
+                    Element.Types? primType = Element.Types.Null; //primType initializer
 
                     ArgumentNullException.ThrowIfNull(headElem); //TODO: Is this optimal?
                     foreach (var i in jsonArray)
@@ -96,16 +100,7 @@ namespace JsonConverter
                                     var val = i.AsValue();
 
                                     primType = GetNumType(i.ToString());
-                                    var prim = new Element(primType, val.ToString());
-                                    var added = headElem.AddChild(prim);
                                     
-                                    if (added) SubRecursive(i, elements, prim);
-                                    else
-                                    {
-                                        var match = headElem.GetMatching(prim);
-                                        if (match != null)
-                                            SubRecursive(i, elements, match);
-                                    }
                                     break;
                                 }
                             case JsonArray: //unlikely, but possible JsonArray nesting
@@ -186,11 +181,7 @@ namespace JsonConverter
                                 if (element.Value != null) SubRecursive(element.Value, elements, elem);
                             }
                             else
-                            { //st case never reaches this
-                                
-                                //TODO: check if match headElem is the same, otherwise, create this with a weird name (add @ or sum)
-                                //TODO: Maybe add a parent Elem in Element so that you can compare match and elem side by side to see if they're
-                                //      cool and jazzy. If parent matches, run it normally, if not rename the elem, and that should run it normally
+                            {
                                 var match = headElem.GetMatching(elem);
                                 if (match == null) continue;
 
