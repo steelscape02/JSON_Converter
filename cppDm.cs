@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -64,7 +65,7 @@ namespace JsonConverter
                 "#include <vector>\n" +
                 "#include <string>"
             };
-            var forwards = new List<Element>();
+            var forwards = new HashSet<Element>();
             var rootClass = $"\nclass {BaseName}\n{{\npublic:\n";
             var builder = "    void from_json(const json& j)\n    {\n";
             foreach (var element in elements)
@@ -93,6 +94,12 @@ namespace JsonConverter
                 BuildSubDm(element, visited, classDefinitions, forwards,new Element(Element.Types.Object, BaseName));
             }
 
+            classDefinitions.InsertRange(1, forwards.Select(element => $"class {GetPrintType(element, true)};"));
+            forwards.Add(new Element(Element.Types.Object, BaseName));
+            classDefinitions.AddRange(forwards.Select(element => $"void from_json(const json& j, {GetPrintType(element, true)}& {element.Name[0].ToString().ToLower()}) {{{element.Name[0].ToString().ToLower()}.from_json(j);}}"));
+            
+            
+
             return string.Join("\n", classDefinitions);
         }
 
@@ -104,11 +111,14 @@ namespace JsonConverter
         /// <param name="classDefinitions">
         /// A list of class definitions, representing the child classes that are created
         /// </param>
-        private static void BuildSubDm(Element element, HashSet<Element?> visited, List<string> classDefinitions, List<Element> forwards, Element parent)
+        /// <param name="forwards">A list of forward class declarations</param>
+        /// 
+        private static void BuildSubDm(Element element, HashSet<Element?> visited, List<string> classDefinitions, HashSet<Element> forwards, Element parent)
         {
             if (element.Type == null) return;
             var type = GetPrintType(element, true);
-            //if (element.Type == Element.Types.Object) classDefinitions.Insert(1, $"class {element.Name};");
+            if (type.Contains("integer")) Debug.WriteLine("OH");
+            if (element.Type == Element.Types.Object) forwards.Add(element);
             // Avoid re-creating classes
             if (IsPrimitive(type) || !visited.Add(element))
             {
@@ -133,8 +143,6 @@ namespace JsonConverter
             }
 
             //TODO: Check for prim
-            if (element.Prim == null) type = MakeFriendly(type);
-
             var classDef = $"class {type}\n{{\npublic:\n" +
                 $"    {GetPrintType(parent,false)} {parent.LegalName('_', HasReserved(parent.Name))};\n";
             var builder = $"    void from_json(const json& j)\n    {{\n" +
@@ -142,7 +150,7 @@ namespace JsonConverter
             foreach (var child in element.Children)
             {
                 child.Type ??= Element.Types.Null;
-                if (child.Type == Element.Types.Object) forwards.Add(child);
+                
                 var childType = GetPrintType(child, false);
 
                 var fqName = child.LegalName('_', HasReserved(child.Name));
@@ -235,9 +243,18 @@ namespace JsonConverter
                     var isPrim = IsPrimitive(elem.Prim.ToString()?.ToLower());
                     if (isPrim && isList)
                     {
-                        name = elem.Prim.ToString()?.ToLower();
+                        if(elem.Prim == Element.Types.Integer) name = "int";
+                        else if (elem.Prim == Element.Types.Float) name = "float";
+                        else if (elem.Prim == Element.Types.Double) name = "double";
+                        else if (elem.Prim == Element.Types.Long) name = "long";
+                        else if (elem.Prim == Element.Types.String) name = "string";
+                        else if (elem.Prim == Element.Types.Boolean) name = "bool";
+                        else
+                            name = elem.Prim.ToString()?.ToLower();
                     }
+               
                     if (name != null) type = MakeFriendly(name, isList, isPrim);
+                    if (type.Contains("integer")) Debug.WriteLine("Oh");
                     break;
                 case Element.Types.Null:
                     type = "json";
@@ -248,6 +265,8 @@ namespace JsonConverter
                 case Element.Types.Double:
                 case Element.Types.Float:
                 case Element.Types.Long:
+                    type = type?.ToLower();
+                    break;
                 case Element.Types.String:
                     type = "std::string";
                     break;

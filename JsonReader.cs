@@ -98,6 +98,7 @@ namespace JsonConverter
                                     primType = GetNumType(i.ToString());
                                     var prim = new Element(primType, val.ToString());
                                     var added = headElem.AddChild(prim);
+                                    
                                     if (added) SubRecursive(i, elements, prim);
                                     else
                                     {

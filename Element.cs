@@ -158,7 +158,6 @@ namespace JsonConverter
             {
                 var index = Name.IndexOfAny(_illegal);
                 legalName = Name.Remove(index, 1);
-
             }
             if (addAt) legalName = replace + legalName;
             return legalName;

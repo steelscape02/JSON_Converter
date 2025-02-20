@@ -127,8 +127,6 @@ namespace JsonConverter
                 type = RptPlaceHolder + type; 
             }
 
-            //TODO: Check for prim
-            if (element.Prim == null) type = MakeFriendly(type);
             var classDef = $"{Vis} class {type}\n{{\n";
             foreach (var child in element.Children)
             {
@@ -240,7 +238,14 @@ namespace JsonConverter
                     var isPrim = IsPrimitive(elem.Prim.ToString()?.ToLower());
                     if (isPrim && isList)
                     {
-                        name = elem.Prim.ToString()?.ToLower();
+                        if (elem.Prim == Element.Types.Integer) name = "int";
+                        else if (elem.Prim == Element.Types.Float) name = "float";
+                        else if (elem.Prim == Element.Types.Double) name = "double";
+                        else if (elem.Prim == Element.Types.Long) name = "long";
+                        else if (elem.Prim == Element.Types.String) name = "string";
+                        else if (elem.Prim == Element.Types.Boolean) name = "bool";
+                        else
+                            name = elem.Prim.ToString()?.ToLower();
                     }
                     if (name != null) type = MakeFriendly(name, isList,isPrim);
                     break;
