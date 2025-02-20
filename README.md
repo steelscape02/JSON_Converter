@@ -6,5 +6,3 @@ This program is designed to convert a JSON response into a Data Model. It allows
 - Refine engine to better handle objects
 - Add an acrylic background to the UI
 - Refine UI for attractiveness
-- Add language support for C++
-- Add language support for Python
