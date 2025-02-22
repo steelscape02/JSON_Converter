@@ -54,6 +54,7 @@ namespace JsonConverter
 
             foreach (var element in elements)
             {
+                
                 string? rename;
                 if (element.Rename || HasReserved(element.Name))
                 {
@@ -64,7 +65,8 @@ namespace JsonConverter
                     rename = null;
 
                 var headerType = GetPrintType(element, false);
-                rootClass += $"   {rename}{Vis} {headerType} {element.LegalName('@',HasReserved(element.Name))} {{get; set;}}\n";
+                var nullable = element.Nullable ? headerType + "?" : headerType;
+                rootClass += $"   {rename}{Vis} {nullable} {element.LegalName('@',HasReserved(element.Name))} {{get; set;}}\n";
             }
 
             rootClass += "}\n";

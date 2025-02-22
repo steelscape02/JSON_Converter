@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Nodes;
 using System.Text.Json;
-using System.Threading.Tasks;
-using System.IO;
-using System.Diagnostics;
 
 namespace JsonConverter
 {
@@ -151,6 +146,7 @@ namespace JsonConverter
                             var name = element.Key;
 
                             var elem = new Element(type, name);
+                            
                             if (type is Element.Types.Null or null) elem.Nullable = true; //null is possible due to ? above
                             var added = elements.Add(elem);
                             if (added)
@@ -182,6 +178,7 @@ namespace JsonConverter
                             }
                             else
                             {
+                                //TAG 1
                                 var match = headElem.GetMatching(elem);
                                 if (match == null) continue;
 

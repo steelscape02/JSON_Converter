@@ -7,28 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-//EXAMPLE:
-
-//class Person
-//{
-//    public:
-//    string name;
-//    int age;
-//    bool is_student;
-
-//    // You can define this to allow deserialization
-//    // from a JSON object to the class
-//    void from_json(const json& j) {
-//        j.at("name").get_to(name);
-//    j.at("age").get_to(age);
-//    j.at("is_student").get_to(is_student);
-//}
-
-//// Optional: for output
-//void print() const {
-//        cout << "Name: " << name << ", Age: " << age << ", Student: " << is_student << endl;
-//    }
-//};
 
 namespace JsonConverter
 {
@@ -41,6 +19,8 @@ namespace JsonConverter
         private const string BaseName = "Root";
 
         private const string RptPlaceHolder = "_";
+
+        private static bool _optional = false;
 
 
         public static readonly string[] ReservedWords = {
@@ -60,27 +40,38 @@ namespace JsonConverter
             var classDefinitions = new List<string>
             {
                 //imports
-                "#include <nlohmann/json.hpp>\n\n" +
-                "using json = nlohmann::json;\n" +
+                "#include <nlohmann/json.hpp>\n" +
+                "using json = nlohmann::json;\n\n" +
                 "#include <vector>\n" +
                 "#include <string>"
             };
             var forwards = new HashSet<Element>();
-            var rootClass = $"\nclass {BaseName}\n{{\npublic:\n";
+            var rootClass = $"class {BaseName}\n{{\npublic:\n";
             var builder = "    void from_json(const json& j)\n    {\n";
             foreach (var element in elements)
             {
                 //if(element.Type == Element.Types.Object) classDefinitions.Insert(1, $"class {element.Name};");
                 var headerType = GetPrintType(element, false);
+                string? nullable;
+                if (element.Nullable)
+                {
+                    nullable = "std::optional<" + headerType + ">";
+                    _optional = true;
+                }
+                else
+                {
+                    nullable = headerType;
+                }
 
                 var fqName = element.LegalName('_', HasReserved(element.Name));
-                rootClass += $"    {headerType} {fqName};\n";
+                rootClass += $"    {nullable} {fqName};\n";
                 builder += $"        j.at(\"{element.Name}\").get_to({fqName});\n"; //keep actual name for deser.
             }
             builder += "    }\n";
             rootClass += builder;
             rootClass += "};\n";
-            classDefinitions.Add(rootClass);
+            //root class added after others to avoid circular deps
+            
 
             var visited = new HashSet<Element?>();
 
@@ -93,12 +84,12 @@ namespace JsonConverter
             {
                 BuildSubDm(element, visited, classDefinitions, forwards,new Element(Element.Types.Object, BaseName));
             }
-
-            classDefinitions.InsertRange(1, forwards.Select(element => $"class {GetPrintType(element, true)};"));
+            classDefinitions.Add(rootClass);
+            //classDefinitions.InsertRange(1, forwards.Select(element => $"class {GetPrintType(element, true)};"));
             forwards.Add(new Element(Element.Types.Object, BaseName));
             classDefinitions.AddRange(forwards.Select(element => $"void from_json(const json& j, {GetPrintType(element, true)}& {element.Name[0].ToString().ToLower()}) {{{element.Name[0].ToString().ToLower()}.from_json(j);}}"));
-            
-            
+            if (_optional) classDefinitions.Insert(1, "#include <optional>\n"); else classDefinitions.Insert(1, "\n");
+
 
             return string.Join("\n", classDefinitions);
         }
@@ -150,11 +141,30 @@ namespace JsonConverter
             foreach (var child in element.Children)
             {
                 child.Type ??= Element.Types.Null;
-                
-                var childType = GetPrintType(child, false);
+                string? childType;
+                if (visited.TryGetValue(child, out var match) && match != null)
+                {
 
+                    match.List = child.List; //match list and type mem vars (not needed in normal TryGetValue override in Element)
+                    match.Type = child.Type;
+                    childType = GetPrintType(match, false);
+                    for (int i = 0; i <= match.at_count; i++)
+                        childType = RptPlaceHolder + childType;
+                }
+                else
+                    childType = GetPrintType(child, false);
+                string? nullable;
+                if (child.Nullable)
+                {
+                    nullable = "std::optional<" + childType + ">";
+                    _optional = true;
+                }
+                else
+                {
+                    nullable = childType;
+                }
                 var fqName = child.LegalName('_', HasReserved(child.Name));
-                classDef += $"    {childType} {fqName};\n";
+                classDef += $"    {nullable} {fqName};\n";
                 builder += $"        j.at(\"{child.Name}\").get_to({fqName});\n"; //keep actual name for deser.
 
                 if (child.Children.Count > 0)
