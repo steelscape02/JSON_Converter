@@ -40,12 +40,15 @@ namespace JsonConverter
                 "\nfrom typing import List" +
                 "\n"
             };
-
+            
             var rootClass = $"@dataclass\nclass {BaseName}:\n";
             foreach(var element in elements)
             {
                 var headerType = GetPrintType(element, false);
-                rootClass += $"    {element.LegalName('_',HasReserved(element.Name))} : {headerType}\n";
+                if (HasReserved(element.Name))
+                    rootClass += $"    {element.LegalName('_', HasReserved(element.Name))} : {headerType} = field(metadata={{\"json_name\": \"{element.Name}\"}})\n";
+                else
+                    rootClass += $"    {element.Name} : {headerType}\n";
             }
             rootClass += "    @staticmethod\r\n" +
                 "    def from_json(json_string: str) -> \"Root\":\r\n" +
@@ -114,7 +117,7 @@ namespace JsonConverter
 
                 if (visited.TryGetValue(child, out var match) && match != null)
                 {
-
+                    //type_: str = field(metadata={"json_name": "type"})
                     match.List = child.List; //match list and type mem vars (not needed in normal TryGetValue override in Element)
                     match.Type = child.Type;
                     childType = GetPrintType(match, false);
@@ -123,8 +126,11 @@ namespace JsonConverter
                 }
                 else
                     childType = GetPrintType(child, false);
-
-                classDef += $"    {child.LegalName('_', HasReserved(child.Name))} : {childType}\n";
+                //child.LegalName('_', HasReserved(child.Name))
+                if(HasReserved(child.Name))
+                    classDef += $"    {child.LegalName('_', HasReserved(child.Name))} : {childType} = field(metadata={{\"json_name\": \"{child.Name}\"}})\n";
+                else
+                    classDef += $"    {child.Name} : {childType}\n";
 
                 if (child.Children.Count > 0)
                 {
