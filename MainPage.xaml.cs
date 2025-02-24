@@ -1,27 +1,15 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
-using System.Formats.Asn1;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Storage;
 using WinRT.Interop;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace JsonConverter
 {
@@ -115,14 +103,48 @@ namespace JsonConverter
 
         private async void SaveJson(object sender, RoutedEventArgs e)
         {
-
-            var savePicker = new Windows.Storage.Pickers.FileSavePicker();
-            savePicker.SuggestedStartLocation =
-                Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+            if(Language == "")
+            {
+                return; //TODO: Add an error here
+            }
+            Windows.Storage.Pickers.FileSavePicker savePicker = new()
+            {
+                SuggestedStartLocation =
+                Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary
+            };
             // Dropdown of file types the user can save the file as
-            savePicker.FileTypeChoices.Add("C# Source File", new List<string>() { ".cs" }); //ONLY CSHARP
-            // Default file name if the user does not type one in or select a file to replace
+            string ext;
+            string exp;
+            switch (Language)
+            {
+                case "C#":
+                    {
+                        ext = ".cs";
+                        exp = "C# Source File";
+                        break;
+                    }
+                case "Python":
+                    {
+                        ext = ".py";
+                        exp = "Python Source File";
+                        break;
+                    }
+                case "C++":
+                    {
+                        ext = ".cpp";
+                        exp = "C++ Source File";
+                        break;
+                    }
+                default:
+                    {
+                        FlashComboBox();
+                        return;
+                    }
+            }
+            
+            savePicker.FileTypeChoices.Add(exp, [ext]);
             savePicker.SuggestedFileName = "json_model";
+
             var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this); // Get your main window handle
             InitializeWithWindow.Initialize(savePicker, hwnd);
             Windows.Storage.StorageFile file = await savePicker.PickSaveFileAsync();
@@ -130,14 +152,14 @@ namespace JsonConverter
             {
                 // Prevent updates to the remote version of the file until
                 // we finish making changes and call CompleteUpdatesAsync.
-                Windows.Storage.CachedFileManager.DeferUpdates(file);
+                CachedFileManager.DeferUpdates(file);
                 // write to file
-                await Windows.Storage.FileIO.WriteTextAsync(file, outputBox.Text);
+                await FileIO.WriteTextAsync(file, outputBox.Text);
                 // Let Windows know that we're finished changing the file so
                 // the other app can update the remote version of the file.
                 // Completing updates may require Windows to ask for user input.
                 Windows.Storage.Provider.FileUpdateStatus status =
-                    await Windows.Storage.CachedFileManager.CompleteUpdatesAsync(file);
+                    await CachedFileManager.CompleteUpdatesAsync(file);
                 if (status == Windows.Storage.Provider.FileUpdateStatus.Complete)
                 {
                     this.outputBox.Text = "File " + file.Name + " was saved.";
