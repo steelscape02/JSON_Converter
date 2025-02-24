@@ -8,11 +8,11 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="92e2476b-c442-48ca-8dc8-f6f00afe024c"
+    Name="67085336-386c-4a90-af9b-a533aee1fd2f"
     Publisher="CN=nicho"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="92e2476b-c442-48ca-8dc8-f6f00afe024c" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="67085336-386c-4a90-af9b-a533aee1fd2f" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>JsonConverter</DisplayName>

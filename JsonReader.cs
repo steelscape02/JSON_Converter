@@ -74,7 +74,6 @@ namespace JsonConverter
                     var isObj = true;
                     var isPrim = true;
                     Element.Types? primType = Element.Types.Null; //primType initializer
-
                     ArgumentNullException.ThrowIfNull(headElem); //TODO: Is this optimal?
                     foreach (var i in jsonArray)
                     {
@@ -85,6 +84,7 @@ namespace JsonConverter
                                     isPrim = false;
                                     var obj = new Element(Element.Types.Object);
                                     var match = headElem.GetMatching(obj);
+                                    
                                     SubRecursive(i, elements, match ?? headElem);
 
                                     break;
