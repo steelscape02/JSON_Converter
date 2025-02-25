@@ -26,6 +26,12 @@ namespace JsonConverter
         public MainWindow()
         {
             this.InitializeComponent();
+            if (Microsoft.UI.Composition.SystemBackdrops.DesktopAcrylicController.IsSupported())
+            {
+                Microsoft.UI.Xaml.Media.DesktopAcrylicBackdrop DesktopAcrylicBackdrop = new Microsoft.UI.Xaml.Media.DesktopAcrylicBackdrop();
+                this.SystemBackdrop = DesktopAcrylicBackdrop;
+            }
+
         }
     }
 }

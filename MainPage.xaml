@@ -7,9 +7,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource AcrylicBackgroundFillColorBaseBrush}">
 
-    <Grid >
+    <Grid>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -66,9 +66,22 @@
                PlaceholderText="Select Language" 
                Width="200"
                >
+                <ComboBox.Resources>
+                    <Storyboard x:Name="flash_start">
+                        <ColorAnimation Storyboard.TargetName="language_brush"
+                            Storyboard.TargetProperty="Color" From="{ThemeResource SystemAccentColorDark1}" To="Red" Duration="0:0:0.5"/>
+                    </Storyboard>
+                    <Storyboard x:Name="flash_end">
+                        <ColorAnimation Storyboard.TargetName="language_brush"
+                            Storyboard.TargetProperty="Color" From="Red" To="{ThemeResource SystemAccentColorDark1}" Duration="0:0:0.5"/>
+                    </Storyboard>
+                </ComboBox.Resources>
+                <ComboBox.Background>
+                    <SolidColorBrush x:Name="language_brush" Color= "{ThemeResource SystemAccentColorDark1}" />
+                </ComboBox.Background>
                 <x:String>C#</x:String>
                 <x:String>Python</x:String>
-                <x:String>C++</x:String>
+                <!--<x:String>C++</x:String>-->
             </ComboBox>
         </Grid>
         <StackPanel 
@@ -85,9 +98,7 @@
                Margin="10"
                Click="Settings_Click"
                Style="{StaticResource AccentButtonStyle}"
-               >
-
-            </Button>
+               />
             <Canvas
                Margin="0 0 50 0">
                 <TextBlock

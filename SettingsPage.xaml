@@ -9,7 +9,31 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Button
+            Grid.Row="0"
+            Grid.Column="0"
+            VerticalAlignment="Top"
+            Content="Back"
+            x:Name="BackBtn"
+            Margin="10"
+            Click="Back_Click"
+            Style="{StaticResource AccentButtonStyle}"/>
+        <TextBlock
+            Grid.Row="1"
+            Grid.Column="0"
+            x:Name="versionID"
+            Text=""
+            FontSize="10"
+            Margin="10"/>
     </Grid>
 </Page>

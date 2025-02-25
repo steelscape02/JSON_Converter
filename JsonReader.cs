@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Text.Json.Nodes;
 using System.Text.Json;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using Microsoft.UI.Xaml;
 
 namespace JsonConverter
 {
@@ -32,7 +35,6 @@ namespace JsonConverter
         /// <param name="current">The initial JSON object (<i>Typically <c>root</c></i>)</param>
         /// <param name="elements">An <b>empty</b> Element HashSet to store the top level (root) elements with their respective children</param>
         /// <param name="headElem">The current head element. When execution begins, this should be <c>null</c> unless another start point has been determined</param>
-        // <exception cref="ArgumentOutOfRangeException"></exception> //TODO: Add back. Reduce existing exceptions?
         private static void SubRecursive(JsonNode current, HashSet<Element> elements, Element? headElem)
         {
             switch (current)
@@ -75,6 +77,7 @@ namespace JsonConverter
                     var isPrim = true;
                     Element.Types? primType = Element.Types.Null; //primType initializer
                     ArgumentNullException.ThrowIfNull(headElem); //TODO: Is this optimal?
+                    //TC 1 -> only sees features once
                     foreach (var i in jsonArray)
                     {
                         switch (i)
@@ -82,10 +85,9 @@ namespace JsonConverter
                             case JsonObject:
                                 {
                                     isPrim = false;
-                                    var obj = new Element(Element.Types.Object);
-                                    var match = headElem.GetMatching(obj);
                                     
-                                    SubRecursive(i, elements, match ?? headElem);
+                                    SubRecursive(i, elements, headElem);
+                                    //check last child and compare?
 
                                     break;
                                 }
@@ -107,6 +109,7 @@ namespace JsonConverter
                                 throw new ArgumentOutOfRangeException(nameof(current));
                         }
                     }
+
 
                     switch (isObj)
                     {
@@ -153,7 +156,7 @@ namespace JsonConverter
                             {
                                 if (element.Value != null)
                                 {
-                                    SubRecursive(element.Value, elements, elem); 
+                                    SubRecursive(element.Value, elements, elem);
                                 }
                                
                             }
@@ -166,23 +169,24 @@ namespace JsonConverter
                         {
                             var type = GetValueType(element.Value);
                             var name = element.Key;
-                            //if (type == Element.Types.Object) name = MakeFriendly(name);
 
                             var elem = new Element(type, name);
-                            if (type is Element.Types.Null or null) elem.Nullable = true; //null is possible due to ? above
+                            if (type is Element.Types.Null or null) elem.Nullable = true; 
 
                             var added = headElem.AddChild(elem);
                             if (added)
                             {
-                                if (element.Value != null) SubRecursive(element.Value, elements, elem);
+                                if (element.Value != null) { elem.Nullable = true; SubRecursive(element.Value, elements, elem); }
+                                
                             }
                             else
                             {
                                 //TAG 1
                                 var match = headElem.GetMatching(elem);
-                                if (match == null) continue;
+                                if (match == null) { continue; }
 
                                 if (elem.Nullable) match.Nullable = true;
+                                else match.Nullable = false;
 
                                 if (element.Value != null) SubRecursive(element.Value, elements, match);
                             }
@@ -191,6 +195,7 @@ namespace JsonConverter
                     break;
             }
         }
+
 
         /// <summary>
         /// Gets the type of the given number string using type parsing
@@ -222,6 +227,12 @@ namespace JsonConverter
             return null;
         }
 
+        /// <summary>
+        /// Map <c>JsonValueKind</c> values to <c>Element.Types</c> values
+        /// </summary>
+        /// <param name="value">The <c>JsonNode</c> to be mapped</param>
+        /// <returns>The corresponding <c>Element.Types</c> type</returns>
+        /// <exception cref="Exception">The given <c>JsonValueKind</c> is not one of the normal types</exception>
         private static Element.Types? GetValueType(JsonNode? value)
         {
             if (value != null)

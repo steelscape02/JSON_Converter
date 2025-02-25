@@ -118,6 +118,7 @@ namespace JsonConverter
         public Element? GetMatching(Element element)
         {
             var match = Children.FirstOrDefault(x => x.Name == element.Name);
+            
             return match ?? null;
         }
 

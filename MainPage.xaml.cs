@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -21,6 +22,8 @@ namespace JsonConverter
         public MainPage()
         {
             this.InitializeComponent();
+            
+
         }
         private new string Language = "";
 
@@ -57,8 +60,6 @@ namespace JsonConverter
                         FlashComboBox();
                         break;
                 }
-
-
             }
         }
 
@@ -231,14 +232,18 @@ namespace JsonConverter
             }
         }
 
-        private async void FlashComboBox()
+        private void FlashComboBox()
         {
-            var originalBrush = LanguageSelect.Background;
-            var brush = new SolidColorBrush(Microsoft.UI.Colors.Red);
-            LanguageSelect.Background = brush;
-
-            await Task.Delay(500); // Wait for fade animation to complete
-            LanguageSelect.Background = originalBrush; // Restore original background
+            flash_start.Begin();
+            flash_end.Begin();
         }
+        //<StackPanel.Resources>
+        //  <Storyboard x:Name="colorStoryboard">
+        //    <!-- Animate the background color of the canvas from red to green
+        //      over 4 seconds. -->
+        //    <ColorAnimation Storyboard.TargetName="mySolidColorBrush"
+        //      Storyboard.TargetProperty= "Color" From= "Red" To= "Blue" Duration= "0:0:4" />
+        //  </ Storyboard >
+        //</ StackPanel.Resources >
     }
 }
