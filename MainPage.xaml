@@ -87,7 +87,7 @@
                 </ComboBox.Background>
                 <x:String>C#</x:String>
                 <x:String>Python</x:String>
-                <!--<x:String>C++</x:String>-->
+                <x:String>C++</x:String>
             </ComboBox>
         </Grid>
         <StackPanel 

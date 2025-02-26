@@ -1,12 +1,8 @@
-﻿using Microsoft.UI.Xaml.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-
+//TODO: Add set for later init
 
 namespace JsonConverter
 {
@@ -47,7 +43,7 @@ namespace JsonConverter
             };
             var forwards = new HashSet<Element>();
             var rootClass = $"class {BaseName}\n{{\npublic:\n";
-            var builder = "    void from_json(const json& j)\n    {\n";
+            var builder = "";
             foreach (var element in elements)
             {
                 //if(element.Type == Element.Types.Object) classDefinitions.Insert(1, $"class {element.Name};");
@@ -65,9 +61,10 @@ namespace JsonConverter
 
                 var fqName = element.LegalName('_', HasReserved(element.Name));
                 rootClass += $"    {nullable} {fqName};\n";
-                builder += $"        j.at(\"{element.Name}\").get_to({fqName});\n"; //keep actual name for deser.
+                //const std::string & get_created() const { return created; }
+                builder += $"    const {nullable} & get_{element.Name}() {{ return {fqName}; }}\n"; //keep actual name for deser.
             }
-            builder += "    }\n";
+            //builder += "    }\n";
             rootClass += builder;
             rootClass += "};\n";
             //root class added after others to avoid circular deps
@@ -136,8 +133,7 @@ namespace JsonConverter
             //TODO: Check for prim
             var classDef = $"class {type}\n{{\npublic:\n" +
                 $"    {GetPrintType(parent,false)} {parent.LegalName('_', HasReserved(parent.Name))};\n";
-            var builder = $"    void from_json(const json& j)\n    {{\n" +
-                $"        j.at(\"{parent.Name}\").get_to({parent.LegalName('_', HasReserved(parent.Name))});\n";
+            var builder = $"";
             foreach (var child in element.Children)
             {
                 child.Type ??= Element.Types.Null;
@@ -165,7 +161,8 @@ namespace JsonConverter
                 }
                 var fqName = child.LegalName('_', HasReserved(child.Name));
                 classDef += $"    {nullable} {fqName};\n";
-                builder += $"        j.at(\"{child.Name}\").get_to({fqName});\n"; //keep actual name for deser.
+                //const {GetPrintType(element,false)} & get_{element.Name}() const {{ return {fqName}; }}\n
+                builder += $"    const {nullable} & get_{child.Name}() {{ return {fqName}; }}\n"; //keep actual name for deser.
 
                 if (child.Children.Count > 0)
                 {
@@ -174,7 +171,7 @@ namespace JsonConverter
                 }
             }
 
-            builder += "    }\n";
+            //builder += "    }\n";
             classDef += builder;
             classDef += "};\n";
             classDefinitions.Add(classDef);
