@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
@@ -32,7 +33,21 @@ namespace JsonConverter
             this.Frame.Navigate(typeof(SettingsPage));
         }
 
-
+        private void Validate_JSON(object sender, RoutedEventArgs e)
+        {
+            validateBtn.Focus(FocusState.Programmatic);
+            jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out string entry);
+            if (IsJson(entry))
+            {
+                valid_validate_start.Begin();
+                valid_validate_end.Begin();
+            }
+            else
+            {
+                invalid_validate_start.Begin();
+                invalid_validate_end.Begin();
+            }
+        }
         private void Submit_Click(object sender, RoutedEventArgs e)
         {
             jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out string entry);

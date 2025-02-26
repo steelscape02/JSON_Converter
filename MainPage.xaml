@@ -31,7 +31,13 @@
            VerticalAlignment="Top">
             <AppBarButton Icon="Upload" Label="Upload" Click="Upload_json"/>
             <AppBarButton Icon="Delete" Label="Clear" Click="Clear_input"/>
-            <AppBarButton Icon="Find" Label="Validate"/>
+            <AppBarButton 
+                x:Name="validateBtn"
+                Icon="Find" 
+                Label="Validate"
+                Click="Validate_JSON">
+                
+            </AppBarButton>
             <!-- Find a place to put this output (for this and submit errors)-->
             <AppBarButton Icon="Accept" Label="Submit" Click="Submit_Click"/>
 
@@ -130,7 +136,29 @@
            Unloaded="JsonEntry_Unloaded"
            IsSpellCheckEnabled="False"
            Style="{StaticResource DefaultRichEditBoxStyle}"
-       />
+        >
+            <RichEditBox.Resources>
+                <Storyboard x:Name="invalid_validate_start">
+                    <ColorAnimation Storyboard.TargetName="validate_brush"
+            Storyboard.TargetProperty="Color" From="{ThemeResource SystemAccentColorDark2}" To="DarkRed" Duration="0:0:0.8"/>
+                </Storyboard>
+                <Storyboard x:Name="invalid_validate_end">
+                    <ColorAnimation Storyboard.TargetName="validate_brush"
+            Storyboard.TargetProperty="Color" From="DarkRed" To="{ThemeResource SystemAccentColorDark2}" Duration="0:0:0.8"/>
+                </Storyboard>
+                <Storyboard x:Name="valid_validate_start">
+                    <ColorAnimation Storyboard.TargetName="validate_brush"
+            Storyboard.TargetProperty="Color" From="{ThemeResource SystemAccentColorDark2}" To="DarkGreen" Duration="0:0:0.8"/>
+                </Storyboard>
+                <Storyboard x:Name="valid_validate_end">
+                    <ColorAnimation Storyboard.TargetName="validate_brush"
+            Storyboard.TargetProperty="Color" From="DarkGreen" To="{ThemeResource SystemAccentColorDark2}" Duration="0:0:0.8"/>
+                </Storyboard>
+            </RichEditBox.Resources>
+            <RichEditBox.Background>
+                <SolidColorBrush x:Name="validate_brush" Color= "{ThemeResource SystemAccentColorDark2}" />
+            </RichEditBox.Background>
+        </RichEditBox>
         <Border
            Grid.Row="0"
            Grid.Column="2"
@@ -140,7 +168,7 @@
            
            Margin="10"
            CornerRadius="4"
-           Background="{ThemeResource TextControlBackground}">
+           Background="{ThemeResource SystemAccentColorDark2}">
             <ScrollViewer>
                 <TextBox
                    x:Name="outputBox"
