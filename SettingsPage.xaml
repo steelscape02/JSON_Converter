@@ -74,7 +74,7 @@
                         </Button>
                     </Grid>
 
-                    <RadioButtons x:Name="themeSelect" Header="Theme:" Margin="10">
+                    <RadioButtons x:Name="themeSelect" Header="Theme:" Margin="10" SelectionChanged="ThemeSelect_Change">
                         <RadioButton x:Name="System" AutomationProperties.Name="System Theme" Content="System"/>
                         <RadioButton x:Name="dark" AutomationProperties.Name="Dark Theme" Content="Dark"/>
                         <RadioButton x:Name="light" AutomationProperties.Name="Light Theme" Content="Light"/>

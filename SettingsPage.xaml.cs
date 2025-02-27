@@ -24,20 +24,14 @@ namespace JsonConverter
 
         private void BaseName_Change(object sender, Microsoft.UI.Xaml.Controls.TextChangedEventArgs e)
         {
-            if (e is null)
-            {
-                throw new ArgumentNullException(nameof(e));
-            }
+            ArgumentNullException.ThrowIfNull(e);
 
             LanguageSelector.RootName = RootName.Text;
         }
 
         private void ThemeSelect_Change(object sender, Microsoft.UI.Xaml.Controls.SelectionChangedEventArgs e)
         {
-            if (e is null)
-            {
-                throw new ArgumentNullException(nameof(e));
-            }
+            ArgumentNullException.ThrowIfNull(e);
             ThemeIndex = themeSelect.SelectedIndex;
         }
 
