@@ -12,10 +12,6 @@ namespace JsonConverter
         /// </summary>
         private const string Vis = "public";
 
-        /// <summary>
-        /// The default name for the base class. Almost always "Root"
-        /// </summary>
-        private const string BaseName = "Root";
 
         private const string RptPlaceHolder = "_";
 
@@ -50,7 +46,7 @@ namespace JsonConverter
             var classDefinitions = new List<string>();
 
             // Collect all classes, starting with the root
-            var rootClass = $"{Vis} class {BaseName}\n{{\n";
+            var rootClass = $"{Vis} class {TextResources.baseName}\n{{\n";
 
             foreach (var element in elements)
             {

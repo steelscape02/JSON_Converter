@@ -61,6 +61,15 @@ namespace JsonConverter {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Root.
+        /// </summary>
+        internal static string baseName {
+            get {
+                return ResourceManager.GetString("baseName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 0.9.1.
         /// </summary>
         internal static string version {

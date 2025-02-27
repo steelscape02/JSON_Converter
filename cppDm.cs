@@ -13,7 +13,6 @@ namespace JsonConverter
         /// <summary>
         /// The default name for the base class. Almost always "Root"
         /// </summary>
-        private const string BaseName = "Root";
 
         private const string RptPlaceHolder = "_";
 
@@ -43,11 +42,11 @@ namespace JsonConverter
                 "#include <string>"
             };
             var forwards = new HashSet<Element>();
-            var rootClass = $"\nclass {BaseName}\n{{\npublic:\n";
-            var classFirst = BaseName[0].ToString().ToLower();
+            var rootClass = $"\nclass {TextResources.baseName}\n{{\npublic:\n";
+            var classFirst = TextResources.baseName[0].ToString().ToLower();
             var currForward = "";
-            currForward += $"void from_json(const json& j, {BaseName}& {classFirst})\n{{\n";
-            var root = new Element(Element.Types.Object, BaseName);
+            currForward += $"void from_json(const json& j, {TextResources.baseName}& {classFirst})\n{{\n";
+            var root = new Element(Element.Types.Object, TextResources.baseName);
             foreach (var element in elements)
             {
                 var headerType = GetPrintType(element, false);
@@ -67,7 +66,7 @@ namespace JsonConverter
                 rootClass += $"    {nullable} {fqName};\n";
             }
             forwards.Add(root);
-            rootClass += $"    friend void from_json(const json& j, {BaseName}& {classFirst});\n";
+            rootClass += $"    friend void from_json(const json& j, {TextResources.baseName}& {classFirst});\n";
             rootClass += "};\n";
             //root class added after others to avoid circular deps
             
@@ -81,7 +80,7 @@ namespace JsonConverter
             foreach (var element in elements.Where(element =>
                     !IsPrimitive(element.Prim.ToString()?.ToLower()) && !IsPrimitive(element.Type.ToString()?.ToLower())))
             {
-                BuildSubDm(element, visited, classDefinitions, forwards,new Element(Element.Types.Object, BaseName));
+                BuildSubDm(element, visited, classDefinitions, forwards,new Element(Element.Types.Object, TextResources.baseName));
             }
             classDefinitions.Add(rootClass);
             if (_optional) classDefinitions.Insert(1, "#include <optional>\n"); else classDefinitions.Insert(1, "\n");

@@ -11,6 +11,7 @@ namespace JsonConverter
         {
             InitializeComponent();
             versionID.Text = TextResources.version;
+            RootName.Text = TextResources.baseName;
         }
 
         private void Back_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

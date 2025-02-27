@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 //TODO: Add renamin
 
@@ -12,10 +8,6 @@ namespace JsonConverter
 {
     class PythonDm
     {
-        /// <summary>
-        /// The default name for the base class. Almost always "Root"
-        /// </summary>
-        private const string BaseName = "Root";
 
         private const string RptPlaceHolder = "_";
 
@@ -41,7 +33,7 @@ namespace JsonConverter
                 "\n"
             };
             
-            var rootClass = $"@dataclass\nclass {BaseName}:\n";
+            var rootClass = $"@dataclass\nclass {TextResources.baseName}:\n";
             foreach(var element in elements)
             {
                 var headerType = GetPrintType(element, false);
