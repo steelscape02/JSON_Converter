@@ -50,7 +50,6 @@ namespace JsonConverter
             var root = new Element(Element.Types.Object, BaseName);
             foreach (var element in elements)
             {
-                //if(element.Type == Element.Types.Object) classDefinitions.Insert(1, $"class {element.Name};");
                 var headerType = GetPrintType(element, false);
                 string? nullable;
                 if (element.Nullable)

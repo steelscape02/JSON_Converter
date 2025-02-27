@@ -35,5 +35,58 @@
             Text=""
             FontSize="10"
             Margin="10"/>
+        <Grid Grid.Row="0" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Grid.Row="0" Margin="10" BorderBrush="{ThemeResource SystemAccentColorLight3}" BorderThickness="3" CornerRadius="4">
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="10">
+                    <TextBox  x:Name="RootName" AutomationProperties.Name="Root Name Entry" Header="Base class name:"
+                        Margin="10 5 10 20" AcceptsReturn="False" IsSpellCheckEnabled="False"/>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <CheckBox Grid.Row="0" Grid.Column="0" x:Name="allOptional" AutomationProperties.Name="All elements optional" Content="All optional" Margin="0 5 10 5"/>
+                        <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">
+                            <SymbolIcon Symbol="Help"/>
+                        </Button>
+                        
+                        <CheckBox Grid.Row="1" Grid.Column="0" x:Name="suggestCorrs" AutomationProperties.Name="Suggest corrections to mispellings" Content="Suggest Corrections" Margin="0 5 10 5"/>
+                        <Button Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right">
+                            <SymbolIcon Symbol="Help"/>
+                        </Button>
+                        
+                        <CheckBox Grid.Row="2" Grid.Column="0" x:Name="validateMsgs" AutomationProperties.Name="Show validation errors" Content="Validate Information" Margin="0 5 10 5"/>
+                        <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right">
+                            <SymbolIcon Symbol="Help"/>
+                        </Button>
+                    </Grid>
+
+                    <RadioButtons Header="Theme:" Margin="10" SelectedIndex="0">
+                        <RadioButton x:Name="System" AutomationProperties.Name="System Theme" Content="System"/>
+                        <RadioButton x:Name="dark" AutomationProperties.Name="Dark Theme" Content="Dark"/>
+                        <RadioButton x:Name="light" AutomationProperties.Name="Light Theme" Content="Light"/>
+                    </RadioButtons>
+                </StackPanel>
+            </Border>
+            
+            <Border Grid.Row="0" Grid.Column="1" Margin="10" BorderBrush="{ThemeResource SystemAccentColorLight2}" BorderThickness="3" CornerRadius="4">
+                <TextBlock Margin="10" x:Name="infoBox" Text=""/>
+            </Border>
+            
+        </Grid>
+        
     </Grid>
 </Page>
