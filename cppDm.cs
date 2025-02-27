@@ -36,14 +36,16 @@ namespace JsonConverter
             var classDefinitions = new List<string>
             {
                 //imports
-                "#include <nlohmann/json.hpp>\n" +
+                "#include \"json.hpp\"\n" +
                 "using json = nlohmann::json;\n\n" +
                 "#include <vector>\n" +
                 "#include <string>"
             };
             var forwards = new HashSet<Element>();
             var rootClass = $"class {BaseName}\n{{\npublic:\n";
-            var builder = "";
+            var classFirst = BaseName[0].ToString().ToLower();
+            var currForward = "";
+            currForward += $"void from_json(const json& j, {BaseName}& {classFirst})\n{{\n";
             foreach (var element in elements)
             {
                 //if(element.Type == Element.Types.Object) classDefinitions.Insert(1, $"class {element.Name};");
@@ -58,14 +60,12 @@ namespace JsonConverter
                 {
                     nullable = headerType;
                 }
-
+                
+                
                 var fqName = element.LegalName('_', HasReserved(element.Name));
                 rootClass += $"    {nullable} {fqName};\n";
-                //const std::string & get_created() const { return created; }
-                builder += $"    const {nullable} & get_{element.Name}() {{ return {fqName}; }}\n"; //keep actual name for deser.
             }
-            //builder += "    }\n";
-            rootClass += builder;
+            
             rootClass += "};\n";
             //root class added after others to avoid circular deps
             
@@ -75,18 +75,32 @@ namespace JsonConverter
             //TODO: Append forwards to front, JSON contents to back
             //Forward: class Feature; (list of class defs for circular dep prevention)
             //JSON contents: void from_json(const json& j, Root& r) { r.from_json(j); } (list of from_json method decs for simple calling)
-
+            classDefinitions.Add(rootClass);
             foreach (var element in elements.Where(element =>
                     !IsPrimitive(element.Prim.ToString()?.ToLower()) && !IsPrimitive(element.Type.ToString()?.ToLower())))
             {
                 BuildSubDm(element, visited, classDefinitions, forwards,new Element(Element.Types.Object, BaseName));
             }
-            classDefinitions.Add(rootClass);
-            //classDefinitions.InsertRange(1, forwards.Select(element => $"class {GetPrintType(element, true)};"));
-            forwards.Add(new Element(Element.Types.Object, BaseName));
-            classDefinitions.AddRange(forwards.Select(element => $"void from_json(const json& j, {GetPrintType(element, true)}& {element.Name[0].ToString().ToLower()}) {{{element.Name[0].ToString().ToLower()}.from_json(j);}}"));
+            
             if (_optional) classDefinitions.Insert(1, "#include <optional>\n"); else classDefinitions.Insert(1, "\n");
-
+            
+            foreach (var i in forwards)
+            {
+                classFirst = i.Name[0].ToString().ToLower();
+                classDefinitions.Insert(3, $"class {GetPrintType(i, true)};");
+                var headerType = GetPrintType(i, false);
+                var fqName = i.LegalName('_', HasReserved(i.Name));
+                var currClass = $"void from_json(const json& j, {GetPrintType(i, true)}& {classFirst})\n{{\n";
+                foreach (var e in i.Children)
+                {
+                    headerType = GetPrintType(e, false);
+                    fqName = e.LegalName('_', HasReserved(e.Name));
+                    if (i.Nullable) currClass += $"    if (j.contains(\"{e.Name}\")) {classFirst}.{fqName} = j.at(\"{e.Name}\").is_null() ? std::nullopt : std::make_optional(j.at(\"{e.Name}\").get<{headerType}>());\n";
+                    else currClass += $"    if (j.contains(\"{e.Name}\")) j.at(\"{e.Name}\").get_to({classFirst}.{fqName});\n";
+                }
+                currClass += "\n}\n";
+                classDefinitions.Add(currClass);
+            }
 
             return string.Join("\n", classDefinitions);
         }
@@ -105,8 +119,8 @@ namespace JsonConverter
         {
             if (element.Type == null) return;
             var type = GetPrintType(element, true);
-            if (type.Contains("integer")) Debug.WriteLine("OH");
-            if (element.Type == Element.Types.Object) forwards.Add(element);
+            if(element.Prim == null) forwards.Add(element);
+
             // Avoid re-creating classes
             if (IsPrimitive(type) || !visited.Add(element))
             {
@@ -131,11 +145,14 @@ namespace JsonConverter
             }
 
             //TODO: Check for prim
-            var classDef = $"class {type}\n{{\npublic:\n" +
+            var classDef = $"\nclass {type}\n{{\npublic:\n" +
                 $"    {GetPrintType(parent,false)} {parent.LegalName('_', HasReserved(parent.Name))};\n";
             var builder = $"";
+            var classFirst = element.Name[0].ToString().ToLower();
+            
             foreach (var child in element.Children)
             {
+                
                 child.Type ??= Element.Types.Null;
                 string? childType;
                 if (visited.TryGetValue(child, out var match) && match != null)
@@ -162,17 +179,14 @@ namespace JsonConverter
                 var fqName = child.LegalName('_', HasReserved(child.Name));
                 classDef += $"    {nullable} {fqName};\n";
                 //const {GetPrintType(element,false)} & get_{element.Name}() const {{ return {fqName}; }}\n
-                builder += $"    const {nullable} & get_{child.Name}() {{ return {fqName}; }}\n"; //keep actual name for deser.
-
                 if (child.Children.Count > 0)
                 {
                     BuildSubDm(child, visited, classDefinitions, forwards,element); // Recursive call for nested children
 
                 }
-            }
+            }//friend void from_json(const json& j, Feature& f);
 
-            //builder += "    }\n";
-            classDef += builder;
+            classDef += $"    friend void from_json(const json& j, {type}& {classFirst});\n";
             classDef += "};\n";
             classDefinitions.Add(classDef);
             
@@ -203,23 +217,25 @@ namespace JsonConverter
         /// <returns>The "friendly" name</returns>
         private static string? MakeFriendly(string? text, bool list = false, bool prim = false)
         {
+            if (string.IsNullOrEmpty(text)) return text;
+
             //check against basic plural rules
             if (!prim)
             {
-                var cap = text?[0].ToString().ToUpper();
+                var cap = text[0].ToString().ToUpper();
 
-                if (text != null && text.EndsWith("ies"))
+                if (text.EndsWith("ies"))
                 {
                     text = cap + text.Substring(1, text.Length - 4) + "y";
                 }
                 //s -> remove s (except special cases)
-                else if (text != null && text.EndsWith("es"))
+                else if (text.EndsWith("es"))
                     text = cap + text.Substring(1, text.Length - 2);
-                else if (text != null && text.EndsWith('s'))
+                else if (text.EndsWith('s'))
                     text = cap + text.Substring(1, text.Length - 2);
                 else
                 {
-                    text = cap + text.Substring(1, text.Length - 1);
+                    text = string.Concat(cap, text.AsSpan(1, text.Length - 1));
                 }
             }
             if (list) text = "std::vector<" + text + ">";
@@ -261,7 +277,6 @@ namespace JsonConverter
                     }
                
                     if (name != null) type = MakeFriendly(name, isList, isPrim);
-                    if (type.Contains("integer")) Debug.WriteLine("Oh");
                     break;
                 case Element.Types.Null:
                     type = "json";

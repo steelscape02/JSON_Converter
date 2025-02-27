@@ -191,25 +191,26 @@ namespace JsonConverter
         /// <param name="text">The text to convert</param>
         /// <param name="list"><c>true</c> if the caller is editing a List <c>Element</c> name</param>
         /// <returns>The "friendly" name</returns>
-        private static string? MakeFriendly(string? text, bool list = false,bool prim = false)
+        private static string? MakeFriendly(string? text, bool list = false, bool prim = false)
         {
+            if (string.IsNullOrEmpty(text)) return text;
             //check against basic plural rules
-            if(!prim)
-            { 
-                var cap = text?[0].ToString().ToUpper();
+            if (!prim)
+            {
+                var cap = text[0].ToString().ToUpper();
 
-                if (text != null && text.EndsWith("ies"))
+                if (text.EndsWith("ies"))
                 {
                     text = cap + text.Substring(1, text.Length - 4) + "y";
                 }
                 //s -> remove s (except special cases)
-                else if (text != null && text.EndsWith("es"))
+                else if (text.EndsWith("es"))
                     text = cap + text.Substring(1, text.Length - 2);
-                else if (text != null && text.EndsWith('s'))
+                else if (text.EndsWith('s'))
                     text = cap + text.Substring(1, text.Length - 2);
                 else
                 {
-                    text = cap + text.Substring(1, text.Length - 1);
+                    text = string.Concat(cap, text.AsSpan(1, text.Length - 1));
                 }
             }
             if (list) text = "List<" + text + ">";

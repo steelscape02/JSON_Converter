@@ -164,10 +164,11 @@ namespace JsonConverter
         /// <returns>The "friendly" name</returns>
         private static string? MakeFriendly(string? text, bool list = false, bool prim = false)
         {
+            if(string.IsNullOrEmpty(text)) return text;
             //check against basic plural rules
             if (!prim)
             {
-                var cap = text?[0].ToString().ToUpper();
+                var cap = text[0].ToString().ToUpper();
 
                 if (text != null && text.EndsWith("ies"))
                 {
