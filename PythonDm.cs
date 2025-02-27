@@ -22,7 +22,7 @@ namespace JsonConverter
             "async", "elif", "if", "or", "yield"
         };
 
-        public static string BuildRoot(HashSet<Element> elements)
+        public static string BuildRoot(HashSet<Element> elements, string baseName)
         {
             var classDefinitions = new List<string>
             {
@@ -33,7 +33,7 @@ namespace JsonConverter
                 "\n"
             };
             
-            var rootClass = $"@dataclass\nclass {TextResources.baseName}:\n";
+            var rootClass = $"@dataclass\nclass {baseName}:\n";
             foreach(var element in elements)
             {
                 var headerType = GetPrintType(element, false);

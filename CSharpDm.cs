@@ -41,12 +41,12 @@ namespace JsonConverter
         /// <param name="elements">A <c>HashSet</c> of <c>Element</c> objects representing the <c>Root</c> class of
         /// the JSON response</param>
         /// <returns>A string representation of a C# data model</returns>
-        public static string BuildRoot(HashSet<Element> elements)
+        public static string BuildRoot(HashSet<Element> elements, string baseName)
         {
             var classDefinitions = new List<string>();
 
             // Collect all classes, starting with the root
-            var rootClass = $"{Vis} class {TextResources.baseName}\n{{\n";
+            var rootClass = $"{Vis} class {baseName}\n{{\n";
 
             foreach (var element in elements)
             {

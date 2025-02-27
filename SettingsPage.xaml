@@ -44,9 +44,9 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Border Grid.Column="0" Grid.Row="0" Margin="10" BorderBrush="{ThemeResource SystemAccentColorLight3}" BorderThickness="3" CornerRadius="4">
-                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="10">
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="10" Loaded="Options_Loaded" Unloaded="Options_Unloaded">
                     <TextBox  x:Name="RootName" AutomationProperties.Name="Root Name Entry" Header="Base class name:"
-                        Margin="10 5 10 20" AcceptsReturn="False" IsSpellCheckEnabled="False"/>
+                        Margin="10 5 10 20" AcceptsReturn="False" IsSpellCheckEnabled="False" TextChanged="BaseName_Change"/>
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -74,7 +74,7 @@
                         </Button>
                     </Grid>
 
-                    <RadioButtons Header="Theme:" Margin="10" SelectedIndex="0">
+                    <RadioButtons x:Name="themeSelect" Header="Theme:" Margin="10">
                         <RadioButton x:Name="System" AutomationProperties.Name="System Theme" Content="System"/>
                         <RadioButton x:Name="dark" AutomationProperties.Name="Dark Theme" Content="Dark"/>
                         <RadioButton x:Name="light" AutomationProperties.Name="Light Theme" Content="Light"/>

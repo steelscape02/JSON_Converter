@@ -23,11 +23,12 @@ namespace JsonConverter
         public MainPage()
         {
             this.InitializeComponent();
-            
-
         }
-        private new string Language = "";
 
+        private new string Language = "";
+        
+        private static string JSONContents = "";
+        
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(SettingsPage));
@@ -48,6 +49,7 @@ namespace JsonConverter
                 invalid_validate_end.Begin();
             }
         }
+        
         private void Submit_Click(object sender, RoutedEventArgs e)
         {
             jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out string entry);
@@ -60,15 +62,15 @@ namespace JsonConverter
                 switch (Language)
                 {
                     case "C#":
-                        dm = CSharpDm.BuildRoot(contents);
+                        dm = LanguageSelector.Select(LanguageSelector.Languages.CSharp, contents);
                         outputBox.Text = dm;
                         break;
                     case "Python":
-                        dm = PythonDm.BuildRoot(contents);
+                        dm = LanguageSelector.Select(LanguageSelector.Languages.Python, contents);
                         outputBox.Text = dm;
                         break;
                     case "C++":
-                        dm = CppDm.BuildRoot(contents);
+                        dm = LanguageSelector.Select(LanguageSelector.Languages.Cpp, contents);
                         outputBox.Text = dm;
                         break;
                     default:
@@ -215,12 +217,14 @@ namespace JsonConverter
         {
             jsonEntry.SelectionFlyout.Opening += Menu_Opening;
             jsonEntry.ContextFlyout.Opening += Menu_Opening;
+            jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, JSONContents);
         }
 
         private void JsonEntry_Unloaded(object sender, RoutedEventArgs e)
         {
             jsonEntry.SelectionFlyout.Opening -= Menu_Opening;
             jsonEntry.ContextFlyout.Opening -= Menu_Opening;
+            jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out JSONContents);
         }
 
         private static bool IsJson(string input)
@@ -252,13 +256,5 @@ namespace JsonConverter
             flash_start.Begin();
             flash_end.Begin();
         }
-        //<StackPanel.Resources>
-        //  <Storyboard x:Name="colorStoryboard">
-        //    <!-- Animate the background color of the canvas from red to green
-        //      over 4 seconds. -->
-        //    <ColorAnimation Storyboard.TargetName="mySolidColorBrush"
-        //      Storyboard.TargetProperty= "Color" From= "Red" To= "Blue" Duration= "0:0:4" />
-        //  </ Storyboard >
-        //</ StackPanel.Resources >
     }
 }
