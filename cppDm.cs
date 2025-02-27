@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Windows.Media.Core;
 //TODO: Add set for later init
 
 namespace JsonConverter
@@ -42,10 +43,11 @@ namespace JsonConverter
                 "#include <string>"
             };
             var forwards = new HashSet<Element>();
-            var rootClass = $"class {BaseName}\n{{\npublic:\n";
+            var rootClass = $"\nclass {BaseName}\n{{\npublic:\n";
             var classFirst = BaseName[0].ToString().ToLower();
             var currForward = "";
             currForward += $"void from_json(const json& j, {BaseName}& {classFirst})\n{{\n";
+            var root = new Element(Element.Types.Object, BaseName);
             foreach (var element in elements)
             {
                 //if(element.Type == Element.Types.Object) classDefinitions.Insert(1, $"class {element.Name};");
@@ -61,11 +63,12 @@ namespace JsonConverter
                     nullable = headerType;
                 }
                 
-                
+                root.AddChild(element);
                 var fqName = element.LegalName('_', HasReserved(element.Name));
                 rootClass += $"    {nullable} {fqName};\n";
             }
-            
+            forwards.Add(root);
+            rootClass += $"    friend void from_json(const json& j, {BaseName}& {classFirst});\n";
             rootClass += "};\n";
             //root class added after others to avoid circular deps
             
@@ -75,19 +78,19 @@ namespace JsonConverter
             //TODO: Append forwards to front, JSON contents to back
             //Forward: class Feature; (list of class defs for circular dep prevention)
             //JSON contents: void from_json(const json& j, Root& r) { r.from_json(j); } (list of from_json method decs for simple calling)
-            classDefinitions.Add(rootClass);
+            
             foreach (var element in elements.Where(element =>
                     !IsPrimitive(element.Prim.ToString()?.ToLower()) && !IsPrimitive(element.Type.ToString()?.ToLower())))
             {
                 BuildSubDm(element, visited, classDefinitions, forwards,new Element(Element.Types.Object, BaseName));
             }
-            
+            classDefinitions.Add(rootClass);
             if (_optional) classDefinitions.Insert(1, "#include <optional>\n"); else classDefinitions.Insert(1, "\n");
             
             foreach (var i in forwards)
             {
                 classFirst = i.Name[0].ToString().ToLower();
-                classDefinitions.Insert(3, $"class {GetPrintType(i, true)};");
+                classDefinitions.Insert(2, $"class {GetPrintType(i, true)};");
                 var headerType = GetPrintType(i, false);
                 var fqName = i.LegalName('_', HasReserved(i.Name));
                 var currClass = $"void from_json(const json& j, {GetPrintType(i, true)}& {classFirst})\n{{\n";
@@ -95,7 +98,7 @@ namespace JsonConverter
                 {
                     headerType = GetPrintType(e, false);
                     fqName = e.LegalName('_', HasReserved(e.Name));
-                    if (i.Nullable) currClass += $"    if (j.contains(\"{e.Name}\")) {classFirst}.{fqName} = j.at(\"{e.Name}\").is_null() ? std::nullopt : std::make_optional(j.at(\"{e.Name}\").get<{headerType}>());\n";
+                    if (e.Nullable) currClass += $"    if (j.contains(\"{e.Name}\")) {classFirst}.{fqName} = j.at(\"{e.Name}\").is_null() ? std::nullopt : std::make_optional(j.at(\"{e.Name}\").get<{headerType}>());\n";
                     else currClass += $"    if (j.contains(\"{e.Name}\")) j.at(\"{e.Name}\").get_to({classFirst}.{fqName});\n";
                 }
                 currClass += "\n}\n";
@@ -145,8 +148,8 @@ namespace JsonConverter
             }
 
             //TODO: Check for prim
-            var classDef = $"\nclass {type}\n{{\npublic:\n" +
-                $"    {GetPrintType(parent,false)} {parent.LegalName('_', HasReserved(parent.Name))};\n";
+            var classDef = $"class {type}\n{{\npublic:\n" +
+                $"    {GetPrintType(parent,false)}* {parent.LegalName('_', HasReserved(parent.Name))};\n";
             var builder = $"";
             var classFirst = element.Name[0].ToString().ToLower();
             
