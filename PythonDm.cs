@@ -22,7 +22,7 @@ namespace JsonConverter
             "async", "elif", "if", "or", "yield"
         };
 
-        public static string BuildRoot(HashSet<Element> elements, string baseName)
+        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false, bool validateMsgs = false)
         {
             var classDefinitions = new List<string>
             {
@@ -156,24 +156,25 @@ namespace JsonConverter
         /// <returns>The "friendly" name</returns>
         private static string? MakeFriendly(string? text, bool list = false, bool prim = false)
         {
-            if(string.IsNullOrEmpty(text)) return text;
+            if (string.IsNullOrEmpty(text)) return text;
+
             //check against basic plural rules
             if (!prim)
             {
                 var cap = text[0].ToString().ToUpper();
 
-                if (text != null && text.EndsWith("ies"))
+                if (text.EndsWith("ies"))
                 {
-                    text = cap + text.Substring(1, text.Length - 4) + "y";
+                    text = string.Concat(cap, text.AsSpan(1, text.Length - 4), "y");
                 }
                 //s -> remove s (except special cases)
-                else if (text != null && text.EndsWith("es"))
-                    text = cap + text.Substring(1, text.Length - 2);
-                else if (text != null && text.EndsWith('s'))
-                    text = cap + text.Substring(1, text.Length - 2);
+                else if (text.EndsWith("es"))
+                    text = string.Concat(cap, text.AsSpan(1, text.Length - 2));
+                else if (text.EndsWith('s'))
+                    text = string.Concat(cap, text.AsSpan(1, text.Length - 2));
                 else
                 {
-                    text = cap + text.Substring(1, text.Length - 1);
+                    text = string.Concat(cap, text.AsSpan(1, text.Length - 1));
                 }
             }
             if (list) text = "List[" + text + "]";

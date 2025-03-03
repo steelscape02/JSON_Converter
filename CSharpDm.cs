@@ -41,7 +41,7 @@ namespace JsonConverter
         /// <param name="elements">A <c>HashSet</c> of <c>Element</c> objects representing the <c>Root</c> class of
         /// the JSON response</param>
         /// <returns>A string representation of a C# data model</returns>
-        public static string BuildRoot(HashSet<Element> elements, string baseName)
+        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false, bool validateMsgs = false)
         {
             var classDefinitions = new List<string>();
 
@@ -73,7 +73,7 @@ namespace JsonConverter
             foreach (var element in elements.Where(element => 
                 !IsPrimitive(element.Prim.ToString()?.ToLower()) && !IsPrimitive(element.Type.ToString()?.ToLower())))
             {
-                BuildSubDm(element, visited, classDefinitions);
+                BuildSubDm(element, visited, classDefinitions,allOptional);
             }
 
 
@@ -92,7 +92,7 @@ namespace JsonConverter
         /// <param name="classDefinitions">
         /// A list of class definitions, representing the child classes that are created
         /// </param>
-        private static void BuildSubDm(Element element, HashSet<Element?> visited, List<string> classDefinitions,bool redo = false)
+        private static void BuildSubDm(Element element, HashSet<Element?> visited, List<string> classDefinitions, bool allOptional, bool redo = false)
         {
             if (element.Type == null) return;
             var type = GetPrintType(element, true);
@@ -143,7 +143,13 @@ namespace JsonConverter
                 }
                 else
                     childType = GetPrintType(child, false);
-                var nullable = child.Nullable ? childType + "?" : childType;
+
+                var nullable = childType;
+                if (child.Nullable || allOptional)
+                {
+                    nullable = childType + "?";
+                }
+                
                 string? rename;
                 if (child.Rename || HasReserved(child.Name))
                 {
@@ -157,7 +163,7 @@ namespace JsonConverter
 
                 if (child.Children.Count > 0)
                 {
-                    BuildSubDm(child, visited, classDefinitions); // Recursive call for nested children
+                    BuildSubDm(child, visited, classDefinitions, allOptional); // Recursive call for nested children
                     
                 }
             }
@@ -197,13 +203,13 @@ namespace JsonConverter
 
                 if (text.EndsWith("ies"))
                 {
-                    text = cap + text.Substring(1, text.Length - 4) + "y";
+                    text = string.Concat(cap, text.AsSpan(1, text.Length - 4), "y");
                 }
                 //s -> remove s (except special cases)
                 else if (text.EndsWith("es"))
-                    text = cap + text.Substring(1, text.Length - 2);
+                    text = string.Concat(cap, text.AsSpan(1, text.Length - 2));
                 else if (text.EndsWith('s'))
-                    text = cap + text.Substring(1, text.Length - 2);
+                    text = string.Concat(cap, text.AsSpan(1, text.Length - 2));
                 else
                 {
                     text = string.Concat(cap, text.AsSpan(1, text.Length - 1));

@@ -1,3 +1,4 @@
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 
@@ -8,11 +9,6 @@ namespace JsonConverter
     /// </summary>
     public sealed partial class SettingsPage : Page
     {
-        public static int ThemeIndex = 0;
-        public static bool? AllOptional = false;
-        public static bool? SuggestCorrs = false;
-        public static bool? ValidateMsgs = false;
-
         public SettingsPage()
         {
             InitializeComponent();
@@ -21,40 +17,73 @@ namespace JsonConverter
             themeSelect.SelectedIndex = 0;
         }
 
-        private void Back_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private void Back_Click(object sender, RoutedEventArgs e)
         {
+            ArgumentNullException.ThrowIfNull(e);
             _ = Frame.Navigate(typeof(MainPage));
         }
 
-        private void BaseName_Change(object sender, Microsoft.UI.Xaml.Controls.TextChangedEventArgs e)
+        private void BaseName_Change(object sender, TextChangedEventArgs e)
         {
             ArgumentNullException.ThrowIfNull(e);
-
-            LanguageSelector.RootName = RootName.Text;
+            LanguageSelectorHelpers.RootName = RootName.Text;
         }
 
-        private void ThemeSelect_Change(object sender, Microsoft.UI.Xaml.Controls.SelectionChangedEventArgs e)
+        private void ThemeSelect_Change(object sender, SelectionChangedEventArgs e)
         {
             ArgumentNullException.ThrowIfNull(e);
-            ThemeIndex = themeSelect.SelectedIndex;
+            SettingsPageHelpers.ThemeIndex = themeSelect.SelectedIndex;
+        }
+
+        //All optional
+        private void AllOptional_Checked(object sender, RoutedEventArgs e)
+        {
+            LanguageSelectorHelpers.AllOptional = true;
+        }
+
+        private void AllOptional_Unchecked(object sender, RoutedEventArgs e)
+        {
+            LanguageSelectorHelpers.AllOptional = false;
+        }
+
+        //Suggest corrections
+        private void SuggestCorrs_Checked(object sender, RoutedEventArgs e)
+        {
+            LanguageSelectorHelpers.SuggestCorrs = true;
+        }
+
+        private void SuggestCorrs_Unchecked(object sender, RoutedEventArgs e)
+        {
+            LanguageSelectorHelpers.SuggestCorrs = false;
+        }
+
+        //Validation Messages
+        private void ValidateMsgs_Checked(object sender, RoutedEventArgs e)
+        {
+            LanguageSelectorHelpers.ValidateMsgs = true;
+        }
+
+        private void ValidateMsgs_Unchecked(object sender, RoutedEventArgs e)
+        {
+            LanguageSelectorHelpers.ValidateMsgs = false;
         }
 
         private void Options_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            RootName.Text = LanguageSelector.RootName;
-            themeSelect.SelectedIndex = ThemeIndex;
-            allOptional.IsChecked = AllOptional;
-            suggestCorrs.IsChecked = SuggestCorrs;
-            validateMsgs.IsChecked = ValidateMsgs;
+            RootName.Text = LanguageSelectorHelpers.RootName;
+            themeSelect.SelectedIndex = SettingsPageHelpers.ThemeIndex;
+            allOptional.IsChecked = SettingsPageHelpers.AllOptional;
+            suggestCorrs.IsChecked = SettingsPageHelpers.SuggestCorrs;
+            validateMsgs.IsChecked = SettingsPageHelpers.ValidateMsgs;
         }
 
         private void Options_Unloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            LanguageSelector.RootName = RootName.Text;
-            ThemeIndex = themeSelect.SelectedIndex;
-            AllOptional = allOptional.IsChecked;
-            SuggestCorrs = suggestCorrs.IsChecked;
-            ValidateMsgs = validateMsgs.IsChecked;
+            LanguageSelectorHelpers.RootName = RootName.Text;
+            SettingsPageHelpers.ThemeIndex = themeSelect.SelectedIndex;
+            SettingsPageHelpers.AllOptional = allOptional.IsChecked;
+            SettingsPageHelpers.SuggestCorrs = suggestCorrs.IsChecked;
+            SettingsPageHelpers.ValidateMsgs = validateMsgs.IsChecked;
         }
     }
 }

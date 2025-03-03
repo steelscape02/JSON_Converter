@@ -31,7 +31,7 @@ namespace JsonConverter
             "using", "virtual", "void", "volatile", "wchar_t", "while"
         };
 
-        public static string BuildRoot(HashSet<Element> elements, string baseName)
+        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false, bool validateMsgs = false)
         {
             var classDefinitions = new List<string>
             {
@@ -80,7 +80,7 @@ namespace JsonConverter
             foreach (var element in elements.Where(element =>
                     !IsPrimitive(element.Prim.ToString()?.ToLower()) && !IsPrimitive(element.Type.ToString()?.ToLower())))
             {
-                BuildSubDm(element, visited, classDefinitions, forwards,new Element(Element.Types.Object, baseName));
+                BuildSubDm(element, visited, classDefinitions, forwards,new Element(Element.Types.Object, baseName),allOptional);
             }
             classDefinitions.Add(rootClass);
             if (_optional) classDefinitions.Insert(1, "#include <optional>\n"); else classDefinitions.Insert(1, "\n");
@@ -116,7 +116,7 @@ namespace JsonConverter
         /// </param>
         /// <param name="forwards">A list of forward class declarations</param>
         /// 
-        private static void BuildSubDm(Element element, HashSet<Element?> visited, List<string> classDefinitions, HashSet<Element> forwards, Element parent)
+        private static void BuildSubDm(Element element, HashSet<Element?> visited, List<string> classDefinitions, HashSet<Element> forwards, Element parent, bool allOptional)
         {
             if (element.Type == null) return;
             var type = GetPrintType(element, true);
@@ -168,7 +168,7 @@ namespace JsonConverter
                 else
                     childType = GetPrintType(child, false);
                 string? nullable;
-                if (child.Nullable)
+                if (child.Nullable || allOptional)
                 {
                     nullable = "std::optional<" + childType + ">";
                     _optional = true;
@@ -182,7 +182,7 @@ namespace JsonConverter
                 //const {GetPrintType(element,false)} & get_{element.Name}() const {{ return {fqName}; }}\n
                 if (child.Children.Count > 0)
                 {
-                    BuildSubDm(child, visited, classDefinitions, forwards,element); // Recursive call for nested children
+                    BuildSubDm(child, visited, classDefinitions, forwards,element,allOptional); // Recursive call for nested children
 
                 }
             }//friend void from_json(const json& j, Feature& f);
@@ -227,13 +227,13 @@ namespace JsonConverter
 
                 if (text.EndsWith("ies"))
                 {
-                    text = cap + text.Substring(1, text.Length - 4) + "y";
+                    text = string.Concat(cap, text.AsSpan(1, text.Length - 4), "y");
                 }
                 //s -> remove s (except special cases)
                 else if (text.EndsWith("es"))
-                    text = cap + text.Substring(1, text.Length - 2);
+                    text = string.Concat(cap, text.AsSpan(1, text.Length - 2));
                 else if (text.EndsWith('s'))
-                    text = cap + text.Substring(1, text.Length - 2);
+                    text = string.Concat(cap, text.AsSpan(1, text.Length - 2));
                 else
                 {
                     text = string.Concat(cap, text.AsSpan(1, text.Length - 1));

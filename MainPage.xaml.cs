@@ -1,11 +1,8 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
@@ -26,11 +23,7 @@ namespace JsonConverter
         }
 
         private new string Language = "";
-        
-        private static string JSONContents = "";
 
-        private static string JSONOutput = "";
-        
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(SettingsPage));
@@ -219,18 +212,19 @@ namespace JsonConverter
         {
             jsonEntry.SelectionFlyout.Opening += Menu_Opening;
             jsonEntry.ContextFlyout.Opening += Menu_Opening;
-            jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, JSONContents);
+            jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, MainPageHelpers.JSONContents);
 
-            outputBox.Text = JSONOutput;
+            outputBox.Text = MainPageHelpers.JSONOutput;
+            LanguageSelect.SelectedValue = MainPageHelpers.SelectedLang;
         }
 
         private void Main_Unloaded(object sender, RoutedEventArgs e)
         {
             jsonEntry.SelectionFlyout.Opening -= Menu_Opening;
             jsonEntry.ContextFlyout.Opening -= Menu_Opening;
-            jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out JSONContents);
-
-            JSONOutput = outputBox.Text;
+            jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out MainPageHelpers.JSONContents);
+            MainPageHelpers.JSONOutput = outputBox.Text;
+            MainPageHelpers.SelectedLang = LanguageSelect.SelectedValue;
         }
 
         private static bool IsJson(string input)

@@ -58,24 +58,30 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <CheckBox Grid.Row="0" Grid.Column="0" x:Name="allOptional" AutomationProperties.Name="All elements optional" Content="All optional" Margin="0 5 10 5"/>
+                        <CheckBox Grid.Row="0" Grid.Column="0" Margin="0 5 10 5"
+                                  x:Name="allOptional" Content="All optional" AutomationProperties.Name="All elements optional"
+                                  Checked="AllOptional_Checked" Unchecked="AllOptional_Unchecked"/>
                         <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">
                             <SymbolIcon Symbol="Help"/>
                         </Button>
-                        
-                        <CheckBox Grid.Row="1" Grid.Column="0" x:Name="suggestCorrs" AutomationProperties.Name="Suggest corrections to mispellings" Content="Suggest Corrections" Margin="0 5 10 5"/>
+
+                        <CheckBox Grid.Row="1" Grid.Column="0" Margin="0 5 10 5"
+                                  x:Name="suggestCorrs" Content="Suggest Corrections" AutomationProperties.Name="Suggest corrections to mispellings"
+                                  Checked="SuggestCorrs_Checked" Unchecked="SuggestCorrs_Unchecked"/>
                         <Button Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right">
                             <SymbolIcon Symbol="Help"/>
                         </Button>
-                        
-                        <CheckBox Grid.Row="2" Grid.Column="0" x:Name="validateMsgs" AutomationProperties.Name="Show validation errors" Content="Validate Information" Margin="0 5 10 5"/>
+
+                        <CheckBox Grid.Row="2" Grid.Column="0" Margin="0 5 10 5"
+                                  x:Name="validateMsgs" Content="Validate Information" AutomationProperties.Name="Show validation errors"
+                                  />
                         <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right">
                             <SymbolIcon Symbol="Help"/>
                         </Button>
                     </Grid>
 
                     <RadioButtons x:Name="themeSelect" Header="Theme:" Margin="10" SelectionChanged="ThemeSelect_Change">
-                        <RadioButton x:Name="System" AutomationProperties.Name="System Theme" Content="System"/>
+                        <RadioButton x:Name="system" AutomationProperties.Name="System Theme" Content="System"/>
                         <RadioButton x:Name="dark" AutomationProperties.Name="Dark Theme" Content="Dark"/>
                         <RadioButton x:Name="light" AutomationProperties.Name="Light Theme" Content="Light"/>
                     </RadioButtons>
