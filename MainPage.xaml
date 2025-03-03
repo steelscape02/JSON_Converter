@@ -9,7 +9,9 @@
     mc:Ignorable="d"
     Background="{ThemeResource AcrylicBackgroundFillColorBaseBrush}">
 
-    <Grid>
+    <Grid
+        Loaded="Main_Loaded"
+        Unloaded="Main_Unloaded">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -132,8 +134,6 @@
            HorizontalAlignment="Stretch"
            Padding="10,10"
            Margin="10"
-           Loaded="JsonEntry_Loaded"
-           Unloaded="JsonEntry_Unloaded"
            IsSpellCheckEnabled="False"
            Style="{StaticResource DefaultRichEditBoxStyle}"
         >

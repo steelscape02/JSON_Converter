@@ -16,7 +16,7 @@ using WinRT.Interop;
 namespace JsonConverter
 {
     /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// Main page for performing JSON conversion
     /// </summary>
     public sealed partial class MainPage : Page
     {
@@ -28,6 +28,8 @@ namespace JsonConverter
         private new string Language = "";
         
         private static string JSONContents = "";
+
+        private static string JSONOutput = "";
         
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
@@ -213,18 +215,22 @@ namespace JsonConverter
             }
         }
 
-        private void JsonEntry_Loaded(object sender, RoutedEventArgs e)
+        private void Main_Loaded(object sender, RoutedEventArgs e)
         {
             jsonEntry.SelectionFlyout.Opening += Menu_Opening;
             jsonEntry.ContextFlyout.Opening += Menu_Opening;
             jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, JSONContents);
+
+            outputBox.Text = JSONOutput;
         }
 
-        private void JsonEntry_Unloaded(object sender, RoutedEventArgs e)
+        private void Main_Unloaded(object sender, RoutedEventArgs e)
         {
             jsonEntry.SelectionFlyout.Opening -= Menu_Opening;
             jsonEntry.ContextFlyout.Opening -= Menu_Opening;
             jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out JSONContents);
+
+            JSONOutput = outputBox.Text;
         }
 
         private static bool IsJson(string input)
