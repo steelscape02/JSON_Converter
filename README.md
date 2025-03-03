@@ -1,7 +1,22 @@
-# JSON to Data Model Converter
-## Preview
-This program is designed to convert a JSON response into a Data Model. It allows you to write the data model in specific object-oriented programming languages, including Python, C#, and C++. To better enhance useability, this program will be available for download as a WinUI 3 desktop application. Written entirely in C# using a combination of JetBrains Rider and Microsoft Visual Studio, this program offers an attractive desktop alternative to existing JSON Converters
+# Overview
 
-## Current Steps
-- Add settings page
-- Add options in Settings for granular control of automated renaming
+Welcome to my **JSON Converter**! This is a simple application that allows you to translate a JSON response into a Data Model (a set of classes) in your
+desired programming language. Using this model, the user can quickly produce usable JSON models in their desired language, allowing them to call members of
+the JSON response as member variables of a parent object.
+
+<!--[Software Demo Video](http://youtube.link.goes.here)-->
+
+# Development Environment
+
+The base "engine" of this program is built using C# and the JSON Nodes library. To make this program more user-friendly, I added a UI built in WinUI 3. For ease
+of development, this program was built originally in JetBrains Rider, then in Visual Studio for WinUI 3 development.
+
+# Useful Websites
+
+<!-- - [Web Site Name](http://url.link.goes.here) -->
+<!-- - [Web Site Name](http://url.link.goes.here) -->
+
+# Future Work
+
+- Add **content saving** to main and Settings page
+- Improve **information panel** in Settings page
