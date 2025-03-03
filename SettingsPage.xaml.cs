@@ -60,12 +60,12 @@ namespace JsonConverter
         //Validation Messages
         private void ValidateMsgs_Checked(object sender, RoutedEventArgs e)
         {
-            LanguageSelectorHelpers.ValidateMsgs = true;
+            MainPageHelpers.ValidateMsgs = true;
         }
 
         private void ValidateMsgs_Unchecked(object sender, RoutedEventArgs e)
         {
-            LanguageSelectorHelpers.ValidateMsgs = false;
+            MainPageHelpers.ValidateMsgs = false;
         }
 
         private void Options_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

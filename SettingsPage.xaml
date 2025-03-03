@@ -73,8 +73,8 @@
                         </Button>
 
                         <CheckBox Grid.Row="2" Grid.Column="0" Margin="0 5 10 5"
-                                  x:Name="validateMsgs" Content="Validate Information" AutomationProperties.Name="Show validation errors"
-                                  />
+                                  x:Name="validateMsgs" Content="Detailed errors" AutomationProperties.Name="Provides detailed errors for Validate"
+                                  Checked="ValidateMsgs_Checked" Unchecked="ValidateMsgs_Unchecked"/>
                         <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right">
                             <SymbolIcon Symbol="Help"/>
                         </Button>

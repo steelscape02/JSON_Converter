@@ -22,13 +22,13 @@ class LanguageSelector
             {
                 case Languages.CSharp:
                     return CSharpDm.BuildRoot(contents, LanguageSelectorHelpers.RootName,
-                        LanguageSelectorHelpers.AllOptional, LanguageSelectorHelpers.SuggestCorrs, LanguageSelectorHelpers.ValidateMsgs);
+                        LanguageSelectorHelpers.AllOptional, LanguageSelectorHelpers.SuggestCorrs);
                 case Languages.Cpp:
                     return CppDm.BuildRoot(contents, LanguageSelectorHelpers.RootName,
-                        LanguageSelectorHelpers.AllOptional, LanguageSelectorHelpers.SuggestCorrs, LanguageSelectorHelpers.ValidateMsgs);
+                        LanguageSelectorHelpers.AllOptional, LanguageSelectorHelpers.SuggestCorrs);
                 case Languages.Python:
                     return PythonDm.BuildRoot(contents, LanguageSelectorHelpers.RootName,
-                        LanguageSelectorHelpers.AllOptional, LanguageSelectorHelpers.SuggestCorrs, LanguageSelectorHelpers.ValidateMsgs);
+                        LanguageSelectorHelpers.AllOptional, LanguageSelectorHelpers.SuggestCorrs);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lang), lang, "The specified language is not supported.");
             }

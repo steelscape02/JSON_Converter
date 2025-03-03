@@ -41,7 +41,7 @@ namespace JsonConverter
         /// <param name="elements">A <c>HashSet</c> of <c>Element</c> objects representing the <c>Root</c> class of
         /// the JSON response</param>
         /// <returns>A string representation of a C# data model</returns>
-        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false, bool validateMsgs = false)
+        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false)
         {
             var classDefinitions = new List<string>();
 

@@ -38,9 +38,14 @@
                 Icon="Find" 
                 Label="Validate"
                 Click="Validate_JSON">
-                
+                <Button.Flyout>
+                    <Flyout>
+                        <StackPanel>
+                            <TextBlock x:Name="validateErr_msg" Style="{ThemeResource BaseTextBlockStyle}" Text="Error" Margin="0,0,0,12" />
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
             </AppBarButton>
-            <!-- Find a place to put this output (for this and submit errors)-->
             <AppBarButton Icon="Accept" Label="Submit" Click="Submit_Click"/>
 
         </CommandBar>

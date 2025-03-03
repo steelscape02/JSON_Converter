@@ -19,7 +19,7 @@ namespace JsonConverter
     {
         public MainPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         private new string Language = "";
@@ -31,15 +31,32 @@ namespace JsonConverter
 
         private void Validate_JSON(object sender, RoutedEventArgs e)
         {
+
             validateBtn.Focus(FocusState.Programmatic);
             jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out string entry);
-            if (IsJson(entry))
+
+            
+            try
             {
+                using (JsonDocument.Parse(entry)) { }
                 valid_validate_start.Begin();
                 valid_validate_end.Begin();
             }
-            else
+            catch (JsonException j)
             {
+                
+                if (MainPageHelpers.ValidateMsgs)
+                {
+                    validateErr_msg.Text = j.ToString();
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(entry))
+                        validateErr_msg.Text = "Empty JSON";
+                    else
+                        validateErr_msg.Text = "JSON Error";
+                }
+                
                 invalid_validate_start.Begin();
                 invalid_validate_end.Begin();
             }

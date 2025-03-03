@@ -22,7 +22,7 @@ namespace JsonConverter
             "async", "elif", "if", "or", "yield"
         };
 
-        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false, bool validateMsgs = false)
+        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false)
         {
             var classDefinitions = new List<string>
             {
