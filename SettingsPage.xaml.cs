@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using Windows.Storage;
 
 namespace JsonConverter
 {
@@ -9,11 +10,14 @@ namespace JsonConverter
     /// </summary>
     public sealed partial class SettingsPage : Page
     {
+        StorageManager manager;
         public SettingsPage()
         {
+            manager = new StorageManager();
             InitializeComponent();
             versionID.Text = TextResources.version;
-            RootName.Text = TextResources.baseName;
+            if(manager.Get("RootName") == null)
+                manager.Save("RootName", TextResources.baseName);
             themeSelect.SelectedIndex = 0;
         }
 
@@ -42,64 +46,65 @@ namespace JsonConverter
         private void BaseName_Change(object sender, TextChangedEventArgs e)
         {
             ArgumentNullException.ThrowIfNull(e);
-            LanguageSelectorHelpers.RootName = RootName.Text;
+            manager.Save("RootName", RootName.Text);
         }
 
         private void ThemeSelect_Change(object sender, SelectionChangedEventArgs e)
         {
             ArgumentNullException.ThrowIfNull(e);
-            SettingsPageHelpers.ThemeIndex = themeSelect.SelectedIndex;
+            manager.Save("ThemeIndex", themeSelect.SelectedIndex);
+            //implement theme change
         }
 
         //All optional
         private void AllOptional_Checked(object sender, RoutedEventArgs e)
         {
-            LanguageSelectorHelpers.AllOptional = true;
+            manager.Save("AllOptional", true);
         }
 
         private void AllOptional_Unchecked(object sender, RoutedEventArgs e)
         {
-            LanguageSelectorHelpers.AllOptional = false;
+            manager.Save("AllOptional", false);
         }
 
         //Suggest corrections
         private void SuggestCorrs_Checked(object sender, RoutedEventArgs e)
         {
-            LanguageSelectorHelpers.SuggestCorrs = true;
+            manager.Save("SuggestCorrs", true);
         }
 
         private void SuggestCorrs_Unchecked(object sender, RoutedEventArgs e)
         {
-            LanguageSelectorHelpers.SuggestCorrs = false;
+            manager.Save("SuggestCorrs", false);
         }
 
         //Validation Messages
         private void ValidateMsgs_Checked(object sender, RoutedEventArgs e)
         {
-            MainPageHelpers.ValidateMsgs = true;
+            manager.Save("ValidateMsgs", true);
         }
 
         private void ValidateMsgs_Unchecked(object sender, RoutedEventArgs e)
         {
-            MainPageHelpers.ValidateMsgs = false;
+            manager.Save("ValidateMsgs", false);
         }
 
-        private void Options_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private void Options_Loaded(object sender, RoutedEventArgs e)
         {
-            RootName.Text = LanguageSelectorHelpers.RootName;
-            themeSelect.SelectedIndex = SettingsPageHelpers.ThemeIndex;
-            allOptional.IsChecked = SettingsPageHelpers.AllOptional;
-            suggestCorrs.IsChecked = SettingsPageHelpers.SuggestCorrs;
-            validateMsgs.IsChecked = SettingsPageHelpers.ValidateMsgs;
+            RootName.Text = manager.Get("RootName") as string;
+            themeSelect.SelectedIndex = manager.Get("ThemeIndex") as int? ?? 0;
+            allOptional.IsChecked = manager.Get("AllOptional") as bool? ?? false;
+            suggestCorrs.IsChecked = manager.Get("SuggestCorrs") as bool? ?? false;
+            validateMsgs.IsChecked = manager.Get("ValidateMsgs") as bool? ?? false;
         }
 
-        private void Options_Unloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private void Options_Unloaded(object sender, RoutedEventArgs e)
         {
-            LanguageSelectorHelpers.RootName = RootName.Text;
-            SettingsPageHelpers.ThemeIndex = themeSelect.SelectedIndex;
-            SettingsPageHelpers.AllOptional = allOptional.IsChecked;
-            SettingsPageHelpers.SuggestCorrs = suggestCorrs.IsChecked;
-            SettingsPageHelpers.ValidateMsgs = validateMsgs.IsChecked;
+            manager.Save("RootName", RootName.Text);
+            manager.Save("ThemeIndex", themeSelect.SelectedIndex);
+            manager.Save("AllOptional", allOptional.IsChecked ?? false);
+            manager.Save("SuggestCorrs", suggestCorrs.IsChecked ?? false);
+            manager.Save("ValidateMsgs", validateMsgs.IsChecked ?? false);
         }
 
     }

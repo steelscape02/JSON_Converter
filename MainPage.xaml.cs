@@ -17,9 +17,12 @@ namespace JsonConverter
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        StorageManager manager;
+
         public MainPage()
         {
             InitializeComponent();
+            manager = new StorageManager();
         }
 
         private new string Language = "";
@@ -39,13 +42,13 @@ namespace JsonConverter
             try
             {
                 using (JsonDocument.Parse(entry)) { }
+                validateErr_msg.Text = "No error";
                 valid_validate_start.Begin();
                 valid_validate_end.Begin();
             }
             catch (JsonException j)
             {
-                
-                if (MainPageHelpers.ValidateMsgs)
+                if (manager.Get("ValidateMsgs") as bool? ?? false)
                 {
                     validateErr_msg.Text = j.ToString();
                 }
@@ -64,6 +67,8 @@ namespace JsonConverter
         
         private void Submit_Click(object sender, RoutedEventArgs e)
         {
+            
+            var _selector = new LanguageSelector(manager);
             jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out string entry);
             if (IsJson(entry))
             {
@@ -74,15 +79,15 @@ namespace JsonConverter
                 switch (Language)
                 {
                     case "C#":
-                        dm = LanguageSelector.Select(LanguageSelector.Languages.CSharp, contents);
+                        dm = _selector.Select(LanguageSelector.Languages.CSharp, contents);
                         outputBox.Text = dm;
                         break;
                     case "Python":
-                        dm = LanguageSelector.Select(LanguageSelector.Languages.Python, contents);
+                        dm = _selector.Select(LanguageSelector.Languages.Python, contents);
                         outputBox.Text = dm;
                         break;
                     case "C++":
-                        dm = LanguageSelector.Select(LanguageSelector.Languages.Cpp, contents);
+                        dm = _selector.Select(LanguageSelector.Languages.Cpp, contents);
                         outputBox.Text = dm;
                         break;
                     default:
@@ -229,19 +234,21 @@ namespace JsonConverter
         {
             jsonEntry.SelectionFlyout.Opening += Menu_Opening;
             jsonEntry.ContextFlyout.Opening += Menu_Opening;
-            jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, MainPageHelpers.JSONContents);
+            jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, manager.Get("JSONContents") as string);
 
-            outputBox.Text = MainPageHelpers.JSONOutput;
-            LanguageSelect.SelectedValue = MainPageHelpers.SelectedLang;
+            outputBox.Text = manager.Get("JSONOutput") as string;
+            LanguageSelect.SelectedValue = manager.Get("SelectedLang") as string;
         }
 
         private void Main_Unloaded(object sender, RoutedEventArgs e)
         {
             jsonEntry.SelectionFlyout.Opening -= Menu_Opening;
             jsonEntry.ContextFlyout.Opening -= Menu_Opening;
-            jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out MainPageHelpers.JSONContents);
-            MainPageHelpers.JSONOutput = outputBox.Text;
-            MainPageHelpers.SelectedLang = LanguageSelect.SelectedValue;
+
+            jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out string jsonContents);
+            manager.Save("JSONContents", jsonContents);
+            manager.Save("JSONOutput", outputBox.Text);
+            manager.Save("SelectedLang", LanguageSelect.SelectedValue);
         }
 
         private static bool IsJson(string input)

@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace JsonConverter
 {
     
-class LanguageSelector
+    class LanguageSelector(IStorageManager localStorage)
     {
+        private IStorageManager _localStorage = localStorage;
+
         public enum Languages
         {
             CSharp,
@@ -16,22 +19,18 @@ class LanguageSelector
             Python
         }
 
-        public static string Select(Languages lang, HashSet<Element> contents)
+        public string Select(Languages lang, HashSet<Element> contents)
         {
-            switch (lang)
+            string RootName = _localStorage.Get("RootName") as string ?? "";
+            bool AllOptional = _localStorage.Get("AllOptional") as bool? ?? false;
+            bool SuggestCorrs = _localStorage.Get("SuggestCorrs") as bool? ?? false;
+            return lang switch
             {
-                case Languages.CSharp:
-                    return CSharpDm.BuildRoot(contents, LanguageSelectorHelpers.RootName,
-                        LanguageSelectorHelpers.AllOptional, LanguageSelectorHelpers.SuggestCorrs);
-                case Languages.Cpp:
-                    return CppDm.BuildRoot(contents, LanguageSelectorHelpers.RootName,
-                        LanguageSelectorHelpers.AllOptional, LanguageSelectorHelpers.SuggestCorrs);
-                case Languages.Python:
-                    return PythonDm.BuildRoot(contents, LanguageSelectorHelpers.RootName,
-                        LanguageSelectorHelpers.AllOptional, LanguageSelectorHelpers.SuggestCorrs);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(lang), lang, "The specified language is not supported.");
-            }
+                Languages.CSharp => CSharpDm.BuildRoot(contents, RootName, AllOptional, SuggestCorrs),
+                Languages.Cpp => CppDm.BuildRoot(contents, RootName, AllOptional, SuggestCorrs),
+                Languages.Python => PythonDm.BuildRoot(contents, RootName, AllOptional, SuggestCorrs),
+                _ => throw new ArgumentOutOfRangeException(nameof(lang), lang, "The specified language is not supported."),
+            };
         }
     }
 }

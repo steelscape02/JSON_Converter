@@ -23,15 +23,33 @@ namespace JsonConverter
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        Windows.Storage.ApplicationDataContainer localSettings =
+            Windows.Storage.ApplicationData.Current.LocalSettings;
+        Windows.Storage.StorageFolder localFolder =
+            Windows.Storage.ApplicationData.Current.LocalFolder;
         public MainWindow()
         {
+
             this.InitializeComponent();
             if (Microsoft.UI.Composition.SystemBackdrops.DesktopAcrylicController.IsSupported())
             {
                 Microsoft.UI.Xaml.Media.DesktopAcrylicBackdrop DesktopAcrylicBackdrop = new Microsoft.UI.Xaml.Media.DesktopAcrylicBackdrop();
                 this.SystemBackdrop = DesktopAcrylicBackdrop;
             }
+            this.Activated += MainWindow_Activated;
+            this.Closed += MainWindow_Closed;
+        }
 
+        private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
+        {
+        }
+
+        private void MainWindow_Open()
+        {
+
+        }
+        private void MainWindow_Closed(object sender, WindowEventArgs args)
+        {
         }
     }
 }

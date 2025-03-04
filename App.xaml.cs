@@ -54,7 +54,9 @@ namespace JsonConverter
             m_window.Content = rootFrame;
             // Ensure the MainWindow is active
             m_window.Activate();
+            
         }
+
 
         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
         {

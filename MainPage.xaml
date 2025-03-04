@@ -41,7 +41,7 @@
                 <Button.Flyout>
                     <Flyout>
                         <StackPanel>
-                            <TextBlock x:Name="validateErr_msg" Style="{ThemeResource BaseTextBlockStyle}" Text="Error" Margin="0,0,0,12" />
+                            <TextBlock x:Name="validateErr_msg" Style="{ThemeResource BaseTextBlockStyle}" Text="No error" Margin="0,0,0,12" />
                         </StackPanel>
                     </Flyout>
                 </Button.Flyout>

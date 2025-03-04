@@ -89,9 +89,9 @@
                     </StackPanel>
 
                     <RadioButtons x:Name="themeSelect" Header="Theme:" Margin="10" SelectionChanged="ThemeSelect_Change">
-                        <RadioButton x:Name="system" AutomationProperties.Name="System Theme" Content="System"/>
-                        <RadioButton x:Name="dark" AutomationProperties.Name="Dark Theme" Content="Dark"/>
-                        <RadioButton x:Name="light" AutomationProperties.Name="Light Theme" Content="Light"/>
+                        <RadioButton x:Name="system" AutomationProperties.Name="Default" Content="System"/>
+                        <RadioButton x:Name="dark" AutomationProperties.Name="Dark" Content="Dark"/>
+                        <RadioButton x:Name="light" AutomationProperties.Name="Light" Content="Light"/>
                     </RadioButtons>
                     <Button Margin="0 40 10 5" HorizontalAlignment="Right" Click="Help_Click">
                         <SymbolIcon Symbol="Help"/>
