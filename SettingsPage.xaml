@@ -47,44 +47,56 @@
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="10" Loaded="Options_Loaded" Unloaded="Options_Unloaded">
                     <TextBox  x:Name="RootName" AutomationProperties.Name="Root Name Entry" Header="Base class name:"
                         Margin="10 5 10 20" AcceptsReturn="False" IsSpellCheckEnabled="False" TextChanged="BaseName_Change"/>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <CheckBox Grid.Row="0" Grid.Column="0" Margin="0 5 10 5"
-                                  x:Name="allOptional" Content="All optional" AutomationProperties.Name="All elements optional"
-                                  Checked="AllOptional_Checked" Unchecked="AllOptional_Unchecked"/>
-                        <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">
-                            <SymbolIcon Symbol="Help"/>
-                        </Button>
-
-                        <CheckBox Grid.Row="1" Grid.Column="0" Margin="0 5 10 5"
-                                  x:Name="suggestCorrs" Content="Suggest Corrections" AutomationProperties.Name="Suggest corrections to mispellings"
-                                  Checked="SuggestCorrs_Checked" Unchecked="SuggestCorrs_Unchecked"/>
-                        <Button Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right">
-                            <SymbolIcon Symbol="Help"/>
-                        </Button>
-
-                        <CheckBox Grid.Row="2" Grid.Column="0" Margin="0 5 10 5"
-                                  x:Name="validateMsgs" Content="Detailed errors" AutomationProperties.Name="Provides detailed errors for Validate"
-                                  Checked="ValidateMsgs_Checked" Unchecked="ValidateMsgs_Unchecked"/>
-                        <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right">
-                            <SymbolIcon Symbol="Help"/>
-                        </Button>
-                    </Grid>
+                    <StackPanel>
+                        <CheckBox Margin="0 5 5 5"
+                            x:Name="allOptional" Content="All optional" AutomationProperties.Name="All elements optional"
+                            Checked="AllOptional_Checked" Unchecked="AllOptional_Unchecked"/>
+                        <TeachingTip x:Name="allOptional_TeachingTip"
+                            Target="{x:Bind allOptional}"
+                            Title="All Optional"
+                            Subtitle="Changes all member variables to optional"
+                            PreferredPlacement="TopRight">
+                            <TeachingTip.IconSource>
+                                <SymbolIconSource Symbol="Help" />
+                            </TeachingTip.IconSource>
+                        </TeachingTip>
+                        
+                        <CheckBox Margin="0 5 5 5"
+                            x:Name="suggestCorrs" Content="Suggest Corrections" AutomationProperties.Name="Suggest corrections to mispellings"
+                            Checked="SuggestCorrs_Checked" Unchecked="SuggestCorrs_Unchecked" IsEnabled="False"/>
+                        <TeachingTip x:Name="suggestCorrs_TeachingTip"
+                            Target="{x:Bind suggestCorrs}"
+                            Title="Suggest corrections"
+                            Subtitle="If the JSON contains mismatched elements, suggest corrections"
+                            PreferredPlacement="Right">
+                            <TeachingTip.IconSource>
+                                <SymbolIconSource Symbol="Help" />
+                            </TeachingTip.IconSource>
+                        </TeachingTip>
+                        
+                        <CheckBox Margin="0 5 5 5"
+                            x:Name="validateMsgs" Content="Detailed errors" AutomationProperties.Name="Provides detailed errors for Validate"
+                            Checked="ValidateMsgs_Checked" Unchecked="ValidateMsgs_Unchecked"/>
+                        <TeachingTip x:Name="validateMsgs_TeachingTip"
+                            Target="{x:Bind validateMsgs}"
+                            Title="Show exact error messages"
+                            Subtitle="When Validate is pressed on a faulty response, the exact error is displayed"
+                            PreferredPlacement="BottomRight">
+                            <TeachingTip.IconSource>
+                                <SymbolIconSource Symbol="Help" />
+                            </TeachingTip.IconSource>
+                        </TeachingTip>
+                    </StackPanel>
 
                     <RadioButtons x:Name="themeSelect" Header="Theme:" Margin="10" SelectionChanged="ThemeSelect_Change">
                         <RadioButton x:Name="system" AutomationProperties.Name="System Theme" Content="System"/>
                         <RadioButton x:Name="dark" AutomationProperties.Name="Dark Theme" Content="Dark"/>
                         <RadioButton x:Name="light" AutomationProperties.Name="Light Theme" Content="Light"/>
                     </RadioButtons>
+                    <Button Margin="0 40 10 5" HorizontalAlignment="Right" Click="Help_Click">
+                        <SymbolIcon Symbol="Help"/>
+                    </Button>
+                    
                 </StackPanel>
             </Border>
             

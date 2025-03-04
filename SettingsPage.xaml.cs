@@ -23,6 +23,22 @@ namespace JsonConverter
             _ = Frame.Navigate(typeof(MainPage));
         }
 
+        private void Help_Click(object sender, RoutedEventArgs e)
+        {
+            if (!allOptional_TeachingTip.IsOpen && !suggestCorrs_TeachingTip.IsOpen && !validateMsgs_TeachingTip.IsOpen)
+            {
+                allOptional_TeachingTip.IsOpen = true;
+                suggestCorrs_TeachingTip.IsOpen = true;
+                validateMsgs_TeachingTip.IsOpen = true;
+            }
+            else
+            {
+                allOptional_TeachingTip.IsOpen = false;
+                suggestCorrs_TeachingTip.IsOpen = false;
+                validateMsgs_TeachingTip.IsOpen = false;
+            }
+        }
+
         private void BaseName_Change(object sender, TextChangedEventArgs e)
         {
             ArgumentNullException.ThrowIfNull(e);
@@ -85,5 +101,6 @@ namespace JsonConverter
             SettingsPageHelpers.SuggestCorrs = suggestCorrs.IsChecked;
             SettingsPageHelpers.ValidateMsgs = validateMsgs.IsChecked;
         }
+
     }
 }
