@@ -4,7 +4,7 @@ using System.Linq;
 
 //TODO: Add renamin
 
-namespace JsonConverter
+namespace JsonConverter.dm
 {
     class PythonDm
     {

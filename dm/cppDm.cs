@@ -5,7 +5,7 @@ using System.Linq;
 using Windows.Media.Core;
 //TODO: Add set for later init
 
-namespace JsonConverter
+namespace JsonConverter.dm
 {
     //TODO: Complete conversion (basically copy from Python)
     class CppDm

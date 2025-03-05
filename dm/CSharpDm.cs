@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace JsonConverter
+namespace JsonConverter.dm
 {
     public class CSharpDm //TODO: Optimize this structure (inc naming)
     {
