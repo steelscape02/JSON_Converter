@@ -21,9 +21,9 @@ namespace JsonConverter
 
         public string Select(Languages lang, HashSet<Element> contents)
         {
-            string RootName = _localStorage.Get("RootName") as string ?? "";
-            bool AllOptional = _localStorage.Get("AllOptional") as bool? ?? false;
-            bool SuggestCorrs = _localStorage.Get("SuggestCorrs") as bool? ?? false;
+            string RootName = _localStorage.Get(TextResources.rootName) as string ?? "";
+            bool AllOptional = _localStorage.Get(TextResources.allOptional) as bool? ?? false;
+            bool SuggestCorrs = _localStorage.Get(TextResources.suggestCorrs) as bool? ?? false;
             return lang switch
             {
                 Languages.CSharp => CSharpDm.BuildRoot(contents, RootName, AllOptional, SuggestCorrs),

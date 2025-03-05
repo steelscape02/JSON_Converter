@@ -17,7 +17,7 @@ namespace JsonConverter
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        StorageManager manager;
+        private readonly StorageManager manager;
 
         public MainPage()
         {
@@ -234,10 +234,10 @@ namespace JsonConverter
         {
             jsonEntry.SelectionFlyout.Opening += Menu_Opening;
             jsonEntry.ContextFlyout.Opening += Menu_Opening;
-            jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, manager.Get("JSONContents") as string);
+            jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, manager.Get(TextResources.jsonContents) as string);
 
-            outputBox.Text = manager.Get("JSONOutput") as string;
-            LanguageSelect.SelectedValue = manager.Get("SelectedLang") as string;
+            outputBox.Text = manager.Get(TextResources.jsonOutput) as string;
+            LanguageSelect.SelectedValue = manager.Get(TextResources.selectedLang) as string;
         }
 
         private void Main_Unloaded(object sender, RoutedEventArgs e)
@@ -246,9 +246,9 @@ namespace JsonConverter
             jsonEntry.ContextFlyout.Opening -= Menu_Opening;
 
             jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out string jsonContents);
-            manager.Save("JSONContents", jsonContents);
-            manager.Save("JSONOutput", outputBox.Text);
-            manager.Save("SelectedLang", LanguageSelect.SelectedValue);
+            manager.Set(TextResources.jsonContents, jsonContents);
+            manager.Set(TextResources.jsonOutput, outputBox.Text);
+            manager.Set(TextResources.selectedLang, LanguageSelect.SelectedValue);
         }
 
         private static bool IsJson(string input)

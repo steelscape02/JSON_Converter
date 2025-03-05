@@ -10,14 +10,14 @@ namespace JsonConverter
     /// </summary>
     public sealed partial class SettingsPage : Page
     {
-        StorageManager manager;
+        private readonly StorageManager manager;
         public SettingsPage()
         {
             manager = new StorageManager();
             InitializeComponent();
             versionID.Text = TextResources.version;
-            if(manager.Get("RootName") == null)
-                manager.Save("RootName", TextResources.baseName);
+            if(manager.Get(TextResources.rootName) == null)
+                manager.Set(TextResources.rootName, TextResources.baseName);
             themeSelect.SelectedIndex = 0;
         }
 
@@ -46,65 +46,65 @@ namespace JsonConverter
         private void BaseName_Change(object sender, TextChangedEventArgs e)
         {
             ArgumentNullException.ThrowIfNull(e);
-            manager.Save("RootName", RootName.Text);
+            manager.Set(TextResources.rootName, RootName.Text);
         }
 
         private void ThemeSelect_Change(object sender, SelectionChangedEventArgs e)
         {
             ArgumentNullException.ThrowIfNull(e);
-            manager.Save("ThemeIndex", themeSelect.SelectedIndex);
+            manager.Set(TextResources.themeIndex, themeSelect.SelectedIndex);
             //implement theme change
         }
 
         //All optional
         private void AllOptional_Checked(object sender, RoutedEventArgs e)
         {
-            manager.Save("AllOptional", true);
+            manager.Set(TextResources.allOptional, true);
         }
 
         private void AllOptional_Unchecked(object sender, RoutedEventArgs e)
         {
-            manager.Save("AllOptional", false);
+            manager.Set(TextResources.allOptional, false);
         }
 
         //Suggest corrections
         private void SuggestCorrs_Checked(object sender, RoutedEventArgs e)
         {
-            manager.Save("SuggestCorrs", true);
+            manager.Set(TextResources.suggestCorrs, true);
         }
 
         private void SuggestCorrs_Unchecked(object sender, RoutedEventArgs e)
         {
-            manager.Save("SuggestCorrs", false);
+            manager.Set(TextResources.suggestCorrs, false);
         }
 
         //Validation Messages
         private void ValidateMsgs_Checked(object sender, RoutedEventArgs e)
         {
-            manager.Save("ValidateMsgs", true);
+            manager.Set(TextResources.validateMsgs, true);
         }
 
         private void ValidateMsgs_Unchecked(object sender, RoutedEventArgs e)
         {
-            manager.Save("ValidateMsgs", false);
+            manager.Set(TextResources.validateMsgs, false);
         }
 
         private void Options_Loaded(object sender, RoutedEventArgs e)
         {
-            RootName.Text = manager.Get("RootName") as string;
-            themeSelect.SelectedIndex = manager.Get("ThemeIndex") as int? ?? 0;
-            allOptional.IsChecked = manager.Get("AllOptional") as bool? ?? false;
-            suggestCorrs.IsChecked = manager.Get("SuggestCorrs") as bool? ?? false;
-            validateMsgs.IsChecked = manager.Get("ValidateMsgs") as bool? ?? false;
+            RootName.Text = manager.Get(TextResources.rootName) as string;
+            themeSelect.SelectedIndex = manager.Get(TextResources.themeIndex) as int? ?? 0;
+            allOptional.IsChecked = manager.Get(TextResources.allOptional) as bool? ?? false;
+            suggestCorrs.IsChecked = manager.Get(TextResources.suggestCorrs) as bool? ?? false;
+            validateMsgs.IsChecked = manager.Get(TextResources.validateMsgs) as bool? ?? false;
         }
 
         private void Options_Unloaded(object sender, RoutedEventArgs e)
         {
-            manager.Save("RootName", RootName.Text);
-            manager.Save("ThemeIndex", themeSelect.SelectedIndex);
-            manager.Save("AllOptional", allOptional.IsChecked ?? false);
-            manager.Save("SuggestCorrs", suggestCorrs.IsChecked ?? false);
-            manager.Save("ValidateMsgs", validateMsgs.IsChecked ?? false);
+            manager.Set(TextResources.rootName, RootName.Text);
+            manager.Set(TextResources.themeIndex, themeSelect.SelectedIndex);
+            manager.Set(TextResources.allOptional, allOptional.IsChecked ?? false);
+            manager.Set(TextResources.suggestCorrs, suggestCorrs.IsChecked ?? false);
+            manager.Set(TextResources.validateMsgs, validateMsgs.IsChecked ?? false);
         }
 
     }

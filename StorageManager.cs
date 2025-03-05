@@ -1,9 +1,4 @@
 ﻿using Windows.Storage;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JsonConverter
 {
@@ -16,7 +11,7 @@ namespace JsonConverter
             localSettings = ApplicationData.Current.LocalSettings;
         }
 
-        public void Save(string key, object value)
+        public void Set(string key, object value)
         {
             localSettings.Values[key] = value;
         }

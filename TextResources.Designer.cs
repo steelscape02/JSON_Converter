@@ -61,11 +61,83 @@ namespace JsonConverter {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AllOptional.
+        /// </summary>
+        internal static string allOptional {
+            get {
+                return ResourceManager.GetString("allOptional", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Root.
         /// </summary>
         internal static string baseName {
             get {
                 return ResourceManager.GetString("baseName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to JSONContents.
+        /// </summary>
+        internal static string jsonContents {
+            get {
+                return ResourceManager.GetString("jsonContents", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to JSONOutput.
+        /// </summary>
+        internal static string jsonOutput {
+            get {
+                return ResourceManager.GetString("jsonOutput", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RootName.
+        /// </summary>
+        internal static string rootName {
+            get {
+                return ResourceManager.GetString("rootName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SelectedLang.
+        /// </summary>
+        internal static string selectedLang {
+            get {
+                return ResourceManager.GetString("selectedLang", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SuggestCorrs.
+        /// </summary>
+        internal static string suggestCorrs {
+            get {
+                return ResourceManager.GetString("suggestCorrs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ThemeIndex.
+        /// </summary>
+        internal static string themeIndex {
+            get {
+                return ResourceManager.GetString("themeIndex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ValidateMsgs.
+        /// </summary>
+        internal static string validateMsgs {
+            get {
+                return ResourceManager.GetString("validateMsgs", resourceCulture);
             }
         }
         

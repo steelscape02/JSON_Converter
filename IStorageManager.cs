@@ -8,7 +8,7 @@ namespace JsonConverter
 {
     interface IStorageManager
     {
-        void Save(string key, object value);
+        void Set(string key, object value);
         object? Get(string key);
     }
 }

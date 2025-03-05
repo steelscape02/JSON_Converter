@@ -117,9 +117,33 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="allOptional" xml:space="preserve">
+    <value>AllOptional</value>
+  </data>
   <data name="baseName" xml:space="preserve">
     <value>Root</value>
     <comment>Default version name</comment>
+  </data>
+  <data name="jsonContents" xml:space="preserve">
+    <value>JSONContents</value>
+  </data>
+  <data name="jsonOutput" xml:space="preserve">
+    <value>JSONOutput</value>
+  </data>
+  <data name="rootName" xml:space="preserve">
+    <value>RootName</value>
+  </data>
+  <data name="selectedLang" xml:space="preserve">
+    <value>SelectedLang</value>
+  </data>
+  <data name="suggestCorrs" xml:space="preserve">
+    <value>SuggestCorrs</value>
+  </data>
+  <data name="themeIndex" xml:space="preserve">
+    <value>ThemeIndex</value>
+  </data>
+  <data name="validateMsgs" xml:space="preserve">
+    <value>ValidateMsgs</value>
   </data>
   <data name="version" xml:space="preserve">
     <value>0.9.1</value>
