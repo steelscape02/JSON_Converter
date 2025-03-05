@@ -4,7 +4,7 @@ Welcome to my **JSON Converter**! This is a simple application that allows you t
 desired programming language. Using this model, the user can quickly produce usable JSON models in their desired language, allowing them to call members of
 the JSON response as member variables of a parent object.
 
-<!--[Software Demo Video](http://youtube.link.goes.here)-->
+[Software Demo Video](https://youtu.be/dHg33yI2PsQ)
 
 # Development Environment
 
@@ -13,8 +13,8 @@ of development, this program was built originally in JetBrains Rider, then in Vi
 
 # Useful Websites
 
-<!-- - [Web Site Name](http://url.link.goes.here) -->
-<!-- - [Web Site Name](http://url.link.goes.here) -->
+ - [JsonNode](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.nodes.jsonnode?view=net-9.0)
+ - [WinUI 3](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/)
 
 # Future Work
 
