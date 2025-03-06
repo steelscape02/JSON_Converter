@@ -13,6 +13,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="Assets\nc_logo.jpeg" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Assets\app_icon.png" />
     <None Remove="Assets\nc_banner.png" />
     <None Remove="Assets\nc_tp.png" />
