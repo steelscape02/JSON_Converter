@@ -19,15 +19,21 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Button
+        <Grid Grid.Row="0" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Button
             Grid.Row="0"
-            Grid.Column="0"
             VerticalAlignment="Top"
             Content="Back"
             x:Name="BackBtn"
             Margin="10"
             Click="Back_Click"
             Style="{StaticResource AccentButtonStyle}"/>
+            <Image Grid.Row="1" Source="Assets/nc_tp.png" MaxWidth="100" Margin="5 0 0 10" MaxHeight="100"/>
+        </Grid>
         <TextBlock
             Grid.Row="1"
             Grid.Column="0"
@@ -35,6 +41,7 @@
             Text=""
             FontSize="10"
             Margin="10"/>
+        
         <Grid Grid.Row="0" Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -88,12 +95,12 @@
                         </TeachingTip>
                     </StackPanel>
 
-                    <RadioButtons x:Name="themeSelect" Header="Theme:" Margin="10" SelectionChanged="ThemeSelect_Change">
+                    <!--<RadioButtons x:Name="themeSelect" Header="Theme:" Margin="10" SelectionChanged="ThemeSelect_Change">
                         <RadioButton x:Name="system" AutomationProperties.Name="Default" Content="System"/>
                         <RadioButton x:Name="dark" AutomationProperties.Name="Dark" Content="Dark"/>
                         <RadioButton x:Name="light" AutomationProperties.Name="Light" Content="Light"/>
-                    </RadioButtons>
-                    <Button Margin="0 40 10 5" HorizontalAlignment="Right" Click="Help_Click">
+                    </RadioButtons>-->
+                    <Button Margin="0 50 10 5" HorizontalAlignment="Right" Click="Help_Click">
                         <SymbolIcon Symbol="Help"/>
                     </Button>
                     
@@ -101,7 +108,29 @@
             </Border>
             
             <Border Grid.Row="0" Grid.Column="1" Margin="10" BorderBrush="{ThemeResource SystemAccentColorLight2}" BorderThickness="3" CornerRadius="4">
-                <TextBlock Margin="10" x:Name="infoBox" Text=""/>
+                <RichTextBlock Margin="10" x:Name="infoBox">
+                    <Paragraph>
+                        <Bold>JSON Converter Application</Bold>
+                    </Paragraph>
+                    <Paragraph>
+                        <Bold>Basic instructions</Bold>
+                        <LineBreak></LineBreak>
+                        <Bold>1.</Bold> Enter a JSON response into the
+                        <Italic>right</Italic> box
+                        <LineBreak></LineBreak>
+                        <Bold>2.</Bold> Select your desired language
+                        <LineBreak></LineBreak>
+                        <Bold>3.</Bold> Press
+                        <Underline>Submit</Underline> to begin the conversion
+                        <LineBreak></LineBreak>
+                    </Paragraph>
+                    <Paragraph>
+                        <Bold>Links</Bold>
+                        <LineBreak></LineBreak>
+                        <Hyperlink NavigateUri="https://github.com/steelscape02/JSON_Converter">
+                            <Underline>Github</Underline></Hyperlink>
+                    </Paragraph>
+                </RichTextBlock>
             </Border>
             
         </Grid>

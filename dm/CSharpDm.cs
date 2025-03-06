@@ -12,7 +12,9 @@ namespace JsonConverter.dm
         /// </summary>
         private const string Vis = "public";
 
-
+        /// <summary>
+        /// Placeholder for repeated names
+        /// </summary>
         private const string RptPlaceHolder = "_";
 
         /// <summary>
@@ -43,6 +45,7 @@ namespace JsonConverter.dm
         /// <returns>A string representation of a C# data model</returns>
         public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false)
         {
+            // Initialize the class definitions
             var classDefinitions = new List<string>();
 
             // Collect all classes, starting with the root
@@ -50,7 +53,7 @@ namespace JsonConverter.dm
 
             foreach (var element in elements)
             {
-                
+                //if a rename is needed, this will contain the accurate name to correspond to a corrected name in the DM
                 string? rename;
                 if (element.Rename || HasReserved(element.Name))
                 {
