@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+    
     
     <Grid>
         <Grid.RowDefinitions>
@@ -51,10 +51,15 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Border Grid.Column="0" Grid.Row="0" Margin="10" BorderBrush="{ThemeResource SystemAccentColorLight3}" BorderThickness="3" CornerRadius="4">
-                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="10" Loaded="Options_Loaded" Unloaded="Options_Unloaded">
-                    <TextBox  x:Name="RootName" AutomationProperties.Name="Root Name Entry" Header="Base class name:"
-                        Margin="10 5 10 20" AcceptsReturn="False" IsSpellCheckEnabled="False" TextChanged="BaseName_Change"/>
-                    <StackPanel>
+                <Grid Margin="8" Loaded="Options_Loaded" Unloaded="Options_Unloaded"> 
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0">
+                        <TextBox  x:Name="RootName" AutomationProperties.Name="Root Name Entry" Header="Base class name:"
+                            AcceptsReturn="False" IsSpellCheckEnabled="False" TextChanged="BaseName_Change"
+                            MaxWidth="170"/>
                         <CheckBox Margin="0 5 5 5"
                             x:Name="allOptional" Content="All optional" AutomationProperties.Name="All elements optional"
                             Checked="AllOptional_Checked" Unchecked="AllOptional_Unchecked"/>
@@ -95,16 +100,12 @@
                         </TeachingTip>
                     </StackPanel>
 
-                    <!--<RadioButtons x:Name="themeSelect" Header="Theme:" Margin="10" SelectionChanged="ThemeSelect_Change">
-                        <RadioButton x:Name="system" AutomationProperties.Name="Default" Content="System"/>
-                        <RadioButton x:Name="dark" AutomationProperties.Name="Dark" Content="Dark"/>
-                        <RadioButton x:Name="light" AutomationProperties.Name="Light" Content="Light"/>
-                    </RadioButtons>-->
-                    <Button Margin="0 50 10 5" HorizontalAlignment="Right" Click="Help_Click">
+                    <!--Margin="0 50 10 5"-->
+                    <Button Grid.Row="1" HorizontalAlignment="Right" Click="Help_Click">
                         <SymbolIcon Symbol="Help"/>
                     </Button>
                     
-                </StackPanel>
+                </Grid>
             </Border>
             
             <Border Grid.Row="0" Grid.Column="1" Margin="10" BorderBrush="{ThemeResource SystemAccentColorLight2}" BorderThickness="3" CornerRadius="4">

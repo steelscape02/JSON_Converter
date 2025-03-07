@@ -50,7 +50,10 @@ namespace JsonConverter
             {
                 if (manager.Get("ValidateMsgs") as bool? ?? false)
                 {
-                    validateErr_msg.Text = j.ToString();
+                    if (string.IsNullOrWhiteSpace(entry))
+                        validateErr_msg.Text = "Empty JSON";
+                    else
+                        validateErr_msg.Text = j.ToString();
                 }
                 else
                 {

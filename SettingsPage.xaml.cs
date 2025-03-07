@@ -1,7 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
-using Windows.Storage;
 
 namespace JsonConverter
 {
@@ -18,7 +17,6 @@ namespace JsonConverter
             versionID.Text = TextResources.version;
             if(manager.Get(TextResources.rootName) == null)
                 manager.Set(TextResources.rootName, TextResources.baseName);
-            themeSelect.SelectedIndex = 0;
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)
@@ -47,13 +45,6 @@ namespace JsonConverter
         {
             ArgumentNullException.ThrowIfNull(e);
             manager.Set(TextResources.rootName, RootName.Text);
-        }
-
-        private void ThemeSelect_Change(object sender, SelectionChangedEventArgs e)
-        {
-            ArgumentNullException.ThrowIfNull(e);
-            manager.Set(TextResources.themeIndex, themeSelect.SelectedIndex);
-            //implement theme change
         }
 
         //All optional
@@ -92,7 +83,6 @@ namespace JsonConverter
         private void Options_Loaded(object sender, RoutedEventArgs e)
         {
             RootName.Text = manager.Get(TextResources.rootName) as string;
-            themeSelect.SelectedIndex = manager.Get(TextResources.themeIndex) as int? ?? 0;
             allOptional.IsChecked = manager.Get(TextResources.allOptional) as bool? ?? false;
             suggestCorrs.IsChecked = manager.Get(TextResources.suggestCorrs) as bool? ?? false;
             validateMsgs.IsChecked = manager.Get(TextResources.validateMsgs) as bool? ?? false;
@@ -101,7 +91,6 @@ namespace JsonConverter
         private void Options_Unloaded(object sender, RoutedEventArgs e)
         {
             manager.Set(TextResources.rootName, RootName.Text);
-            manager.Set(TextResources.themeIndex, themeSelect.SelectedIndex);
             manager.Set(TextResources.allOptional, allOptional.IsChecked ?? false);
             manager.Set(TextResources.suggestCorrs, suggestCorrs.IsChecked ?? false);
             manager.Set(TextResources.validateMsgs, validateMsgs.IsChecked ?? false);

@@ -11,12 +11,16 @@ namespace JsonConverter
     /// </summary>
     public partial class App : Application
     {
+        private readonly StorageManager manager;
         /// <summary>
         /// Start App Application instance
         /// </summary>
         public App()
         {
             this.InitializeComponent();
+            manager = new StorageManager();
+            manager.Set(TextResources.jsonContents, "");
+            manager.Set(TextResources.jsonOutput, "");
         }
 
         /// <summary>
