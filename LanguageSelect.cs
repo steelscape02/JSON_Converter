@@ -7,7 +7,7 @@ namespace JsonConverter
     
     class LanguageSelector(IStorageManager localStorage)
     {
-        private IStorageManager _localStorage = localStorage;
+        private readonly IStorageManager _localStorage = localStorage;
 
         public enum Languages
         {
