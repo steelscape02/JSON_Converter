@@ -192,9 +192,11 @@ namespace JsonConverter
                                 if (element.Value != null) {
                                     var temp = new HashSet<Element>();
                                     SubRecursive(element.Value, temp, elem); //create a record of what elem's children would've been changed
+                                    match.MatchChildren(elem);
                                     SubRecursive(element.Value, elements, match); //TODO: Make this unnecessary
                                 }
-                                match.MatchChildren(elem);
+                                //elem.MatchChildren(match);
+                                
                             }
                         }
                     }

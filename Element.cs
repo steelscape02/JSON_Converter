@@ -163,7 +163,7 @@ namespace JsonConverter
             {
                 if (!Children.Contains(matchChild))
                 {
-                    Debug.WriteLine("Reached");
+                    
                     var temp = matchChild;
                     temp.Inconsistent = true;
                     Children.Add(temp);
