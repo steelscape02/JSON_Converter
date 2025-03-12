@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.Devices.Printers;
-using Windows.Security.Cryptography.Core;
 
 namespace JsonConverter
 {
@@ -56,12 +50,15 @@ namespace JsonConverter
         /// </summary>
         public bool Nullable { get; set; }
 
+        /// <summary>
+        /// Indicates that the <c>Element</c> is not present as a child in all occurances of the parent <c>Element</c>
+        /// </summary>
         public bool Inconsistent { get; set; } = false;
 
         /// <summary>
         /// The total count of prefix @ signs for unusual repeat naming
         /// </summary>
-        public int at_count { get; set; } = 0;
+        public int AtCount { get; set; } = 0;
 
         /// <summary>
         /// If an illegal character is found, the <c>Name</c> member variable will need to be edited when printed. If <c>true</c>,
@@ -73,10 +70,6 @@ namespace JsonConverter
         /// If the <c>Element</c> is a list, this will be <c>true</c>
         /// </summary>
         public bool List { get; set; }
-
-        public Element? Parent { get; set; }
-
-        public int Count { get; set; } = 0;
 
         /// <summary>
         /// A list of illegal chars for variable naming
@@ -112,7 +105,6 @@ namespace JsonConverter
         /// <returns><c>true</c> if added, <c>false</c> if not</returns>
         public bool AddChild(Element newChild)
         {
-            Parent = this;
             var added = Children.Add(newChild);
             return added;
         }
@@ -146,6 +138,12 @@ namespace JsonConverter
             return true;
         }
 
+        /// <summary>
+        /// Ensure that this <c>Element</c> can capture any inconsistently appearing variables. If a Child in <c>match</c> is
+        /// not found in this object, it will be added to this object's <c>Children</c> list with an <c>Inconsistent</c> flag set to <c>true</c>.
+        /// If an object in this <c>Element</c>'s <c>Children</c> list is not found in <c>match</c>, it will also be flagged as <c>Inconsistent</c>
+        /// </summary>
+        /// <param name="match">The <c>Element</c> to compare against</param>
         public void MatchChildren(Element match)
         {
             //check this elements children

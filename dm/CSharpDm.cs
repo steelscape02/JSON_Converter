@@ -111,11 +111,11 @@ namespace JsonConverter.dm
                         if (match == null || element.MatchingChildren(match)) return;
                         else 
                         {
-                            for(int i=0;i<=match.at_count; i++)
+                            for(int i=0;i<=match.AtCount; i++)
                                 type = RptPlaceHolder + type;
 
                             visited.Remove(match);
-                            match.at_count += 1;
+                            match.AtCount += 1;
                             visited.Add(match);
                         }
 
@@ -142,7 +142,7 @@ namespace JsonConverter.dm
                     match.List = child.List; //match list and type mem vars (not needed in normal TryGetValue override in Element)
                     match.Type = child.Type; 
                     childType = GetPrintType(match, false);
-                    for (int i = 0; i <= match.at_count; i++)
+                    for (int i = 0; i <= match.AtCount; i++)
                         childType = RptPlaceHolder + childType;
                 }
                 else

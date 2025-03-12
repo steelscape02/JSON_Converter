@@ -146,7 +146,6 @@ namespace JsonConverter
                     {
                         foreach (var element in jsonObject)
                         {
-
                             var type = GetValueType(element.Value);
                             var name = element.Key;
 
@@ -156,10 +155,7 @@ namespace JsonConverter
                             if (added)
                             {
                                 if (element.Value != null)
-                                {
                                     SubRecursive(element.Value, elements, elem);
-                                }
-
                             }
                         }
                     }
@@ -170,7 +166,6 @@ namespace JsonConverter
                         {
                             var type = GetValueType(element.Value);
                             var name = element.Key;
-                            //if (type == Element.Types.Object) name = MakeFriendly(name);
 
                             var elem = new Element(type, name);
                             if (type is Element.Types.Null or null) elem.Nullable = true; //null is possible due to ? above
@@ -192,11 +187,9 @@ namespace JsonConverter
                                 if (element.Value != null) {
                                     var temp = new HashSet<Element>();
                                     SubRecursive(element.Value, temp, elem); //create a record of what elem's children would've been changed
-                                    match.MatchChildren(elem);
-                                    SubRecursive(element.Value, elements, match); //TODO: Make this unnecessary
+                                    match.MatchChildren(elem); //update match to reflect elem
+                                    SubRecursive(element.Value, elements, match); 
                                 }
-                                //elem.MatchChildren(match);
-                                
                             }
                         }
                     }
@@ -234,34 +227,32 @@ namespace JsonConverter
             return null;
         }
 
+        /// <summary>
+        /// Returns the appropriate <c>Element.Types</c> type for the given <c>JsonNode</c> value
+        /// </summary>
+        /// <param name="value">The desired JsonNode to retrieve a Type for</param>
+        /// <returns>A matching <c>Element.Types</c> type</returns>
+        /// <exception cref="Exception">If the valueKind is not a known <c>JsonValueKind</c></exception>
         private static Element.Types? GetValueType(JsonNode? value)
         {
             if (value != null)
             {
-                var valueKind = value.GetValueKind();
-                switch (valueKind)
+                var valueKind = value.GetValueKind(); //get current ValueKind
+                return valueKind switch
                 {
-                    case JsonValueKind.String:
-                        return Element.Types.String;
-                    case JsonValueKind.Number:
-                        return GetNumType(value.ToString());
-                    case JsonValueKind.True:
-                    case JsonValueKind.False:
-                        return Element.Types.Boolean;
-                    case JsonValueKind.Object:
-                        return Element.Types.Object;
-                    case JsonValueKind.Array:
-                        return Element.Types.Array;
-                    case JsonValueKind.Null:
-                        return Element.Types.Null;
-                    case JsonValueKind.Undefined:
-                    default:
-                        throw new Exception("Invalid valueKind");
-                }
+                    JsonValueKind.String => (Element.Types?)Element.Types.String,
+                    JsonValueKind.Number => GetNumType(value.ToString()),
+                    JsonValueKind.True or JsonValueKind.False => (Element.Types?)Element.Types.Boolean,
+                    JsonValueKind.Object => (Element.Types?)Element.Types.Object,
+                    JsonValueKind.Array => (Element.Types?)Element.Types.Array,
+                    JsonValueKind.Null => (Element.Types?)Element.Types.Null,
+                    _ => throw new Exception("Invalid valueKind"),
+                };
             }
 
             return null;
         }
+        
         /// <summary>
         /// Finds the "precision" of a number using its classification (<c>string</c>, <c>double</c>, etc...) for comparison
         /// of precision when deciding what type to keep
