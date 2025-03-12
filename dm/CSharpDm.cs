@@ -43,7 +43,7 @@ namespace JsonConverter.dm
         /// <param name="elements">A <c>HashSet</c> of <c>Element</c> objects representing the <c>Root</c> class of
         /// the JSON response</param>
         /// <returns>A string representation of a C# data model</returns>
-        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false)
+        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false)
         {
             // Initialize the class definitions
             var classDefinitions = new List<string>();
@@ -98,6 +98,7 @@ namespace JsonConverter.dm
         /// </param>
         private static void BuildSubDm(Element element, HashSet<Element?> visited, List<string> classDefinitions, bool allOptional, bool redo = false)
         {
+
             if (element.Type == null) return;
             var type = GetPrintType(element, true);
 
@@ -132,13 +133,11 @@ namespace JsonConverter.dm
             var classDef = $"{Vis} class {type}\n{{\n";
             foreach (var child in element.Children)
             {
-                    
                 child.Type ??= Element.Types.Null;
                 string? childType;
                 
                 if (visited.TryGetValue(child, out var match) && match != null)
                 {
-                    
                     match.List = child.List; //match list and type mem vars (not needed in normal TryGetValue override in Element)
                     match.Type = child.Type; 
                     childType = GetPrintType(match, false);

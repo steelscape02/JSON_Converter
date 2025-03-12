@@ -29,7 +29,7 @@ namespace JsonConverter.dm
             "using", "virtual", "void", "volatile", "wchar_t", "while"
         };
 
-        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false)
+        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false)
         {
             var classDefinitions = new List<string>
             {

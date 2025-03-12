@@ -22,7 +22,7 @@ namespace JsonConverter.dm
             "async", "elif", "if", "or", "yield"
         };
 
-        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false)
+        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false)
         {
             var classDefinitions = new List<string>
             {
