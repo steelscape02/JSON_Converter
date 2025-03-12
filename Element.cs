@@ -151,25 +151,20 @@ namespace JsonConverter
             //check this elements children
             foreach(var child in Children)
             {
-                match.Children.TryGetValue(child, out var Value);
-                if (Value == null)
+                if (!match.Children.Contains(child))
                 {
                     child.Inconsistent = true;
-                    //Debug.WriteLine(match.Children.Count);
                 }
-                else
-                {
-                    child.Inconsistent = false;
-                }
+                
             }
 
             //check the match elements children
-            foreach (var child in match.Children)
+            foreach (var matchChild in match.Children)
             {
-                Children.TryGetValue(child, out var Value);
-                if (Value == null)
+                if (!Children.Contains(matchChild))
                 {
-                    var temp = child;
+                    Debug.WriteLine("Reached");
+                    var temp = matchChild;
                     temp.Inconsistent = true;
                     Children.Add(temp);
                 }
@@ -207,7 +202,6 @@ namespace JsonConverter
             if (obj is Element other)
             {
                 return Name == other.Name;
-                //return Name == other.Name && List == other.List;
             }
             return false;
         }
@@ -215,7 +209,6 @@ namespace JsonConverter
         public override int GetHashCode()
         {
             return Name.GetHashCode();
-            //return HashCode.Combine(Name, List);
         }
     }
 }

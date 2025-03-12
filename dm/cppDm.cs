@@ -49,7 +49,7 @@ namespace JsonConverter.dm
             {
                 var headerType = GetPrintType(element, false);
                 string? nullable;
-                if (element.Nullable)
+                if (element.Nullable || element.Inconsistent)
                 {
                     nullable = "std::optional<" + headerType + ">";
                     _optional = true;
@@ -166,7 +166,7 @@ namespace JsonConverter.dm
                 else
                     childType = GetPrintType(child, false);
                 string? nullable;
-                if (child.Nullable || allOptional)
+                if (child.Nullable || element.Inconsistent || allOptional)
                 {
                     nullable = "std::optional<" + childType + ">";
                     _optional = true;
