@@ -64,7 +64,8 @@ namespace JsonConverter.dm
                     rename = null;
 
                 var headerType = GetPrintType(element, false);
-                var nullable = element.Nullable ? headerType + "?" : headerType;
+
+                var nullable = (element.Nullable || element.Inconsistent) ? headerType + "?" : headerType;
                 rootClass += $"   {rename}{Vis} {nullable} {element.LegalName('@',HasReserved(element.Name))} {{get; set;}}\n";
             }
 
@@ -148,7 +149,7 @@ namespace JsonConverter.dm
                     childType = GetPrintType(child, false);
 
                 var nullable = childType;
-                if (child.Nullable || allOptional)
+                if (child.Nullable || child.Inconsistent || allOptional)
                 {
                     nullable = childType + "?";
                 }

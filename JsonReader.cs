@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Text.Json.Nodes;
 using System.Text.Json;
+using System.Threading.Tasks;
+using System.IO;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using Microsoft.UI.Xaml;
 
 namespace JsonConverter
 {
@@ -22,7 +24,7 @@ namespace JsonConverter
         /// <returns></returns>
         public HashSet<Element> ReadJson()
         {
-            var document = JsonNode.Parse(Contents) ?? ""; 
+            var document = JsonNode.Parse(Contents) ?? "";
             var root = document.Root; //root is JSON Object
             var baseStuff = new HashSet<Element>();
             SubRecursive(root, baseStuff, null);
@@ -35,6 +37,7 @@ namespace JsonConverter
         /// <param name="current">The initial JSON object (<i>Typically <c>root</c></i>)</param>
         /// <param name="elements">An <b>empty</b> Element HashSet to store the top level (root) elements with their respective children</param>
         /// <param name="headElem">The current head element. When execution begins, this should be <c>null</c> unless another start point has been determined</param>
+        // <exception cref="ArgumentOutOfRangeException"></exception> //TODO: Add back. Reduce existing exceptions?
         private static void SubRecursive(JsonNode current, HashSet<Element> elements, Element? headElem)
         {
             switch (current)
@@ -49,13 +52,13 @@ namespace JsonConverter
                             break;
                         case JsonValueKind.Number:
                             //Accuracy: int & long > double > float 
-                            
+
                             var type = GetNumType(jsonValue.ToString());
                             var newPrec = GetNumPrecision(type);
                             var oldPrec = GetNumPrecision(headElem.Type);
                             if (newPrec > oldPrec && newPrec != -1) //-1 is the error case of GetNumPrecision
                             {
-                                
+
                                 headElem.Type = type;
                             }
                             break;
@@ -76,8 +79,8 @@ namespace JsonConverter
                     var isObj = true;
                     var isPrim = true;
                     Element.Types? primType = Element.Types.Null; //primType initializer
+
                     ArgumentNullException.ThrowIfNull(headElem); //TODO: Is this optimal?
-                    //TC 1 -> only sees features once
                     foreach (var i in jsonArray)
                     {
                         switch (i)
@@ -85,9 +88,9 @@ namespace JsonConverter
                             case JsonObject:
                                 {
                                     isPrim = false;
-                                    
-                                    SubRecursive(i, elements, headElem);
-                                    //check last child and compare?
+                                    var obj = new Element(Element.Types.Object);
+                                    var match = headElem.GetMatching(obj);
+                                    SubRecursive(i, elements, match ?? headElem);
 
                                     break;
                                 }
@@ -97,7 +100,7 @@ namespace JsonConverter
                                     var val = i.AsValue();
 
                                     primType = GetNumType(i.ToString());
-                                    
+
                                     break;
                                 }
                             case JsonArray: //unlikely, but possible JsonArray nesting
@@ -109,7 +112,6 @@ namespace JsonConverter
                                 throw new ArgumentOutOfRangeException(nameof(current));
                         }
                     }
-
 
                     switch (isObj)
                     {
@@ -149,7 +151,6 @@ namespace JsonConverter
                             var name = element.Key;
 
                             var elem = new Element(type, name);
-                            
                             if (type is Element.Types.Null or null) elem.Nullable = true; //null is possible due to ? above
                             var added = elements.Add(elem);
                             if (added)
@@ -158,7 +159,7 @@ namespace JsonConverter
                                 {
                                     SubRecursive(element.Value, elements, elem);
                                 }
-                               
+
                             }
                         }
                     }
@@ -169,33 +170,37 @@ namespace JsonConverter
                         {
                             var type = GetValueType(element.Value);
                             var name = element.Key;
+                            //if (type == Element.Types.Object) name = MakeFriendly(name);
 
                             var elem = new Element(type, name);
-                            if (type is Element.Types.Null or null) elem.Nullable = true; 
+                            if (type is Element.Types.Null or null) elem.Nullable = true; //null is possible due to ? above
 
                             var added = headElem.AddChild(elem);
                             if (added)
                             {
-                                if (element.Value != null) { elem.Nullable = true; SubRecursive(element.Value, elements, elem); }
-                                
+                                if (element.Value != null) 
+                                {
+                                    SubRecursive(element.Value, elements, elem);
+                                }
                             }
                             else
                             {
-                                //TAG 1
                                 var match = headElem.GetMatching(elem);
-                                if (match == null) { continue; }
-
-                                if (elem.Nullable) match.Nullable = true;
-                                else match.Nullable = false;
-
-                                if (element.Value != null) SubRecursive(element.Value, elements, match);
+                                if (match == null) continue;
+                                
+                                
+                                if (element.Value != null) {
+                                    var temp = new HashSet<Element>();
+                                    SubRecursive(element.Value, temp, elem); //create a record of what elem's children would've been changed
+                                    SubRecursive(element.Value, elements, match); 
+                                }
+                                match.MatchChildren(elem);
                             }
                         }
                     }
                     break;
             }
         }
-
 
         /// <summary>
         /// Gets the type of the given number string using type parsing
@@ -227,12 +232,6 @@ namespace JsonConverter
             return null;
         }
 
-        /// <summary>
-        /// Map <c>JsonValueKind</c> values to <c>Element.Types</c> values
-        /// </summary>
-        /// <param name="value">The <c>JsonNode</c> to be mapped</param>
-        /// <returns>The corresponding <c>Element.Types</c> type</returns>
-        /// <exception cref="Exception">The given <c>JsonValueKind</c> is not one of the normal types</exception>
         private static Element.Types? GetValueType(JsonNode? value)
         {
             if (value != null)

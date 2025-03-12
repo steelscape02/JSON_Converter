@@ -237,9 +237,9 @@ namespace JsonConverter
         {
             jsonEntry.SelectionFlyout.Opening += Menu_Opening;
             jsonEntry.ContextFlyout.Opening += Menu_Opening;
-            jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, manager.Get(TextResources.jsonContents) as string);
+            jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, MainPageHelpers.JsonInput);
 
-            outputBox.Text = manager.Get(TextResources.jsonOutput) as string;
+            outputBox.Text = MainPageHelpers.JsonOutput;
             LanguageSelect.SelectedValue = manager.Get(TextResources.selectedLang) as string;
         }
 
@@ -248,9 +248,8 @@ namespace JsonConverter
             jsonEntry.SelectionFlyout.Opening -= Menu_Opening;
             jsonEntry.ContextFlyout.Opening -= Menu_Opening;
 
-            jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out string jsonContents);
-            manager.Set(TextResources.jsonContents, jsonContents);
-            manager.Set(TextResources.jsonOutput, outputBox.Text);
+            jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out MainPageHelpers.JsonInput);
+            MainPageHelpers.JsonOutput = outputBox.Text;
             manager.Set(TextResources.selectedLang, LanguageSelect.SelectedValue);
         }
 

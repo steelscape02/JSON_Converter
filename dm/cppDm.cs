@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using Windows.Media.Core;
-//TODO: Add set for later init
 
 namespace JsonConverter.dm
 {
-    //TODO: Complete conversion (basically copy from Python)
     class CppDm
     {
         /// <summary>
-        /// The default name for the base class. Almost always "Root"
+        /// The desired character for a placeholder in a repeated name
         /// </summary>
-
         private const string RptPlaceHolder = "_";
 
+        /// <summary>
+        /// Optional flag to indicate if an optional mem var is present
+        /// </summary>
         private static bool _optional = false;
 
 

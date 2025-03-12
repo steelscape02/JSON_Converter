@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Devices.Printers;
 using Windows.Security.Cryptography.Core;
 
 namespace JsonConverter
@@ -18,7 +19,7 @@ namespace JsonConverter
         public Element(Types? type, string name = "")
         {
             Name = name;
-            if(!string.IsNullOrEmpty(name) && char.IsUpper(name[0]))
+            if (!string.IsNullOrEmpty(name) && char.IsUpper(name[0]))
             {
                 Name = char.ToLower(name[0]) + name.Substring(1);
             }
@@ -38,7 +39,6 @@ namespace JsonConverter
         /// The name of the <c>Element</c>
         /// </summary>
         public string Name { get; }
-        
 
         /// <summary>
         /// The JSON type of the <c>Element</c>
@@ -56,6 +56,8 @@ namespace JsonConverter
         /// </summary>
         public bool Nullable { get; set; }
 
+        public bool Inconsistent { get; set; } = false;
+
         /// <summary>
         /// The total count of prefix @ signs for unusual repeat naming
         /// </summary>
@@ -71,6 +73,10 @@ namespace JsonConverter
         /// If the <c>Element</c> is a list, this will be <c>true</c>
         /// </summary>
         public bool List { get; set; }
+
+        public Element? Parent { get; set; }
+
+        public int Count { get; set; } = 0;
 
         /// <summary>
         /// A list of illegal chars for variable naming
@@ -106,6 +112,7 @@ namespace JsonConverter
         /// <returns><c>true</c> if added, <c>false</c> if not</returns>
         public bool AddChild(Element newChild)
         {
+            Parent = this;
             var added = Children.Add(newChild);
             return added;
         }
@@ -118,7 +125,7 @@ namespace JsonConverter
         public Element? GetMatching(Element element)
         {
             var match = Children.FirstOrDefault(x => x.Name == element.Name);
-            
+
             return match ?? null;
         }
 
@@ -137,6 +144,36 @@ namespace JsonConverter
                 }
             }
             return true;
+        }
+
+        public void MatchChildren(Element match)
+        {
+            //check this elements children
+            foreach(var child in Children)
+            {
+                match.Children.TryGetValue(child, out var Value);
+                if (Value == null)
+                {
+                    child.Inconsistent = true;
+                    //Debug.WriteLine(match.Children.Count);
+                }
+                else
+                {
+                    child.Inconsistent = false;
+                }
+            }
+
+            //check the match elements children
+            foreach (var child in match.Children)
+            {
+                Children.TryGetValue(child, out var Value);
+                if (Value == null)
+                {
+                    var temp = child;
+                    temp.Inconsistent = true;
+                    Children.Add(temp);
+                }
+            }
         }
 
 
