@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace JsonConverter
@@ -64,7 +65,7 @@ namespace JsonConverter
         /// If an illegal character is found, the <c>Name</c> member variable will need to be edited when printed. If <c>true</c>,
         /// this <c>Element</c> must be renamed in the DOM, if <c>false</c> the name is valid without renaming
         /// </summary>
-        public bool Rename { get; }
+        public bool Rename { get; set; }
 
         /// <summary>
         /// If the <c>Element</c> is a list, this will be <c>true</c>
@@ -185,10 +186,15 @@ namespace JsonConverter
         public string LegalName(char replace, bool addAt = false)
         {
             var legalName = Name;
-            while (_illegal.Any(Name.Contains))
+            if(_illegal.Any(Name.Contains))
             {
-                var index = Name.IndexOfAny(_illegal);
-                legalName = Name.Remove(index, 1);
+                for(int i = 0; i < legalName.Length; i++)
+                {
+                    if (_illegal.Contains(legalName[i]))
+                    {
+                        legalName = legalName.Remove(i, 1);
+                    }
+                }
             }
             if (addAt) legalName = replace + legalName;
             return legalName;

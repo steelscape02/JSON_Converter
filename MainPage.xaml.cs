@@ -1,12 +1,15 @@
 using JsonConverter.dm;
+using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -84,8 +87,10 @@ namespace JsonConverter
                 var reader = new JsonReader(entry);
                 var contents = new HashSet<Element>();
                 contents = reader.ReadJson();
-                if (manager.Get("SuggestCorrs") as bool? ?? false)
+                if (manager.Get(TextResources.suggestCorrs) as bool? ?? false)
+                {
                     await SuggestCorrs_Click(contents);
+                }
                 string dm;
                 switch (Language)
                 {
@@ -133,13 +138,13 @@ namespace JsonConverter
                     {
                         // XamlRoot must be set in the case of a ContentDialog running in a Desktop app
                         XamlRoot = XamlRoot,
-                        Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
+                        //Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
                         Title = reserved ? "Reserved word in name" : "Illegal characters in name",
                         PrimaryButtonText = "Set",
                         SecondaryButtonText = "Skip",
                         CloseButtonText = "Cancel All",
                         DefaultButton = ContentDialogButton.Primary,
-                        Content = new SuggestCorrs()
+                        Content = new SuggestCorrs(i.Name)
                     };
                     var result = await dialog.ShowAsync();
                     switch (result)
@@ -147,7 +152,11 @@ namespace JsonConverter
                         case ContentDialogResult.Primary:
                         {
                             elements.TryGetValue(i, out Element? element);
-                            if(element != null) element.Name = "";
+                            if(element != null && SuggestCorrsHelpers.corrected_word != null) 
+                            { 
+                                element.Name = SuggestCorrsHelpers.corrected_word;
+                                if(illegalChars && !Element._illegal.Any(element.Name.Contains)) element.Rename = false;
+                            }
                             break;
                         }
                         case ContentDialogResult.Secondary:

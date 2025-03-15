@@ -9,9 +9,17 @@ namespace JsonConverter
     /// </summary>
     public sealed partial class SuggestCorrs : Page
     {
-        public SuggestCorrs()
+        public SuggestCorrs(string? name)
         {
             InitializeComponent();
+            if (name != null) error_word.Text = name;
+            
+        }
+
+
+        private void corrected_word_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            SuggestCorrsHelpers.corrected_word = corrected_word.Text;
         }
     }
 }
