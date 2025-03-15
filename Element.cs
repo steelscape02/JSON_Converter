@@ -27,12 +27,12 @@ namespace JsonConverter
         /// <summary>
         /// The Child elements of the parent <c>Element</c>
         /// </summary>
-        public readonly HashSet<Element> Children = [];
+        public HashSet<Element> Children = [];
 
         /// <summary>
         /// The name of the <c>Element</c>
         /// </summary>
-        public string Name { get; }
+        public string Name { get; set; }
 
         /// <summary>
         /// The JSON type of the <c>Element</c>
@@ -74,7 +74,7 @@ namespace JsonConverter
         /// <summary>
         /// A list of illegal chars for variable naming
         /// </summary>
-        private readonly char[] _illegal =
+        public static readonly char[] _illegal =
         [
             '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
         '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':',
