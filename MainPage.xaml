@@ -78,19 +78,20 @@
                SelectionChanged="Language_Select" 
                PlaceholderText="Select Language" 
                Width="200"
+               Style="{StaticResource DefaultComboBoxStyle}"
                >
                 <ComboBox.Resources>
                     <Storyboard x:Name="flash_start">
                         <ColorAnimation Storyboard.TargetName="language_brush"
-                            Storyboard.TargetProperty="Color" From="{ThemeResource SystemAccentColorDark1}" To="Red" Duration="0:0:0.5"/>
+                            Storyboard.TargetProperty="Color" From="{ThemeResource AcrylicBackgroundFillColorBaseBrush}" To="Red" Duration="0:0:0.5"/>
                     </Storyboard>
                     <Storyboard x:Name="flash_end">
                         <ColorAnimation Storyboard.TargetName="language_brush"
-                            Storyboard.TargetProperty="Color" From="Red" To="{ThemeResource SystemAccentColorDark1}" Duration="0:0:0.5"/>
+                            Storyboard.TargetProperty="Color" From="Red" To="{ThemeResource AcrylicBackgroundFillColorBaseBrush}" Duration="0:0:0.5"/>
                     </Storyboard>
                 </ComboBox.Resources>
                 <ComboBox.Background>
-                    <SolidColorBrush x:Name="language_brush" Color= "{ThemeResource SystemAccentColorDark1}" />
+                    <SolidColorBrush x:Name="language_brush" Color= "{StaticResource SystemAccentColor}" />
                 </ComboBox.Background>
                 <x:String>C#</x:String>
                 <x:String>Python</x:String>
@@ -141,27 +142,28 @@
            Margin="10"
            IsSpellCheckEnabled="False"
            Style="{StaticResource DefaultRichEditBoxStyle}"
+           Foreground="{ThemeResource AcrylicBackgroundFillColorBaseBrush}"
         >
             <RichEditBox.Resources>
                 <Storyboard x:Name="invalid_validate_start">
                     <ColorAnimation Storyboard.TargetName="validate_brush"
-            Storyboard.TargetProperty="Color" From="{ThemeResource SystemAccentColorDark2}" To="DarkRed" Duration="0:0:0.8"/>
+            Storyboard.TargetProperty="Color" From="{ThemeResource AcrylicBackgroundFillColorBaseBrush}" To="DarkRed" Duration="0:0:0.8"/>
                 </Storyboard>
                 <Storyboard x:Name="invalid_validate_end">
                     <ColorAnimation Storyboard.TargetName="validate_brush"
-            Storyboard.TargetProperty="Color" From="DarkRed" To="{ThemeResource SystemAccentColorDark2}" Duration="0:0:0.8"/>
+            Storyboard.TargetProperty="Color" From="DarkRed" To="{ThemeResource AcrylicBackgroundFillColorBaseBrush}" Duration="0:0:0.8"/>
                 </Storyboard>
                 <Storyboard x:Name="valid_validate_start">
                     <ColorAnimation Storyboard.TargetName="validate_brush"
-            Storyboard.TargetProperty="Color" From="{ThemeResource SystemAccentColorDark2}" To="DarkGreen" Duration="0:0:0.8"/>
+            Storyboard.TargetProperty="Color" From="{ThemeResource AcrylicBackgroundFillColorBaseBrush}" To="DarkGreen" Duration="0:0:0.8"/>
                 </Storyboard>
                 <Storyboard x:Name="valid_validate_end">
                     <ColorAnimation Storyboard.TargetName="validate_brush"
-            Storyboard.TargetProperty="Color" From="DarkGreen" To="{ThemeResource SystemAccentColorDark2}" Duration="0:0:0.8"/>
+            Storyboard.TargetProperty="Color" From="DarkGreen" To="{ThemeResource AcrylicBackgroundFillColorBaseBrush}" Duration="0:0:0.8"/>
                 </Storyboard>
             </RichEditBox.Resources>
             <RichEditBox.Background>
-                <SolidColorBrush x:Name="validate_brush" Color= "{ThemeResource SystemAccentColorDark2}" />
+                <SolidColorBrush x:Name="validate_brush" Color= "{ThemeResource AcrylicBackgroundFillColorBaseBrush}" />
             </RichEditBox.Background>
         </RichEditBox>
         <Border
@@ -172,8 +174,7 @@
            HorizontalAlignment="Stretch"
            
            Margin="10"
-           CornerRadius="4"
-           Background="{ThemeResource SystemAccentColorDark2}">
+           CornerRadius="4">
             <ScrollViewer>
                 <TextBox
                    x:Name="outputBox"
