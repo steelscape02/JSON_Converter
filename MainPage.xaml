@@ -182,6 +182,7 @@
                    IsReadOnly="True"
                    AcceptsReturn="True"
                    Foreground="{ThemeResource AcrylicBackgroundFillColorBaseBrush}"
+                   
                />
             </ScrollViewer>
         </Border>

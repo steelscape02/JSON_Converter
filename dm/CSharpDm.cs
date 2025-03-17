@@ -26,7 +26,7 @@ namespace JsonConverter.dm
         /// <summary>
         /// Array of reserved words in C#
         /// </summary>
-        private static readonly string[] ReservedWords =
+        public static readonly string[] ReservedWords =
         [
             "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const",
         "continue", "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit", "extern",
@@ -43,7 +43,7 @@ namespace JsonConverter.dm
         /// <param name="elements">A <c>HashSet</c> of <c>Element</c> objects representing the <c>Root</c> class of
         /// the JSON response</param>
         /// <returns>A string representation of a C# data model</returns>
-        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false)
+        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false)
         {
             // Initialize the class definitions
             var classDefinitions = new List<string>();
@@ -64,7 +64,8 @@ namespace JsonConverter.dm
                     rename = null;
 
                 var headerType = GetPrintType(element, false);
-                var nullable = element.Nullable ? headerType + "?" : headerType;
+
+                var nullable = (element.Nullable || element.Inconsistent) ? headerType + "?" : headerType;
                 rootClass += $"   {rename}{Vis} {nullable} {element.LegalName('@',HasReserved(element.Name))} {{get; set;}}\n";
             }
 
@@ -97,6 +98,7 @@ namespace JsonConverter.dm
         /// </param>
         private static void BuildSubDm(Element element, HashSet<Element?> visited, List<string> classDefinitions, bool allOptional, bool redo = false)
         {
+
             if (element.Type == null) return;
             var type = GetPrintType(element, true);
 
@@ -110,11 +112,11 @@ namespace JsonConverter.dm
                         if (match == null || element.MatchingChildren(match)) return;
                         else 
                         {
-                            for(int i=0;i<=match.at_count; i++)
+                            for(int i=0;i<=match.AtCount; i++)
                                 type = RptPlaceHolder + type;
 
                             visited.Remove(match);
-                            match.at_count += 1;
+                            match.AtCount += 1;
                             visited.Add(match);
                         }
 
@@ -131,24 +133,22 @@ namespace JsonConverter.dm
             var classDef = $"{Vis} class {type}\n{{\n";
             foreach (var child in element.Children)
             {
-                    
                 child.Type ??= Element.Types.Null;
                 string? childType;
                 
                 if (visited.TryGetValue(child, out var match) && match != null)
                 {
-                    
                     match.List = child.List; //match list and type mem vars (not needed in normal TryGetValue override in Element)
                     match.Type = child.Type; 
                     childType = GetPrintType(match, false);
-                    for (int i = 0; i <= match.at_count; i++)
+                    for (int i = 0; i <= match.AtCount; i++)
                         childType = RptPlaceHolder + childType;
                 }
                 else
                     childType = GetPrintType(child, false);
 
                 var nullable = childType;
-                if (child.Nullable || allOptional)
+                if (child.Nullable || child.Inconsistent || allOptional)
                 {
                     nullable = childType + "?";
                 }

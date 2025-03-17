@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.Security.Cryptography.Core;
 
 namespace JsonConverter
 {
@@ -18,7 +14,7 @@ namespace JsonConverter
         public Element(Types? type, string name = "")
         {
             Name = name;
-            if(!string.IsNullOrEmpty(name) && char.IsUpper(name[0]))
+            if (!string.IsNullOrEmpty(name) && char.IsUpper(name[0]))
             {
                 Name = char.ToLower(name[0]) + name.Substring(1);
             }
@@ -32,13 +28,12 @@ namespace JsonConverter
         /// <summary>
         /// The Child elements of the parent <c>Element</c>
         /// </summary>
-        public readonly HashSet<Element> Children = [];
+        public HashSet<Element> Children = [];
 
         /// <summary>
         /// The name of the <c>Element</c>
         /// </summary>
-        public string Name { get; }
-        
+        public string Name { get; set; }
 
         /// <summary>
         /// The JSON type of the <c>Element</c>
@@ -57,15 +52,20 @@ namespace JsonConverter
         public bool Nullable { get; set; }
 
         /// <summary>
+        /// Indicates that the <c>Element</c> is not present as a child in all occurances of the parent <c>Element</c>
+        /// </summary>
+        public bool Inconsistent { get; set; } = false;
+
+        /// <summary>
         /// The total count of prefix @ signs for unusual repeat naming
         /// </summary>
-        public int at_count { get; set; } = 0;
+        public int AtCount { get; set; } = 0;
 
         /// <summary>
         /// If an illegal character is found, the <c>Name</c> member variable will need to be edited when printed. If <c>true</c>,
         /// this <c>Element</c> must be renamed in the DOM, if <c>false</c> the name is valid without renaming
         /// </summary>
-        public bool Rename { get; }
+        public bool Rename { get; set; }
 
         /// <summary>
         /// If the <c>Element</c> is a list, this will be <c>true</c>
@@ -75,7 +75,7 @@ namespace JsonConverter
         /// <summary>
         /// A list of illegal chars for variable naming
         /// </summary>
-        private readonly char[] _illegal =
+        public static readonly char[] _illegal =
         [
             '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
         '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':',
@@ -118,7 +118,7 @@ namespace JsonConverter
         public Element? GetMatching(Element element)
         {
             var match = Children.FirstOrDefault(x => x.Name == element.Name);
-            
+
             return match ?? null;
         }
 
@@ -139,6 +139,37 @@ namespace JsonConverter
             return true;
         }
 
+        /// <summary>
+        /// Ensure that this <c>Element</c> can capture any inconsistently appearing variables. If a Child in <c>match</c> is
+        /// not found in this object, it will be added to this object's <c>Children</c> list with an <c>Inconsistent</c> flag set to <c>true</c>.
+        /// If an object in this <c>Element</c>'s <c>Children</c> list is not found in <c>match</c>, it will also be flagged as <c>Inconsistent</c>
+        /// </summary>
+        /// <param name="match">The <c>Element</c> to compare against</param>
+        public void MatchChildren(Element match)
+        {
+            //check this elements children
+            foreach(var child in Children)
+            {
+                if (!match.Children.Contains(child))
+                {
+                    child.Inconsistent = true;
+                }
+                
+            }
+
+            //check the match elements children
+            foreach (var matchChild in match.Children)
+            {
+                if (!Children.Contains(matchChild))
+                {
+                    
+                    var temp = matchChild;
+                    temp.Inconsistent = true;
+                    Children.Add(temp);
+                }
+            }
+        }
+
 
         /// <summary>
         /// Remove all Children for this element
@@ -155,10 +186,15 @@ namespace JsonConverter
         public string LegalName(char replace, bool addAt = false)
         {
             var legalName = Name;
-            while (_illegal.Any(Name.Contains))
+            if(_illegal.Any(Name.Contains))
             {
-                var index = Name.IndexOfAny(_illegal);
-                legalName = Name.Remove(index, 1);
+                for(int i = 0; i < legalName.Length; i++)
+                {
+                    if (_illegal.Contains(legalName[i]))
+                    {
+                        legalName = legalName.Remove(i, 1);
+                    }
+                }
             }
             if (addAt) legalName = replace + legalName;
             return legalName;
@@ -170,7 +206,6 @@ namespace JsonConverter
             if (obj is Element other)
             {
                 return Name == other.Name;
-                //return Name == other.Name && List == other.List;
             }
             return false;
         }
@@ -178,7 +213,6 @@ namespace JsonConverter
         public override int GetHashCode()
         {
             return Name.GetHashCode();
-            //return HashCode.Combine(Name, List);
         }
     }
 }

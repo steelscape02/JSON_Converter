@@ -7,7 +7,7 @@ namespace JsonConverter
     
     class LanguageSelector(IStorageManager localStorage)
     {
-        private IStorageManager _localStorage = localStorage;
+        private readonly IStorageManager _localStorage = localStorage;
 
         public enum Languages
         {
@@ -20,12 +20,11 @@ namespace JsonConverter
         {
             string RootName = _localStorage.Get(TextResources.rootName) as string ?? "";
             bool AllOptional = _localStorage.Get(TextResources.allOptional) as bool? ?? false;
-            bool SuggestCorrs = _localStorage.Get(TextResources.suggestCorrs) as bool? ?? false;
             return lang switch
             {
-                Languages.CSharp => CSharpDm.BuildRoot(contents, RootName, AllOptional, SuggestCorrs),
-                Languages.Cpp => CppDm.BuildRoot(contents, RootName, AllOptional, SuggestCorrs),
-                Languages.Python => PythonDm.BuildRoot(contents, RootName, AllOptional, SuggestCorrs),
+                Languages.CSharp => CSharpDm.BuildRoot(contents, RootName, AllOptional),
+                Languages.Cpp => CppDm.BuildRoot(contents, RootName, AllOptional),
+                Languages.Python => PythonDm.BuildRoot(contents, RootName, AllOptional),
                 _ => throw new ArgumentOutOfRangeException(nameof(lang), lang, "The specified language is not supported."),
             };
         }
