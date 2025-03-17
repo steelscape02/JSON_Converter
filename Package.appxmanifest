@@ -10,14 +10,14 @@
 
   <Identity
     Name="67085336-386c-4a90-af9b-a533aee1fd2f"
-    Publisher="CN=nicho"
+    Publisher="CN=ncSoftware"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="67085336-386c-4a90-af9b-a533aee1fd2f" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>JsonConverter</DisplayName>
-    <PublisherDisplayName>nicho</PublisherDisplayName>
+    <PublisherDisplayName>NC Software</PublisherDisplayName>
     <Logo>Assets\app_icon.png</Logo>
   </Properties>
 
