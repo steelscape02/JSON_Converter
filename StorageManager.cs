@@ -9,6 +9,7 @@ namespace JsonConverter
         public StorageManager()
         {
             localSettings = ApplicationData.Current.LocalSettings;
+            //localSettings.Values.Clear(); //clear current settings
         }
 
         public void Set(string key, object value)

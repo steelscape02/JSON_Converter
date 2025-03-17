@@ -1,10 +1,19 @@
+using JsonConverter.dm;
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using WinRT.Interop;
@@ -68,7 +77,7 @@ namespace JsonConverter
             }
         }
         
-        private void Submit_Click(object sender, RoutedEventArgs e)
+        private async void Submit_Click(object sender, RoutedEventArgs e)
         {
             
             var _selector = new LanguageSelector(manager);
@@ -78,7 +87,11 @@ namespace JsonConverter
                 var reader = new JsonReader(entry);
                 var contents = new HashSet<Element>();
                 contents = reader.ReadJson();
-                string dm = "";
+                if (manager.Get(TextResources.suggestCorrs) as bool? ?? false)
+                {
+                    await SuggestCorrs_Click(contents);
+                }
+                string dm;
                 switch (Language)
                 {
                     case "C#":
@@ -96,6 +109,71 @@ namespace JsonConverter
                     default:
                         FlashComboBox();
                         break;
+                }
+            }
+        }
+
+        public async Task SuggestCorrs_Click(HashSet<Element> elements)
+        {
+            foreach(var i in elements)
+            {
+                var reserved = false;
+                switch (Language)
+                {
+                    case "C#":
+                        reserved = CSharpDm.ReservedWords.Any(i.Name.Contains);
+                        break;
+                    case "Python":
+                        reserved = PythonDm.ReservedWords.Any(i.Name.Contains);
+                        break;
+                    case "C++":
+                        reserved = CppDm.ReservedWords.Any(i.Name.Contains);
+                        break;
+                }
+                var illegalChars = Element._illegal.Any(i.Name.Contains);
+                //show popup
+                if (reserved || illegalChars)
+                {
+                    ContentDialog dialog = new()
+                    {
+                        // XamlRoot must be set in the case of a ContentDialog running in a Desktop app
+                        XamlRoot = XamlRoot,
+                        //Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
+                        Title = reserved ? "Reserved word in name" : "Illegal characters in name",
+                        PrimaryButtonText = "Set",
+                        SecondaryButtonText = "Skip",
+                        CloseButtonText = "Cancel All",
+                        DefaultButton = ContentDialogButton.Primary,
+                        Content = new SuggestCorrs(i.Name)
+                    };
+                    var result = await dialog.ShowAsync();
+                    switch (result)
+                    {
+                        case ContentDialogResult.Primary:
+                        {
+                            elements.TryGetValue(i, out Element? element);
+                            if(element != null && SuggestCorrsHelpers.corrected_word != null) 
+                            { 
+                                element.Name = SuggestCorrsHelpers.corrected_word;
+                                if(illegalChars && !Element._illegal.Any(element.Name.Contains)) element.Rename = false;
+                            }
+                            break;
+                        }
+                        case ContentDialogResult.Secondary:
+                        {
+                            break;
+                        }
+                        case ContentDialogResult.None:
+                        {
+                            return;
+                        }
+                    }
+                }
+
+                //recursive search
+                if (i.Children.Count > 0)
+                {
+                    await SuggestCorrs_Click(i.Children);
                 }
             }
         }
@@ -237,9 +315,9 @@ namespace JsonConverter
         {
             jsonEntry.SelectionFlyout.Opening += Menu_Opening;
             jsonEntry.ContextFlyout.Opening += Menu_Opening;
-            jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, manager.Get(TextResources.jsonContents) as string);
+            jsonEntry.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, MainPageHelpers.JsonInput);
 
-            outputBox.Text = manager.Get(TextResources.jsonOutput) as string;
+            outputBox.Text = MainPageHelpers.JsonOutput;
             LanguageSelect.SelectedValue = manager.Get(TextResources.selectedLang) as string;
         }
 
@@ -248,9 +326,8 @@ namespace JsonConverter
             jsonEntry.SelectionFlyout.Opening -= Menu_Opening;
             jsonEntry.ContextFlyout.Opening -= Menu_Opening;
 
-            jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out string jsonContents);
-            manager.Set(TextResources.jsonContents, jsonContents);
-            manager.Set(TextResources.jsonOutput, outputBox.Text);
+            jsonEntry.Document.GetText(Microsoft.UI.Text.TextGetOptions.None, out MainPageHelpers.JsonInput);
+            MainPageHelpers.JsonOutput = outputBox.Text;
             manager.Set(TextResources.selectedLang, LanguageSelect.SelectedValue);
         }
 

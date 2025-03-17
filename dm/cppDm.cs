@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using Windows.Media.Core;
-//TODO: Add set for later init
 
 namespace JsonConverter.dm
 {
-    //TODO: Complete conversion (basically copy from Python)
     class CppDm
     {
         /// <summary>
-        /// The default name for the base class. Almost always "Root"
+        /// The desired character for a placeholder in a repeated name
         /// </summary>
-
         private const string RptPlaceHolder = "_";
 
+        /// <summary>
+        /// Optional flag to indicate if an optional mem var is present
+        /// </summary>
         private static bool _optional = false;
 
 
@@ -31,7 +29,7 @@ namespace JsonConverter.dm
             "using", "virtual", "void", "volatile", "wchar_t", "while"
         };
 
-        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false)
+        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false)
         {
             var classDefinitions = new List<string>
             {
@@ -51,7 +49,7 @@ namespace JsonConverter.dm
             {
                 var headerType = GetPrintType(element, false);
                 string? nullable;
-                if (element.Nullable)
+                if (element.Nullable || element.Inconsistent)
                 {
                     nullable = "std::optional<" + headerType + ">";
                     _optional = true;
@@ -132,11 +130,11 @@ namespace JsonConverter.dm
                         if (match == null || element.MatchingChildren(match)) return;
                         else
                         {
-                            for (int i = 0; i <= match.at_count; i++)
+                            for (int i = 0; i <= match.AtCount; i++)
                                 type = RptPlaceHolder + type;
 
                             visited.Remove(match);
-                            match.at_count += 1;
+                            match.AtCount += 1;
                             visited.Add(match);
                         }
 
@@ -162,13 +160,13 @@ namespace JsonConverter.dm
                     match.List = child.List; //match list and type mem vars (not needed in normal TryGetValue override in Element)
                     match.Type = child.Type;
                     childType = GetPrintType(match, false);
-                    for (int i = 0; i <= match.at_count; i++)
+                    for (int i = 0; i <= match.AtCount; i++)
                         childType = RptPlaceHolder + childType;
                 }
                 else
                     childType = GetPrintType(child, false);
                 string? nullable;
-                if (child.Nullable || allOptional)
+                if (child.Nullable || element.Inconsistent || allOptional)
                 {
                     nullable = "std::optional<" + childType + ">";
                     _optional = true;

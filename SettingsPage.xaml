@@ -75,7 +75,7 @@
                         
                         <CheckBox Margin="0 5 5 5"
                             x:Name="suggestCorrs" Content="Suggest Corrections" AutomationProperties.Name="Suggest corrections to mispellings"
-                            Checked="SuggestCorrs_Checked" Unchecked="SuggestCorrs_Unchecked" IsEnabled="False"/>
+                            Checked="SuggestCorrs_Checked" Unchecked="SuggestCorrs_Unchecked"/>
                         <TeachingTip x:Name="suggestCorrs_TeachingTip"
                             Target="{x:Bind suggestCorrs}"
                             Title="Suggest corrections"

@@ -22,7 +22,7 @@ namespace JsonConverter.dm
             "async", "elif", "if", "or", "yield"
         };
 
-        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false, bool suggestCorrs = false)
+        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false)
         {
             var classDefinitions = new List<string>
             {
@@ -81,11 +81,11 @@ namespace JsonConverter.dm
                         if (match == null || element.MatchingChildren(match)) return;
                         else
                         {
-                            for (int i = 0; i <= match.at_count; i++)
+                            for (int i = 0; i <= match.AtCount; i++)
                                 type = RptPlaceHolder + type;
 
                             visited.Remove(match);
-                            match.at_count += 1;
+                            match.AtCount += 1;
                             visited.Add(match);
                         }
 
@@ -113,7 +113,7 @@ namespace JsonConverter.dm
                     match.List = child.List; //match list and type mem vars (not needed in normal TryGetValue override in Element)
                     match.Type = child.Type;
                     childType = GetPrintType(match, false);
-                    for (int i = 0; i <= match.at_count; i++)
+                    for (int i = 0; i <= match.AtCount; i++)
                         childType = RptPlaceHolder + childType;
                 }
                 else

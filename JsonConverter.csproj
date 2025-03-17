@@ -51,6 +51,11 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Page Update="SuggestCorrs.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
     <Page Update="SettingsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
