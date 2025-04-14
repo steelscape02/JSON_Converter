@@ -3,7 +3,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="using:JsonArchitect.ViewModels"
-        xmlns:res="clr-namespace:JsonArchitect"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
         x:Class="JsonArchitect.Views.MainWindow"
         x:DataType="viewModels:MainWindowViewModel"
@@ -52,20 +51,40 @@
                 </CheckBox>
             </StackPanel>
         </SplitView.Pane>
+        
         <Grid RowDefinitions="*,Auto" ColumnDefinitions="*,*">
-            <Popup x:Name="SuggestFlyout" 
-                   PlacementTarget="{Binding RelativeSource={RelativeSource AncestorType=Button}}" 
-                   Placement="Center" IsOpen="{Binding IsSugFlyoutOpen}">
-                <Border Background="{StaticResource SystemAccentColor}" Padding="10" CornerRadius="4">
-                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
-                                   Text="{Binding ValidateMsg}" />
-                        <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Content="Cancel" Margin="10"
-                                HorizontalContentAlignment="Center" HorizontalAlignment="Center" 
-                                Command="{Binding CancelCommand}"/>
-                    </Grid>
-                </Border>
-            </Popup>
+            <StackPanel Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" 
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Popup x:Name="ValidateFlyout" 
+                       PlacementTarget="{Binding RelativeSource={RelativeSource AncestorType=Button}}" 
+                       Placement="Center" IsOpen="{Binding IsValFlyoutOpen}">
+                    <Border Background="{StaticResource SystemAccentColor}" Padding="10" CornerRadius="4">
+                        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
+                                       Text="{Binding ValidateMsg}" />
+                            <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Content="Cancel" Margin="10"
+                                    HorizontalContentAlignment="Center" HorizontalAlignment="Center" 
+                                    Command="{Binding CancelCommand}"/>
+                        </Grid>
+                    </Border>
+                </Popup>
+                <Popup x:Name="SuggestFlyout"
+                       PlacementTarget="{Binding RelativeSource={RelativeSource AncestorType=Button}}" 
+                       Placement="Center" IsOpen="{Binding IsSugCorrsFlyoutOpen}">
+                    <Border Background="{StaticResource SystemAccentColor}" Padding="10" CornerRadius="4">
+                        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*,*">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Center"/>
+                            <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Center"/>
+                            <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" 
+                                    HorizontalContentAlignment="Center" Content="Confirm"/>
+                            <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center"
+                                    HorizontalContentAlignment="Center" Content="Cancel"/>
+                            <Button Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center"
+                                    HorizontalContentAlignment="Center" Content="Cancel All"/>
+                        </Grid>
+                    </Border>
+                </Popup>
+            </StackPanel>
             <!--Entry and Output-->
             <TextBox x:Name="JsonInput" Grid.Row="0" Grid.Column="0" Margin="10 5" 
                      AcceptsReturn="True" AcceptsTab="True"
@@ -98,11 +117,8 @@
             <ComboBox Grid.Row="1" Grid.Column="1" MaxDropDownHeight="100" HorizontalAlignment="Right" Margin="10"
                       Classes.flash="{Binding FlashAnimation}"
                       SelectedIndex="{Binding SelectedIndex}"
-                      SelectedValue="{Binding SelectedLanguage}">
-                <ComboBoxItem >C#</ComboBoxItem>
-                <ComboBoxItem>C++</ComboBoxItem>
-                <ComboBoxItem>Python</ComboBoxItem>
-                
+                      SelectedItem="{Binding SelectedLanguage}"
+                      ItemsSource="{Binding Languages}">
             </ComboBox>
         </Grid>
     </SplitView>

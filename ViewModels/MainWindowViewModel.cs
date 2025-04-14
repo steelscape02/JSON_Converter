@@ -12,7 +12,6 @@ namespace JsonArchitect.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    
     private string _jsonOutput = string.Empty;
     public string JsonOutput
     {
@@ -41,13 +40,6 @@ public class MainWindowViewModel : ViewModelBase
     {
         get => _validateMsg;
         set => this.RaiseAndSetIfChanged(ref _validateMsg, value);
-    }
-    
-    private string _corrMsg = string.Empty;
-    public string CorrMsg
-    {
-        get => _corrMsg;
-        set => this.RaiseAndSetIfChanged(ref _corrMsg, value);
     }
     
     private bool _isJsonInputValid;
@@ -99,11 +91,11 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _flashAnimation, value);
     }
 
-    private bool _isSugFlyoutOpen;
-    public bool IsSugFlyoutOpen
+    private bool _isValFlyoutOpen;
+    public bool IsValFlyoutOpen
     {
-        get => _isSugFlyoutOpen;
-        set => this.RaiseAndSetIfChanged(ref _isSugFlyoutOpen, value);
+        get => _isValFlyoutOpen;
+        set => this.RaiseAndSetIfChanged(ref _isValFlyoutOpen, value);
     }
 
     private bool _allOptional;
@@ -154,11 +146,18 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private bool _isSugCorrsFlyoutOpen;
+    public bool IsSugCorrsFlyoutOpen
+    {
+        get => _isSugCorrsFlyoutOpen;
+        set => this.RaiseAndSetIfChanged(ref _isSugCorrsFlyoutOpen, value);
+    }
+
     //ObservableCollection<string> Items { get; } = new ObservableCollection<string>
     public ObservableCollection<string> Languages { get; set; } = ["C#", "C++", "Python"];
     
     private readonly Window _mainWindow;
-    private readonly IStorageManager _manager;
+    private readonly StorageManager _manager;
     
     public static void SaveSettings()
     {
@@ -216,31 +215,8 @@ public class MainWindowViewModel : ViewModelBase
             //show popup
             if (reserved || illegalChars)
             {
-                //TODO: Show a dialog with the item to correct and options
-                //
-
-                // var result = await dialog.ShowAsync();
-                // switch (result)
-                // {
-                //     case ContentDialogResult.Primary:
-                //     {
-                //         elements.TryGetValue(i, out Element? element);
-                //         if(element != null && SuggestCorrsHelpers.corrected_word != null) 
-                //         { 
-                //             element.Name = SuggestCorrsHelpers.corrected_word;
-                //             if(illegalChars && !Element._illegal.Any(element.Name.Contains)) element.Rename = false;
-                //         }
-                //         break;
-                //     }
-                //     case ContentDialogResult.Secondary:
-                //     {
-                //         break;
-                //     }
-                //     case ContentDialogResult.None:
-                //     {
-                //         return;
-                //     }
-                // }
+                //TODO: Doesn't wait
+                IsSugCorrsFlyoutOpen = !IsSugCorrsFlyoutOpen;
             }
 
             //recursive search
@@ -306,7 +282,7 @@ public class MainWindowViewModel : ViewModelBase
     
     private void ValidateInput(TextBox textBox)
     {
-        IsSugFlyoutOpen = !IsSugFlyoutOpen;
+        IsValFlyoutOpen = !IsValFlyoutOpen;
         try
         {
             using (JsonDocument.Parse(JsonInput)) {}
@@ -330,7 +306,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private void CancelMsg()
     {
-        IsSugFlyoutOpen = false;
+        IsValFlyoutOpen = false;
     }
     
     // ReSharper disable once AsyncVoidMethod
@@ -361,17 +337,17 @@ public class MainWindowViewModel : ViewModelBase
             await SuggestCorrs_Click(contents);
         }
         string dm;
-        switch (SelectedIndex)
+        switch (SelectedLanguage)
         {
-            case 0:
+            case "C#":
                 dm = selector.Select(LanguageSelector.Languages.CSharp, contents);
                 JsonOutput = dm;
                 break;
-            case 1:
+            case "C++":
                 dm = selector.Select(LanguageSelector.Languages.Cpp, contents);
                 JsonOutput = dm;
                 break;
-            case 2:
+            case "Python":
                 dm = selector.Select(LanguageSelector.Languages.Python, contents);
                 JsonOutput = dm;
                 break;
@@ -385,16 +361,16 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> UploadCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearCommand { get; }
     public ReactiveCommand<TextBox, Unit> ValidateCommand { get; }
-    public ReactiveCommand<Unit,Unit> CancelCommand { get; }
+    public ReactiveCommand<Unit, Unit> CancelCommand { get; }
     public ReactiveCommand<Unit, Unit> SubmitCommand { get; }
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveCommand { get; }
     
     public MainWindowViewModel(Window window)
     {
-        //SelectedIndex = 0; //TODO: Not functional
         _mainWindow = window;
         _manager = new StorageManager();
+        
         //pane toggle command
         ToggleCommand= ReactiveCommand.Create(() => {
                 IsPaneOpen = !IsPaneOpen;
@@ -407,7 +383,8 @@ public class MainWindowViewModel : ViewModelBase
         ClearCommand = ReactiveCommand.Create(ClearInput);
         
         ValidateCommand = ReactiveCommand.Create<TextBox>(ValidateInput);
-        CancelCommand = ReactiveCommand.Create(CancelMsg);
+        CancelCommand = ReactiveCommand.Create(CancelMsg); //close validate msg box
+        
         SubmitCommand = ReactiveCommand.CreateFromTask(SubmitInput);
     }
 }
