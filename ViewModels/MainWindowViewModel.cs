@@ -23,6 +23,13 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private bool _isJsonOutput;
+    public bool IsJsonOutput
+    {
+        get => _isJsonOutput;
+        set => this.RaiseAndSetIfChanged(ref _isJsonOutput, value);
+    }
+    
     private string _jsonInput = string.Empty;
     public string JsonInput
     {
@@ -34,12 +41,12 @@ public class MainWindowViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _jsonInput, value);
         }
     }
-
-    private string _validateMsg = string.Empty;
-    public string ValidateMsg
+    
+    private bool _isJsonInput;
+    public bool IsJsonInput
     {
-        get => _validateMsg;
-        set => this.RaiseAndSetIfChanged(ref _validateMsg, value);
+        get => _isJsonInput;
+        set => this.RaiseAndSetIfChanged(ref _isJsonInput, value);
     }
     
     private bool _isJsonInputValid;
@@ -49,18 +56,11 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _isJsonInputValid, value);
     }
     
-    private bool _isJsonInput;
-    public bool IsJsonInput
+    private string _validateMsg = string.Empty;
+    public string ValidateMsg
     {
-        get => _isJsonInput;
-        set => this.RaiseAndSetIfChanged(ref _isJsonInput, value);
-    }
-
-    private bool _isJsonOutput;
-    public bool IsJsonOutput
-    {
-        get => _isJsonOutput;
-        set => this.RaiseAndSetIfChanged(ref _isJsonOutput, value);
+        get => _validateMsg;
+        set => this.RaiseAndSetIfChanged(ref _validateMsg, value);
     }
     
     private bool _isPaneOpen;
@@ -146,15 +146,35 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    //suggest corrections
     private bool _isSugCorrsFlyoutOpen;
     public bool IsSugCorrsFlyoutOpen
     {
         get => _isSugCorrsFlyoutOpen;
         set => this.RaiseAndSetIfChanged(ref _isSugCorrsFlyoutOpen, value);
     }
+    
+    private string _corrMsg = string.Empty;
+    public string CorrMsg
+    {
+        get => _corrMsg;
+        set => this.RaiseAndSetIfChanged(ref _corrMsg, value);
+    }
+    
+    private string _corrEntry = string.Empty;
+    public string CorrEntry
+    {
+        get => _corrEntry;
+        set => this.RaiseAndSetIfChanged(ref _corrEntry, value);
+    }
 
-    //ObservableCollection<string> Items { get; } = new ObservableCollection<string>
     public ObservableCollection<string> Languages { get; set; } = ["C#", "C++", "Python"];
+    
+    private static FilePickerFileType JsonFileType { get; } = new("All Images") {
+        Patterns = ["*.json"],
+        AppleUniformTypeIdentifiers = ["public.json"],
+        MimeTypes = ["application/json"]
+    };
     
     private readonly Window _mainWindow;
     private readonly StorageManager _manager;
@@ -180,12 +200,6 @@ public class MainWindowViewModel : ViewModelBase
         catch (FileNotFoundException)
         { }
     }
-    
-    private static FilePickerFileType JsonFileType { get; } = new("All Images") {
-        Patterns = ["*.json"],
-        AppleUniformTypeIdentifiers = ["public.json"],
-        MimeTypes = ["application/json"]
-    };
 
     private static bool IsValidJson(string str)
     {
@@ -308,6 +322,21 @@ public class MainWindowViewModel : ViewModelBase
     {
         IsValFlyoutOpen = false;
     }
+
+    private void ConfirmSugg()
+    {
+        //TODO: set target to this
+    }
+
+    private void CancelSugg()
+    {
+        IsSugCorrsFlyoutOpen = false;
+    }
+
+    private void CancelAllSugg()
+    {
+        //TODO: Close all suggestions
+    }
     
     // ReSharper disable once AsyncVoidMethod
     private async void FlashControl()
@@ -361,10 +390,14 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> UploadCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearCommand { get; }
     public ReactiveCommand<TextBox, Unit> ValidateCommand { get; }
-    public ReactiveCommand<Unit, Unit> CancelCommand { get; }
+    public ReactiveCommand<Unit, Unit> CancelValCommand { get; }
     public ReactiveCommand<Unit, Unit> SubmitCommand { get; }
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveCommand { get; }
+    
+    public ReactiveCommand<Unit, Unit> ConfirmSuggCommand { get; }
+    public ReactiveCommand<Unit, Unit> CancelSuggCommand { get; }
+    public ReactiveCommand<Unit, Unit> CancelAllSuggCommand { get; }
     
     public MainWindowViewModel(Window window)
     {
@@ -383,8 +416,11 @@ public class MainWindowViewModel : ViewModelBase
         ClearCommand = ReactiveCommand.Create(ClearInput);
         
         ValidateCommand = ReactiveCommand.Create<TextBox>(ValidateInput);
-        CancelCommand = ReactiveCommand.Create(CancelMsg); //close validate msg box
+        CancelValCommand = ReactiveCommand.Create(CancelMsg); //close validate msg box
         
         SubmitCommand = ReactiveCommand.CreateFromTask(SubmitInput);
+        ConfirmSuggCommand = ReactiveCommand.Create(ConfirmSugg);
+        CancelSuggCommand = ReactiveCommand.Create(CancelSugg);
+        CancelAllSuggCommand = ReactiveCommand.Create(CancelAllSugg);
     }
 }

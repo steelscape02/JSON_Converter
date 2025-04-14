@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using JsonArchitect.ViewModels;
+using JsonArchitect.Views;
 
 namespace JsonArchitect;
 
@@ -20,18 +21,17 @@ public partial class App : Application
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 await OnAppStart();
-            
-                desktop.MainWindow = new Views.MainWindow();
+
+                desktop.MainWindow = new MainWindow();
                 desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
                 desktop.Exit += OnAppExit;
-            
             }
 
             base.OnFrameworkInitializationCompleted();
         }
         catch (Exception e)
         {
-            throw; // TODO handle exception
+            throw new Exception("App cannot launch");
         }
     }
     private static void OnAppExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
