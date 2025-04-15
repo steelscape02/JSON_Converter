@@ -1,7 +1,16 @@
+<<<<<<< HEAD
 ﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace JsonArchitect
+=======
+﻿using System;
+using System.Collections.Generic;
+using System.Text.Json.Nodes;
+using System.Text.Json;
+
+namespace JsonConverter
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
 {
     internal class JsonReader(string contents)
     {
@@ -30,7 +39,11 @@ namespace JsonArchitect
         /// <param name="current">The initial JSON object (<i>Typically <c>root</c></i>)</param>
         /// <param name="elements">An <b>empty</b> Element HashSet to store the top level (root) elements with their respective children</param>
         /// <param name="headElem">The current head element. When execution begins, this should be <c>null</c> unless another start point has been determined</param>
+<<<<<<< HEAD
         // <exception cref="ArgumentOutOfRangeException"></exception>
+=======
+        // <exception cref="ArgumentOutOfRangeException"></exception> //TODO: Add back. Reduce existing exceptions?
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
         private static void SubRecursive(JsonNode current, HashSet<Element> elements, Element? headElem)
         {
             switch (current)
@@ -73,7 +86,11 @@ namespace JsonArchitect
                     var isPrim = true;
                     Element.Types? primType = Element.Types.Null; //primType initializer
 
+<<<<<<< HEAD
                     ArgumentNullException.ThrowIfNull(headElem);
+=======
+                    ArgumentNullException.ThrowIfNull(headElem); //TODO: Is this optimal?
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
                     foreach (var i in jsonArray)
                     {
                         switch (i)

@@ -1,13 +1,29 @@
+<<<<<<< HEAD
 ﻿namespace JsonArchitect.dm
 {
     internal abstract class PythonDm
+=======
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+//TODO: Add renamin
+
+namespace JsonConverter.dm
+{
+    class PythonDm
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
     {
 
         private const string RptPlaceHolder = "_";
 
 
+<<<<<<< HEAD
         public static readonly string[] ReservedWords =
         [
+=======
+        public static readonly string[] ReservedWords = {
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
             "False", "await", "else", "import", "pass",
             "None", "break", "except", "in", "raise",
             "True", "class", "finally", "is", "return",
@@ -15,7 +31,11 @@
             "as", "def", "from", "nonlocal", "while",
             "assert", "del", "global", "not", "with",
             "async", "elif", "if", "or", "yield"
+<<<<<<< HEAD
         ];
+=======
+        };
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
 
         public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false)
         {
@@ -61,7 +81,10 @@
         /// <param name="classDefinitions">
         /// A list of class definitions, representing the child classes that are created
         /// </param>
+<<<<<<< HEAD
         /// <param name="redo"></param>
+=======
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
         private static void BuildSubDm(Element element, HashSet<Element?> visited, List<string> classDefinitions, bool redo = false)
         {
             if (element.Type == null) return;
@@ -149,7 +172,10 @@
         /// </summary>
         /// <param name="text">The text to convert</param>
         /// <param name="list"><c>true</c> if the caller is editing a List <c>Element</c> name</param>
+<<<<<<< HEAD
         /// <param name="prim"></param>
+=======
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
         /// <returns>The "friendly" name</returns>
         private static string? MakeFriendly(string? text, bool list = false, bool prim = false)
         {
@@ -228,6 +254,10 @@
                 case Element.Types.Boolean:
                     type = "bool";
                     break;
+<<<<<<< HEAD
+=======
+                case null:
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
                 default:
                     throw new Exception("Unknown type");
             }

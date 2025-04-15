@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿
 
 using System.Diagnostics;
@@ -5,6 +6,15 @@ using System.Diagnostics;
 namespace JsonArchitect.dm
 {
     internal abstract class CppDm
+=======
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+//
+namespace JsonConverter.dm
+{
+    class CppDm
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
     {
         /// <summary>
         /// The desired character for a placeholder in a repeated name
@@ -14,11 +24,18 @@ namespace JsonArchitect.dm
         /// <summary>
         /// Optional flag to indicate if an optional mem var is present
         /// </summary>
+<<<<<<< HEAD
         private static bool _optional;
 
 
         public static readonly string[] ReservedWords =
         [
+=======
+        private static bool _optional = false;
+
+
+        public static readonly string[] ReservedWords = {
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
             "alignas", "alignof", "and", "and_eq", "asm", "auto", "bitand", "bitor", "bool",
             "break", "case", "catch", "char", "char16_t", "char32_t", "class", "compl", "const",
             "const_cast", "continue", "decltype", "default", "delete", "do", "double", "dynamic_cast",
@@ -28,7 +45,11 @@ namespace JsonArchitect.dm
             "return", "short", "signed", "sizeof", "static", "static_assert", "static_cast", "struct", "switch",
             "template", "this", "throw", "true", "try", "typedef", "typeid", "typename", "union", "unsigned",
             "using", "virtual", "void", "volatile", "wchar_t", "while"
+<<<<<<< HEAD
         ];
+=======
+        };
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
 
         public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false)
         {
@@ -42,9 +63,15 @@ namespace JsonArchitect.dm
             };
             var forwards = new HashSet<Element>();
             var rootClass = $"\nclass {baseName}\n{{\npublic:\n";
+<<<<<<< HEAD
             Debug.WriteLine(baseName);
             var classFirst = baseName[0].ToString().ToLower();
             _ = $"void from_json(const json& j, {baseName}& {classFirst})\n{{\n";
+=======
+            var classFirst = baseName[0].ToString().ToLower();
+            var currForward = "";
+            currForward += $"void from_json(const json& j, {baseName}& {classFirst})\n{{\n";
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
             var root = new Element(Element.Types.Object, baseName);
             foreach (var element in elements)
             {
@@ -72,23 +99,45 @@ namespace JsonArchitect.dm
 
             var visited = new HashSet<Element?>();
 
+<<<<<<< HEAD
+=======
+            //TODO: Append forwards to front, JSON contents to back
+            //Forward: class Feature; (list of class defs for circular dep prevention)
+            //JSON contents: void from_json(const json& j, Root& r) { r.from_json(j); } (list of from_json method decs for simple calling)
+            
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
             foreach (var element in elements.Where(element =>
                     !IsPrimitive(element.Prim.ToString()?.ToLower()) && !IsPrimitive(element.Type.ToString()?.ToLower())))
             {
                 BuildSubDm(element, visited, classDefinitions, forwards,new Element(Element.Types.Object, baseName),allOptional);
             }
             classDefinitions.Add(rootClass);
+<<<<<<< HEAD
             classDefinitions.Insert(1, _optional ? "#include <optional>\n" : "\n");
 
+=======
+            if (_optional) classDefinitions.Insert(1, "#include <optional>\n"); else classDefinitions.Insert(1, "\n");
+            
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
             foreach (var i in forwards)
             {
                 classFirst = i.Name[0].ToString().ToLower();
                 classDefinitions.Insert(2, $"class {GetPrintType(i, true)};");
+<<<<<<< HEAD
                 var currClass = $"void from_json(const json& j, {GetPrintType(i, true)}& {classFirst})\n{{\n";
                 foreach (var e in i.Children)
                 {
                     var headerType = GetPrintType(e, false);
                     var fqName = e.LegalName('_', HasReserved(e.Name));
+=======
+                var headerType = GetPrintType(i, false);
+                var fqName = i.LegalName('_', HasReserved(i.Name));
+                var currClass = $"void from_json(const json& j, {GetPrintType(i, true)}& {classFirst})\n{{\n";
+                foreach (var e in i.Children)
+                {
+                    headerType = GetPrintType(e, false);
+                    fqName = e.LegalName('_', HasReserved(e.Name));
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
                     if (e.Nullable) currClass += $"    if (j.contains(\"{e.Name}\")) {classFirst}.{fqName} = j.at(\"{e.Name}\").is_null() ? std::nullopt : std::make_optional(j.at(\"{e.Name}\").get<{headerType}>());\n";
                     else currClass += $"    if (j.contains(\"{e.Name}\")) j.at(\"{e.Name}\").get_to({classFirst}.{fqName});\n";
                 }
@@ -108,8 +157,11 @@ namespace JsonArchitect.dm
         /// A list of class definitions, representing the child classes that are created
         /// </param>
         /// <param name="forwards">A list of forward class declarations</param>
+<<<<<<< HEAD
         /// <param name="parent"></param>
         /// <param name="allOptional"></param>
+=======
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
         /// 
         private static void BuildSubDm(Element element, HashSet<Element?> visited, List<string> classDefinitions, HashSet<Element> forwards, Element parent, bool allOptional)
         {
@@ -140,8 +192,15 @@ namespace JsonArchitect.dm
 
             }
 
+<<<<<<< HEAD
             var classDef = $"class {type}\n{{\npublic:\n" +
                 $"    {GetPrintType(parent,false)}* {parent.LegalName('_', HasReserved(parent.Name))};\n";
+=======
+            //TODO: Check for prim
+            var classDef = $"class {type}\n{{\npublic:\n" +
+                $"    {GetPrintType(parent,false)}* {parent.LegalName('_', HasReserved(parent.Name))};\n";
+            var builder = $"";
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
             var classFirst = element.Name[0].ToString().ToLower();
             
             foreach (var child in element.Children)
@@ -208,7 +267,10 @@ namespace JsonArchitect.dm
         /// </summary>
         /// <param name="text">The text to convert</param>
         /// <param name="list"><c>true</c> if the caller is editing a List <c>Element</c> name</param>
+<<<<<<< HEAD
         /// <param name="prim"></param>
+=======
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
         /// <returns>The "friendly" name</returns>
         private static string? MakeFriendly(string? text, bool list = false, bool prim = false)
         {
@@ -290,6 +352,10 @@ namespace JsonArchitect.dm
                 case Element.Types.Boolean:
                     type = "bool";
                     break;
+<<<<<<< HEAD
+=======
+                case null:
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
                 default:
                     throw new Exception("Unknown type");
             }

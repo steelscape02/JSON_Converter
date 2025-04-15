@@ -1,6 +1,17 @@
+<<<<<<< HEAD
 ﻿namespace JsonArchitect.dm
 {
     public abstract class CSharpDm 
+=======
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Diagnostics;
+
+namespace JsonConverter.dm
+{
+    public class CSharpDm //TODO: Optimize this structure (inc naming)
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
     {
         /// <summary>
         /// The default visibility of the C# elements in the data model
@@ -37,12 +48,18 @@
         /// </summary>
         /// <param name="elements">A <c>HashSet</c> of <c>Element</c> objects representing the <c>Root</c> class of
         /// the JSON response</param>
+<<<<<<< HEAD
         /// <param name="baseName"></param>
         /// <param name="allOptional"></param>
         /// <returns>A string representation of a C# data model</returns>
         public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false)
         {
             
+=======
+        /// <returns>A string representation of a C# data model</returns>
+        public static string BuildRoot(HashSet<Element> elements, string baseName, bool allOptional = false)
+        {
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
             // Initialize the class definitions
             var classDefinitions = new List<string>();
 
@@ -63,8 +80,12 @@
 
                 var headerType = GetPrintType(element, false);
 
+<<<<<<< HEAD
                 var nullable = element.Nullable || element.Inconsistent ? headerType + "?" : headerType;
                 if(element.Children.Count == 0 && allOptional) nullable += "?";
+=======
+                var nullable = (element.Nullable || element.Inconsistent) ? headerType + "?" : headerType;
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
                 rootClass += $"   {rename}{Vis} {nullable} {element.LegalName('@',HasReserved(element.Name))} {{get; set;}}\n";
             }
 

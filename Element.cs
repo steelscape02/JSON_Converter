@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 ﻿namespace JsonArchitect
+=======
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+
+namespace JsonConverter
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
 {
     public class Element
     {
@@ -7,7 +15,10 @@
         /// </summary>
         /// <param name="type">The type of the JSON item</param>
         /// <param name="name">The name of the JSON item. Can be parsed to improve readability and comply with language restrictions</param>
+<<<<<<< HEAD
         
+=======
+>>>>>>> 77352be7aa5a4294ded88c5feb1fe2f71acb70fc
         public Element(Types? type, string name = "")
         {
             Name = name;
