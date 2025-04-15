@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Text.Json;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -165,9 +166,24 @@ public class MainWindowViewModel : ViewModelBase
     public string CorrEntry
     {
         get => _corrEntry;
-        set => this.RaiseAndSetIfChanged(ref _corrEntry, value);
+        set
+        {
+            IsCorrEntry = !string.IsNullOrEmpty(value) && !IsReserved(value) && !IsIllegal(value);
+            this.RaiseAndSetIfChanged(ref _corrEntry, value);
+        }
     }
 
+    private bool _isCorrEntry;
+    public bool IsCorrEntry
+    {
+        get => _isCorrEntry;
+        set => this.RaiseAndSetIfChanged(ref _isCorrEntry, value);
+    }
+
+    private static string _popupContent = string.Empty;
+
+    private static bool _cancelAllSuggs;
+    
     public ObservableCollection<string> Languages { get; set; } = ["C#", "C++", "Python"];
     
     private static FilePickerFileType JsonFileType { get; } = new("All Images") {
@@ -214,23 +230,59 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private async Task WaitForSuggClose()
+    {
+        if (IsSugCorrsFlyoutOpen)
+        {
+            await this.WhenAnyValue(x => x.IsSugCorrsFlyoutOpen)
+                .Where(isOpen => !isOpen)
+                .Take(1); // Take only the first false value
+        }
+    }
+
+    private bool IsReserved(string text)
+    {
+        var reserved = SelectedLanguage switch
+        {
+            "C#" => CSharpDm.ReservedWords.Contains(text),
+            "C++" => PythonDm.ReservedWords.Contains(text),
+            "Python" => CppDm.ReservedWords.Contains(text),
+            _ => false
+        };
+        return reserved;
+    }
+
+    private bool IsIllegal(string text)
+    {
+        var illegal = Element._illegal.Any(text.Contains);
+        return illegal;
+    }
+    
     private async Task SuggestCorrs_Click(HashSet<Element> elements)
     {
         foreach (var i in elements)
         {
-            var reserved = SelectedIndex switch
-            {
-                0 => CSharpDm.ReservedWords.Any(i.Name.Contains),
-                1 => PythonDm.ReservedWords.Any(i.Name.Contains),
-                2 => CppDm.ReservedWords.Any(i.Name.Contains),
-                _ => false
-            };
-            var illegalChars = Element._illegal.Any(i.Name.Contains);
+            var reserved = IsReserved(i.Name);
+            var illegalChars = IsIllegal(i.Name);
             //show popup
             if (reserved || illegalChars)
             {
-                //TODO: Doesn't wait
-                IsSugCorrsFlyoutOpen = !IsSugCorrsFlyoutOpen;
+                if (reserved)
+                {
+                    CorrMsg = $"Reserved word found: {i.Name}";
+                }
+                else if (illegalChars)
+                {
+                    CorrMsg = $"Illegal char found: {i.Name}";
+                }
+                
+                _popupContent = i.Name;
+                IsSugCorrsFlyoutOpen = true;
+                await WaitForSuggClose();
+                if(_popupContent != "")
+                    i.Name = _popupContent;
+                if(_cancelAllSuggs) return;
+                CorrEntry = string.Empty;
             }
 
             //recursive search
@@ -325,17 +377,18 @@ public class MainWindowViewModel : ViewModelBase
 
     private void ConfirmSugg()
     {
-        //TODO: set target to this
-    }
-
-    private void CancelSugg()
-    {
+        _popupContent = CorrEntry;
         IsSugCorrsFlyoutOpen = false;
     }
 
-    private void CancelAllSugg()
+    private void CancelSugg() //cancel one
     {
-        //TODO: Close all suggestions
+        IsSugCorrsFlyoutOpen = false;
+    } 
+
+    private void CancelAllSugg() //cancel all
+    {
+        _cancelAllSuggs = true;
     }
     
     // ReSharper disable once AsyncVoidMethod
@@ -360,8 +413,9 @@ public class MainWindowViewModel : ViewModelBase
         if (!IsValidJson(JsonInput)) return;
         var reader = new JsonReader(JsonInput);
         var contents = reader.ReadJson();
-        
-        if (_manager.Get(TextResources.suggestCorrs) as bool? ?? false)
+        var res = _manager.Get(TextResources.suggestCorrs);
+        _ = bool.TryParse(res?.ToString(), out var suggCorr);
+        if (suggCorr)
         {
             await SuggestCorrs_Click(contents);
         }
@@ -411,7 +465,7 @@ public class MainWindowViewModel : ViewModelBase
 
         UploadCommand = ReactiveCommand.CreateFromTask(OpenFilePicker);
         SaveCommand = ReactiveCommand.CreateFromTask(SaveFilePicker);
-        CopyCommand = ReactiveCommand.CreateFromTask(CopyOutput); //TODO: Test
+        CopyCommand = ReactiveCommand.CreateFromTask(CopyOutput);
         
         ClearCommand = ReactiveCommand.Create(ClearInput);
         

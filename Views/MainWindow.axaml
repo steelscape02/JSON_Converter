@@ -73,19 +73,26 @@
                        Placement="Center" IsOpen="{Binding IsSugCorrsFlyoutOpen}">
                     <Border Background="{StaticResource SystemAccentColor}" Padding="10" CornerRadius="4">
                         <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*,*">
+                            
                             <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Center"
                                        Text="{Binding CorrMsg}"/>
+                            
                             <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Center"
                                      Text="{Binding CorrEntry}"/>
+                            
                             <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" 
                                     HorizontalContentAlignment="Center" Content="Confirm" 
+                                    IsEnabled="{Binding IsCorrEntry}"
                                     Command="{Binding ConfirmSuggCommand}"/>
+                            
                             <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center"
                                     HorizontalContentAlignment="Center" Content="Cancel" 
                                     Command="{Binding CancelSuggCommand}"/>
+                            
                             <Button Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center"
                                     HorizontalContentAlignment="Center" Content="Cancel All" 
                                     Command="{Binding CancelAllSuggCommand}"/>
+                            
                         </Grid>
                     </Border>
                 </Popup>
