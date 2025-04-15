@@ -315,11 +315,23 @@ public class MainWindowViewModel : ViewModelBase
     
     private async Task SaveFilePicker()
     {
+        var ext = SelectedLanguage switch
+        {
+            "C#" => ".cs",
+            "C++" => ".cpp",
+            "Python" => ".py",
+            _ => ".txt"
+        };
         // Get top level from the current control. Alternatively, you can use Window reference instead.
         var file = await _mainWindow.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            Title = "Save Output", //TODO: Sync lang
-            
+            Title = "Save Output",
+            SuggestedFileName = $"output{ext}",
+            FileTypeChoices =
+            [
+                new FilePickerFileType($"{SelectedLanguage} File") { Patterns = ["*{ext}"] },
+                new FilePickerFileType("All Files") { Patterns = ["*"] },
+            ]
         });
 
         if (file is not null)

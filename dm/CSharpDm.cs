@@ -1,6 +1,6 @@
 ﻿namespace JsonArchitect.dm
 {
-    public class CSharpDm //TODO: Optimize this structure (inc naming)
+    public abstract class CSharpDm 
     {
         /// <summary>
         /// The default visibility of the C# elements in the data model

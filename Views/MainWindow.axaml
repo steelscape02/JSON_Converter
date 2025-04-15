@@ -121,7 +121,7 @@
                 <MenuItem Header="Submit" IsEnabled="{Binding IsJsonInputValid}" 
                           Margin="0 0 5 0" Command="{Binding SubmitCommand}"/>
                 <MenuItem Header="Copy Output" IsEnabled="{Binding IsJsonOutput}" 
-                          Command="{Binding CopyCommand}"/> <!-- TODO: Update to have a Copied message on action -->
+                          Command="{Binding CopyCommand}"/>
                 <MenuItem Header="Save Output" IsEnabled="{Binding IsJsonOutput}" 
                           Command="{Binding SaveCommand}"/>
             </Menu>
